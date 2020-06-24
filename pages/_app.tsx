@@ -7,7 +7,7 @@ import '../css/index.scss'
 export default function MyApp({ Component, pageProps }) {
   const myApolloClient = useApollo(pageProps.initialApolloState);
 
-  return (<(ApolloProvider: ApolloProvider) client = { myApolloClient } >
-    <Component { ...pageProps } />
-    </ApolloProvider>);
+  return (<ApolloProvider client={myApolloClient}>
+    < Component {...pageProps} />
+  </ApolloProvider >);
 }
