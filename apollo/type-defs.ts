@@ -1,39 +1,51 @@
-import gql from 'graphql-tag'
+import { gql } from 'apollo-server-micro';
 
-export const typeDefs = gql`
-  type User {
+const typeDef = gql`
+
+scalar Date
+
+type User {
     id: ID!
-    email: String!
-    createdAt: Int!
-  }
+    hash: String!
+    salt: String!
+    name: String!
+}
 
-  input SignUpInput {
-    email: String!
+input SignUpInput {
+    name: String!
     password: String!
-  }
+}
 
-  input SignInInput {
-    email: String!
+type SignUpPayload {
+    user: User!
+}
+
+input SignInInput {
+    name: String!
     password: String!
-  }
+}
 
-  type SignUpPayload {
-    user: User!
-  }
+type SignInPayload {
+    user: User
+}
 
-  type SignInPayload {
-    user: User!
-  }
+type DeleteUserPayload {
+    user: User
+}
 
-  type Query {
-    user(id: ID!): User!
+type Query {
+    user(id:ID!): User!
+    userByName(name:String!): [User]!
     users: [User]!
     viewer: User
-  }
+}
 
-  type Mutation {
+type Mutation {
     signUp(input: SignUpInput!): SignUpPayload!
     signIn(input: SignInInput!): SignInPayload!
     signOut: Boolean!
-  }
+    deleteMyself: DeleteUserPayload!
+    deleteUser(id: ID!): DeleteUserPayload!
+}
 `
+export default typeDef;

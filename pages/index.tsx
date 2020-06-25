@@ -8,7 +8,7 @@ const ViewerQuery = gql`
   query ViewerQuery {
     viewer {
       id
-      email
+      name
     }
   }
 `
@@ -27,6 +27,7 @@ const Index = () => {
   }, [shouldRedirect])
 
   if (error) {
+    console.log(error)
     return <p>{error.message}</p>
   }
 

@@ -21,21 +21,9 @@ $theme-colors: (
 // Manipulating default shaping
 $enable-rounded: false;
 
-// Setting default fonts
-@font-face {
-    font-family: 'OCR A Std';
-    font-style: normal;
-    font-weight: normal;
-    src: local('OCR A Std'), url('/fonts/OCRAStd.woff') format('woff');
-}
-$font-family-serif: Times;
-$font-family-monospace: 'OCR A Std', monospace !default;
-$font-family-base: $font-family-monospace !default;
 
 @import "node_modules/bootstrap/scss/bootstrap.scss";
 body {
-    background: url("/images/vulspalogo.svg") no-repeat center center fixed;
-    background-size: 60vw 60vh;
     background-color: $dark;
 }
 
