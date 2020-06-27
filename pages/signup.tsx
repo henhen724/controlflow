@@ -42,30 +42,28 @@ function SignUp() {
   }
 
   return (
-    <>
+    <form onSubmit={handleSubmit} className="mat-form">
       <h1>Sign Up</h1>
-      <form onSubmit={handleSubmit}>
-        {errorMsg && <p>{errorMsg}</p>}
-        <Field
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          label="Email"
-        />
-        <Field
-          name="password"
-          type="password"
-          autoComplete="password"
-          required
-          label="Password"
-        />
-        <button type="submit">Sign up</button> or{' '}
-        <Link href="signin">
-          <a>Sign in</a>
-        </Link>
-      </form>
-    </>
+      {errorMsg && <p>{errorMsg}</p>}
+      <Field
+        name="email"
+        type="email"
+        autoComplete="email"
+        required
+        label="Email"
+      />
+      <Field
+        name="password"
+        type="password"
+        autoComplete="password"
+        required
+        label="Password"
+      />
+      <button className="btn btn-info mt-2 mb-2" type="submit">Sign up</button> or{' '}
+      <Link href="signin">
+        <a className="btn btn-info mt-2 mb-2">Sign in</a>
+      </Link>
+    </form>
   )
 }
 

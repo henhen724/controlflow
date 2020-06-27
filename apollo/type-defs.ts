@@ -6,13 +6,13 @@ scalar Date
 
 type User {
     id: ID!
-    hash: String!
-    salt: String!
-    name: String!
+    email: String!
+    hash: String
+    salt: String
 }
 
 input SignUpInput {
-    name: String!
+    email: String!
     password: String!
 }
 
@@ -21,7 +21,7 @@ type SignUpPayload {
 }
 
 input SignInInput {
-    name: String!
+    email: String!
     password: String!
 }
 
@@ -33,10 +33,14 @@ type DeleteUserPayload {
     user: User
 }
 
+type Subscription {
+    dataRecieved: any
+}
+
 type Query {
-    user(id:ID!): User!
+    user(id:ID!): User
     userByName(name:String!): [User]!
-    users: [User]!
+    users: [User]
     viewer: User
 }
 

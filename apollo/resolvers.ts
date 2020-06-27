@@ -1,10 +1,13 @@
 import { AuthenticationError, UserInputError } from 'apollo-server-micro';
+import { PubSub } from 'apollo-server';
 import User from '../models/User';
 import { createUser, validatePassword } from '../lib/user';
 import { setLoginSession, getLoginSession } from '../lib/auth';
 import { removeTokenCookie } from '../lib/auth-cookies';
 import fetch from 'isomorphic-unfetch';
 import { GraphQLScalarType } from 'graphql';
+
+const pubsub = new PubSub();
 
 export const resolvers = {
   Date: new GraphQLScalarType({
@@ -17,18 +20,33 @@ export const resolvers = {
       return value.getTime();
     },
   }),
+  Subscriptions: {
+    dataRecieved: {
+      subscribe: () => pubsub.asyncIterator([]),
+    },
+  },
   Query: {
     async user(id) {
       return await User.find({ id: id }).exec();
     },
-    async userByName(name) {
-      return await User.find({ name: name }).exec();
+    async userByName(email) {
+      return await User.find({ email: email }).exec();
     },
     async users() {
-      return await User.find({}).exec();
+      const users = await User.find({}).exec();
+      return users;
     },
     async viewer(parent, args, context, info) {
-      const session = await getLoginSession(context.req);
+      var session = null;
+      try {
+        session = await getLoginSession(context.req);
+      } catch (err) {
+        if (err.message === 'Bad hmac value') {
+          removeTokenCookie(context.res);
+          throw new UserInputError("Cookie was corupted.  Please reload the page.");
+        }
+        throw err;
+      }
 
       if (session) {
         return await User.findOne({ id: session.id }).exec();
@@ -45,16 +63,16 @@ export const resolvers = {
       return { user };
     },
     async signIn(parent, args, context, info) {
-      const { name, password } = args.input;
-      const user = await User.find({ name }).exec(); // Find returns an array here I check that there is exactly one match
+      const { email, password } = args.input;
+      const user = await User.find({ email }).exec(); // Find returns an array here I check that there is exactly one match
       if (user.length === 0)
-        throw new UserInputError(`There is no users with the name ${name}`, { type: 'USER_DOES_NOT_EXIST' });
+        throw new UserInputError(`There is no users with the email ${email}`, { type: 'USER_DOES_NOT_EXIST' });
       if (user.length > 1) {
-        console.log(`There are some how ${user.length} users with the name ${name}.  Here they are:\n${user}`);
-        throw new Error(`Internal server error, some how multiple people have the name ${user.name}.`);
+        console.log(`There are some how ${user.length} users with the email ${email}.  Here they are:\n${user}`);
+        throw new Error(`Internal server error, some how multiple people have the email ${user.email}.`);
       }
       if (await validatePassword(user[0], password)) {
-        const session = { id: user[0].id, name: user[0].name }
+        const session = { id: user[0].id, email: user[0].email }
 
         await setLoginSession(context.res, session);
 

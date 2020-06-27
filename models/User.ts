@@ -6,7 +6,7 @@ interface User {
     id: string,
     hash: string,
     salt: string,
-    name: string,
+    email: string,
 }
 
 const UserSchema = new mongoose.Schema({
@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: [true, 'This user needs a name.']
+        required: [true, 'This user needs a email.']
     },
 })
 

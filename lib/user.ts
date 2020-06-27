@@ -9,7 +9,7 @@ export const createUser = data => {
   const user = {
     id: new mongoose.Types.ObjectId,
     createdAt: Date.now(),
-    name: data.name,
+    email: data.email,
     hash,
     salt,
   }

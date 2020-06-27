@@ -36,7 +36,7 @@ function SignIn() {
           email: emailElement.value,
           password: passwordElement.value,
         },
-      })
+      });
       if (data.signIn.user) {
         await router.push('/')
       }
@@ -46,30 +46,28 @@ function SignIn() {
   }
 
   return (
-    <>
+    <form onSubmit={handleSubmit} className="mat-form bg-primary p-3 mt-4">
       <h1>Sign In</h1>
-      <form onSubmit={handleSubmit}>
-        {errorMsg && <p>{errorMsg}</p>}
-        <Field
-          name="email"
-          type="email"
-          autoComplete="email"
-          required
-          label="Email"
-        />
-        <Field
-          name="password"
-          type="password"
-          autoComplete="password"
-          required
-          label="Password"
-        />
-        <button type="submit">Sign in</button> or{' '}
-        <Link href="signup">
-          <a>Sign up</a>
-        </Link>
-      </form>
-    </>
+      {errorMsg && <p>{errorMsg}</p>}
+      <Field
+        name="email"
+        type="email"
+        autoComplete="email"
+        required
+        label="Email"
+      />
+      <Field
+        name="password"
+        type="password"
+        autoComplete="password"
+        required
+        label="Password"
+      />
+      <button className="btn btn-info mt-2 mb-2" type="submit">Sign in</button> or{' '}
+      <Link href="signup">
+        <a className="btn btn-info mt-2 mb-2">Sign up</a>
+      </Link>
+    </form>
   )
 }
 

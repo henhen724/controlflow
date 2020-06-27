@@ -1,14 +1,15 @@
-import { useEffect } from 'react'
-import { useRouter } from 'next/router'
-import Link from 'next/link'
-import gql from 'graphql-tag'
-import { useQuery } from '@apollo/react-hooks'
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import gql from 'graphql-tag';
+import { useQuery } from '@apollo/react-hooks';
+import EGraph from '../components/EChartsGraph';
 
 const ViewerQuery = gql`
   query ViewerQuery {
     viewer {
       id
-      name
+      email
     }
   }
 `
@@ -23,25 +24,29 @@ const Index = () => {
     if (shouldRedirect) {
       router.push('/signin')
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldRedirect])
 
   if (error) {
-    console.log(error)
     return <p>{error.message}</p>
   }
 
   if (viewer) {
     return (
       <div>
-        You're signed in as {viewer.email} goto{' '}
-        <Link href="/about">
-          <a>about</a>
-        </Link>{' '}
-        page. or{' '}
-        <Link href="/signout">
-          <a>signout</a>
-        </Link>
+        <div className="row">
+          <div className="col md-10">
+            <EGraph />
+          </div>
+          <div className="col md-2">
+            <button className="btn btn-light">Light</button>
+          </div>
+        </div>
+        <footer>
+          You're signed in as {viewer.email}. {' '}
+          <Link href="/signout">
+            <a className="btn btn-info mt-2 mb-2">Sign Out</a>
+          </Link>
+        </footer>
       </div>
     )
   }
