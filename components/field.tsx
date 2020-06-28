@@ -1,4 +1,13 @@
-export default function Field({ name, label, type, autoComplete, required }) {
+interface FieldProps {
+  name: string,
+  label: string,
+  type: string,
+  autoComplete: string,
+  required: boolean,
+}
+
+export default function field({ name, label, type, autoComplete, required }: FieldProps) {
+
   return (
     <div className="field">
       <input

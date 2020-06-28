@@ -1,4 +1,4 @@
-export default function FourOFour({ name, label, type, autoComplete, required }) {
+export default function FourOFour() {
     return (
         <div className="container bg-primary text-info mt-4">
             <h1>Sorry, I don't have that page.</h1>

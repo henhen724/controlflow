@@ -1,7 +1,13 @@
 import crypto from 'crypto';
 import mongoose from 'mongoose';
+import { user } from '../apollo/type-defs';
 
-export const createUser = data => {
+interface createUserArgs {
+  email: string;
+  password: string;
+}
+
+export const createUser = (data: createUserArgs): user => {
   const salt = crypto.randomBytes(16).toString('hex')
   const hash = crypto
     .pbkdf2Sync(data.password, salt, 1000, 64, 'sha512')

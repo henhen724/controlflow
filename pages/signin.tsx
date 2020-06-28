@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, FormEvent } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import gql from 'graphql-tag'
@@ -23,11 +23,11 @@ function SignIn() {
   const [errorMsg, setErrorMsg] = useState()
   const router = useRouter()
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: any) { //FormEvent<HTMLFormElement>
     event.preventDefault()
 
-    const emailElement = event.currentTarget.elements.email
-    const passwordElement = event.currentTarget.elements.password
+    const emailElement = event.currentTarget.elements.email;
+    const passwordElement = event.currentTarget.elements.password;
 
     try {
       await client.resetStore()

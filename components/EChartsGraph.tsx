@@ -2,11 +2,8 @@ import React, { Component } from "react";
 import ReactECharts from 'echarts-for-react';
 
 class EGraph extends Component {
-    eventSource: EventSource;
-    constructor(props) {
+    constructor(props: any) {
         super(props);
-
-        this.eventSource = new EventSource("events");
     }
 
     getEGraphOption() {

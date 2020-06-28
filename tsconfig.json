@@ -19,7 +19,11 @@
     "jsx": "preserve"
   },
   "exclude": [
-    "node_modules"
+    "dist",
+    "node_modules",
+    ".next",
+    "out",
+    "next.config.js",
   ],
   "include": [
     "next-env.d.ts",

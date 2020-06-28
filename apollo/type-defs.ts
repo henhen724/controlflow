@@ -1,4 +1,12 @@
-import { gql } from 'apollo-server-micro';
+import { gql } from 'apollo-server-express';
+import mongoose from 'mongoose';
+
+export interface user {
+    id: mongoose.Types.ObjectId,
+    hash: string,
+    salt: string,
+    email: string,
+}
 
 const typeDef = gql`
 
@@ -7,8 +15,6 @@ scalar Date
 type User {
     id: ID!
     email: String!
-    hash: String
-    salt: String
 }
 
 input SignUpInput {
@@ -33,8 +39,8 @@ type DeleteUserPayload {
     user: User
 }
 
-type Subscription {
-    dataRecieved: any
+type Subscriptions {
+    mqttTopics(topics:[String]!): [String]!
 }
 
 type Query {

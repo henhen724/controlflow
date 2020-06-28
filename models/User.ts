@@ -2,13 +2,6 @@ import mongoose from 'mongoose';
 
 // Defining the typescript interfaces which user will use.
 
-interface User {
-    id: string,
-    hash: string,
-    salt: string,
-    email: string,
-}
-
 const UserSchema = new mongoose.Schema({
     id: {
         type: mongoose.Types.ObjectId,

@@ -13,7 +13,12 @@ const ViewerQuery = gql`
     }
   }
 `
-
+// const DataSubscription = gql`
+//   subscription getData($topicList: [String]!) {
+//     mqttTopics(topics: $topicList) {
+//     }
+//   }
+// `
 const Index = () => {
   const router = useRouter()
   const { data, loading, error } = useQuery(ViewerQuery)
