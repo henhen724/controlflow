@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import gql from 'graphql-tag'
@@ -20,7 +20,7 @@ const SignInMutation = gql`
 function SignIn() {
   const client = useApolloClient()
   const [signIn] = useMutation(SignInMutation)
-  const [errorMsg, setErrorMsg] = useState()
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const router = useRouter()
 
   async function handleSubmit(event: any) { //FormEvent<HTMLFormElement>
@@ -30,7 +30,7 @@ function SignIn() {
     const passwordElement = event.currentTarget.elements.password;
 
     try {
-      await client.resetStore()
+      await client.resetStore();
       const { data } = await signIn({
         variables: {
           email: emailElement.value,

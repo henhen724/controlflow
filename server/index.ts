@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 
 nextApp.prepare().then(() => {
     const expressApp = express();
+    dbConnect();
     const apollo = new ApolloServer({
         schema,
         context: (ctx) => {
@@ -29,9 +30,7 @@ nextApp.prepare().then(() => {
     expressApp.all('*', (req, res) => {
         const { pathname, query } = parse(req.url, true);
         if (!pathname) throw new Error(`Failed to parse url ${req.url}.`); //Apparently, url.parse can failed 🤔
-        if (!pathname.startsWith("/api")) {
-            nextApp.render(req, res, pathname, query);
-        }
+        nextApp.render(req, res, pathname, query);
     })
 
     const httpServer = createServer(expressApp);

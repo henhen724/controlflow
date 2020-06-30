@@ -77,6 +77,7 @@ export const resolvers = {
       return { user };
     },
     async signIn(parent: any, args: SignInInput, context: any, info: any) {
+      console.log("sign started");
       const { email, password } = args.input;
       const user = await User.find({ email }).exec(); // Find returns an array here I check that there is exactly one match
       if (user.length === 0)

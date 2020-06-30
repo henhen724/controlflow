@@ -1,9 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import gql from 'graphql-tag';
-import { useQuery } from '@apollo/react-hooks';
-import EGraph from '../components/EChartsGraph';
+import { useQuery, useSubscription } from '@apollo/react-hooks';
+import Graph from '../components/RechartsGraph';
 
 const ViewerQuery = gql`
   query ViewerQuery {
@@ -13,21 +13,27 @@ const ViewerQuery = gql`
     }
   }
 `
-// const DataSubscription = gql`
-//   subscription getData($topicList: [String]!) {
-//     mqttTopics(topics: $topicList) {
-//     }
-//   }
-// `
+const DataSubscription = gql`
+  subscription getData($topicList: [String]!) {
+    mqttTopics(topics: $topicList) {
+      topic
+    }
+  }
+`
 const Index = () => {
   const router = useRouter()
-  const { data, loading, error } = useQuery(ViewerQuery)
-  const viewer = data?.viewer
-  const shouldRedirect = !(loading || error || viewer)
+  const [lightOn, setLight] = useState<boolean>(true);
+  const [graphData, setGraphData] = useState<number[]>([]);
+  const { data: viewerData, loading, error } = useQuery(ViewerQuery);
+  const { data: pmtData, loading: pmtLoading, error: pmtError } = useSubscription(DataSubscription);
+  const viewer = viewerData?.viewer;
+  const shouldRedirect = !(loading || error || viewer);
 
   useEffect(() => {
     if (shouldRedirect) {
       router.push('/signin')
+    } else {
+
     }
   }, [shouldRedirect])
 
@@ -39,11 +45,16 @@ const Index = () => {
     return (
       <div>
         <div className="row">
-          <div className="col md-10">
-            <EGraph />
+          <div className="col md-9">
+            <Graph data={[{ name: "A", pv: 1 }, { name: "B", pv: 2 }]} xProperty="name" yProperty="pv" />
           </div>
           <div className="col md-2">
-            <button className="btn btn-light">Light</button>
+            <div className="checkbox">
+              <label>
+                <input type="checkbox" data-toggle="toggle" checked={lightOn} onClick={() => setLight(!lightOn)} />
+              Light Switch
+              </label>
+            </div>
           </div>
         </div>
         <footer>
