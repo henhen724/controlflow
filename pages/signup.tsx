@@ -19,10 +19,10 @@ const SignUpMutation = gql`
 
 function SignUp() {
   const [signUp] = useMutation(SignUpMutation)
-  const [errorMsg, setErrorMsg] = useState()
+  const [errorMsg, setErrorMsg] = useState<string>()
   const router = useRouter()
 
-  async function handleSubmit(event) {
+  async function handleSubmit(event: any) {
     event.preventDefault()
     const emailElement = event.currentTarget.elements.email
     const passwordElement = event.currentTarget.elements.password
@@ -37,7 +37,7 @@ function SignUp() {
 
       router.push('/signin')
     } catch (error) {
-      setErrorMsg(getErrorMessage(error))
+      setErrorMsg(getErrorMessage(error));
     }
   }
 

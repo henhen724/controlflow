@@ -1,14 +1,7 @@
-import { gql } from 'apollo-server-express';
-import mongoose from 'mongoose';
-
-export interface user {
-    id: mongoose.Types.ObjectId,
-    hash: string,
-    salt: string,
-    email: string,
-}
-
-const typeDef = gql`
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const apollo_server_express_1 = require("apollo-server-express");
+const typeDef = apollo_server_express_1.gql `
 
 scalar Date
 
@@ -39,13 +32,8 @@ type DeleteUserPayload {
     user: User
 }
 
-type DataPacket {
-    topic: String,
-    message: String,
-}
-
-type Subscription {
-    mqttTopics(topics:[String]!): DataPacket
+type Subscriptions {
+    mqttTopics(topics:[String]!): [String]!
 }
 
 type Query {
@@ -62,5 +50,5 @@ type Mutation {
     deleteMyself: DeleteUserPayload!
     deleteUser(id: ID!): DeleteUserPayload!
 }
-`
-export default typeDef;
+`;
+exports.default = typeDef;

@@ -36,8 +36,15 @@ export const resolvers = {
       return value.getTime();
     },
   }),
-  Subscriptions: {
+  Subscription: {
     mqttTopics: {
+      resolve: (payload: any) => {
+        console.log(payload);
+        return {
+          topic: payload.topic,
+          message: payload.data.message,
+        }
+      },
       subscribe: async (_: any, args: { topics: [string] }, context: any) => {
         const session = await context.session;
         if (session) {
@@ -45,7 +52,7 @@ export const resolvers = {
         } else {
           throw new AuthenticationError(`Sorry, but you have to be signed into subscribe to MQTT data.`);
         }
-      }
+      },
     },
   },
   Query: {

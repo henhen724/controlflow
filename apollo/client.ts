@@ -1,8 +1,8 @@
 import { useMemo } from 'react'
 import { ApolloClient } from 'apollo-client'
-import { InMemoryCache } from 'apollo-cache-inmemory'
+import { InMemoryCache, NormalizedCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
 
-let apolloClient: ApolloClient<InMemoryCache>;
+let apolloClient: ApolloClient<NormalizedCacheObject>;
 
 function createIsomorphLink() {
   if (typeof window === 'undefined') {
@@ -26,13 +26,13 @@ function createApolloClient() {
   })
 }
 
-export function initializeApollo(initialState: undefined | InMemoryCache) {
+export function initializeApollo(initialState: undefined | NormalizedCache) {
   const _apolloClient = apolloClient ?? createApolloClient()
 
   // If your page has Next.js data fetching methods that use Apollo Client, the initial state
   // get hydrated here
   if (initialState) {
-    _apolloClient.cache.restore(initialState!)
+    _apolloClient.cache.restore(initialState.toObject())
   }
   // For SSG and SSR always create a new Apollo Client
   if (typeof window === 'undefined') return _apolloClient
@@ -42,7 +42,7 @@ export function initializeApollo(initialState: undefined | InMemoryCache) {
   return _apolloClient
 }
 
-export function useApollo(initialState: undefined | InMemoryCache) {
+export function useApollo(initialState: undefined | NormalizedCache) {
   const store = useMemo(() => initializeApollo(initialState), [initialState])
   return store
 }
