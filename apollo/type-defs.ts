@@ -41,7 +41,7 @@ type DeleteUserPayload {
 
 type DataPacket {
     topic: String,
-    message: String,
+    data: String,
 }
 
 type Subscription {

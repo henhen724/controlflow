@@ -6,10 +6,15 @@ import { removeTokenCookie } from '../lib/auth-cookies';
 import fetch from 'isomorphic-unfetch';
 import { GraphQLScalarType } from 'graphql';
 import { connect } from 'mqtt';
+import { ISubscriptionGrant } from 'mqtt/types/lib/client';
 import { MQTTPubSub } from 'graphql-mqtt-subscriptions';
 
 const client = connect('mqtt://broker.shiftr.io:1883', { username: process.env.SHIFTER_USERNAME, password: process.env.SHIFTER_PASSWORD, reconnectPeriod: 1000 });
-const mqttPubSub = new MQTTPubSub({ client: client });
+const onMQTTSubscribe = (subId: number, granted: ISubscriptionGrant[]) => {
+  console.log(`Subscription with id ${subId}`);
+  console.log(granted);
+}
+const mqttPubSub = new MQTTPubSub({ client, onMQTTSubscribe });
 
 export interface SignUpInput {
   input: {
@@ -39,20 +44,28 @@ export const resolvers = {
   Subscription: {
     mqttTopics: {
       resolve: (payload: any) => {
-        console.log(payload);
+        console.log(payload, typeof payload);
+        var data = payload;
+        if (typeof payload === 'number')
+          data = payload.toString();
         return {
-          topic: payload.topic,
-          message: payload.data.message,
-        }
+          topic: "SENSOR",
+          data,
+        };
       },
-      subscribe: async (_: any, args: { topics: [string] }, context: any) => {
-        const session = await context.session;
-        if (session) {
-          return mqttPubSub.asyncIterator(args.topics);
-        } else {
-          throw new AuthenticationError(`Sorry, but you have to be signed into subscribe to MQTT data.`);
-        }
-      },
+      subscribe: (_: any, args: { topics: [string] }, context: any) => {
+        console.log("Subscribing.");
+        console.log(args);
+        return mqttPubSub.asyncIterator(args.topics);
+      }
+      // async (_: any, args: { topics: [string] }, context: any) => {
+      //   const session = await context.session;
+      //   if (session) {
+      //     return mqttPubSub.asyncIterator(args.topics);
+      //   } else {
+      //     throw new AuthenticationError(`Sorry, but you have to be signed into subscribe to MQTT data.`);
+      //   }
+      // },
     },
   },
   Query: {

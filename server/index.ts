@@ -10,7 +10,7 @@ import schema from '../apollo/schema';
 import { getLoginSession } from '../lib/auth';
 import dbConnect from '../lib/dbConnect';
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || "3000";
 
 
 nextApp.prepare().then(() => {
@@ -26,7 +26,7 @@ nextApp.prepare().then(() => {
             }
         },
     });
-    apollo.applyMiddleware({ app: expressApp, path: '/api/graphql' });
+    apollo.applyMiddleware({ app: expressApp, path: '/graphql' });
     expressApp.all('*', (req, res) => {
         const { pathname, query } = parse(req.url, true);
         if (!pathname) throw new Error(`Failed to parse url ${req.url}.`); //Apparently, url.parse can failed 🤔

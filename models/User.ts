@@ -17,7 +17,8 @@ const UserSchema = new mongoose.Schema({
     },
     email: {
         type: String,
-        required: [true, 'This user needs a email.']
+        required: [true, 'This user needs a email.'],
+        unique: [true, 'This email is already linked to this account.'],
     },
 })
 
