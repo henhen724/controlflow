@@ -1,0 +1,24 @@
+import { AuthenticationError, UserInputError } from 'apollo-server-express';
+import User from '../../models/User';
+
+const Query = {
+    async user(id: string) {
+        return await User.find({ id: id }).exec();
+    },
+    async userByName(email: string) {
+        return await User.find({ email: email }).exec();
+    },
+    async users() {
+        const users = await User.find({}).exec();
+        return users;
+    },
+    async viewer(parent: any, args: any, context: any, info: any) {
+        const session = await context.session
+        if (session) {
+            return await User.findOne({ id: session.id }).exec();
+        }
+        return
+    },
+}
+
+export default Query;

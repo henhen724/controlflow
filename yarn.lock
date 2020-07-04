@@ -4119,6 +4119,13 @@ graphql-mqtt-subscriptions@^1.2.0:
     iterall "^1.1.1"
     mqtt "^2.3.0"
 
+graphql-scalars@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/graphql-scalars/-/graphql-scalars-1.2.1.tgz#21a79393a74d090018993487b457afc4f866259c"
+  integrity sha512-G+A1B4C7Ww/LuNZbmpyTF97yN+Fx1k2fFuyGOWGrzHZAbu5vxA4puHgfjAskJbX0c9MKyDLVJBd4dmNcwgWuGQ==
+  optionalDependencies:
+    mongodb "*"
+
 graphql-subscriptions@^0.4.2:
   version "0.4.4"
   resolved "https://registry.yarnpkg.com/graphql-subscriptions/-/graphql-subscriptions-0.4.4.tgz#39cff32d08dd3c990113864bab77154403727e9b"
@@ -5246,7 +5253,12 @@ mkdirp@^0.5.1, mkdirp@^0.5.3, mkdirp@~0.5.1:
   dependencies:
     minimist "^1.2.5"
 
-mongodb@3.5.9:
+moment@^2.27.0:
+  version "2.27.0"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.27.0.tgz#8bff4e3e26a236220dfe3e36de756b6ebaa0105d"
+  integrity sha512-al0MUK7cpIcglMv3YF13qSgdAIqxHTO7brRtaz3DlSULbqfazqkc5kEjNrLDOM7fsjshoFIihnU8snrP7zUvhQ==
+
+mongodb@*, mongodb@3.5.9:
   version "3.5.9"
   resolved "https://registry.yarnpkg.com/mongodb/-/mongodb-3.5.9.tgz#799b72be8110b7e71a882bb7ce0d84d05429f772"
   integrity sha512-vXHBY1CsGYcEPoVWhwgxIBeWqP3dSu9RuRDsoLRPTITrcrgm1f0Ubu1xqF9ozMwv53agmEiZm0YGo+7WL3Nbug==

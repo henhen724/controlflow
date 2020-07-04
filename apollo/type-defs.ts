@@ -12,6 +12,8 @@ const typeDef = gql`
 
 scalar Date
 
+scalar JSON
+
 type User {
     id: ID!
     email: String!
@@ -41,7 +43,7 @@ type DeleteUserPayload {
 
 type DataPacket {
     topic: String,
-    data: String,
+    data: JSON,
 }
 
 type Subscription {

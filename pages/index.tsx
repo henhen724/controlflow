@@ -32,7 +32,7 @@ const Index = () => {
     return <p>{error.message}</p>
   }
 
-  const dataElement = { topics: ["SENSOR"], graphProps: { data: [] } };
+  const dataElement = { topic: "SENSOR", graphProps: { data: [], firstDataKey: "time", secondDataKey: "brightness" } };
 
   if (viewer) {
     return (

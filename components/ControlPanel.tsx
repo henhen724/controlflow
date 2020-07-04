@@ -6,7 +6,7 @@ import { getErrorMessage } from '../lib/form';
 
 interface DataElementProps {
     graphProps: LineGraphProps,
-    topics: string[],
+    topic: string,
 }
 
 // interface ControlElementProps {
@@ -25,40 +25,58 @@ subscription getData($topicList: [String]!) {
 
 interface ControlPanelProps {
     dataElements: DataElementProps[],
+}
 
+interface DataByTopic {
+    [key: string]: Object[]
+}
+
+interface DataPacket {
+    topic: string,
+    data: Object
+}
+interface SubRslt {
+    mqttTopics: DataPacket
 }
 
 const controlPanel = (props: ControlPanelProps) => {
-    const allTopics = props.dataElements.reduce<string[]>((prevTopics, { topics }) => {
-        return [...prevTopics, ...topics];
+    const allTopics = props.dataElements.reduce<string[]>((prevTopics, { topic }) => {
+        prevTopics.unshift(topic);
+        return prevTopics;
     }, []);
-    console.log(allTopics);
-    const [sensorData, setSensorData] = useState<string>("");
-    const { data, loading, error } = useSubscription(DataSubscription, {
-        // onSubscriptionData: res => {
-        //     console.log(res.subscriptionData);
-        // },
+    const [data, setData] = useState<DataByTopic>({});
+    const { loading, error } = useSubscription<SubRslt>(DataSubscription, {
+        onSubscriptionData: async res => {
+            const { data: subData } = res.subscriptionData;
+            if (subData) {
+                const newDataPacket = subData.mqttTopics;
+                if (data[newDataPacket.topic]) {
+                    data[newDataPacket.topic].unshift(newDataPacket.data);
+                    setData(data);
+                } else {
+                    data[newDataPacket.topic] = [newDataPacket.data];
+                    console.log(`${newDataPacket.topic} topic added.`);
+                    setData(data);
+                }
+            } else {
+                console.warn("Received empty data packet.");
+            }
+        },
         variables: { topicList: allTopics }
     });
 
     if (error) {
-        console.error(getErrorMessage(error));
         return (<div>{getErrorMessage(error)}</div>)
     }
-
-    if (loading) {
-        return (<div>Loading...</div>)
-    }
-
-    // const renderedData = props.dataElements.map(({ graphProps, topics }) => {
-    //     return (<LineGraph {...graphProps} />)
-    // })
+    const renderedData = props.dataElements.map(({ graphProps, topic }, index) => {
+        return (<LineGraph {...graphProps} data={data[topic]} key={"Graph-" + index.toString()} />)
+    });
     if (!loading && !error) {
-        console.log(data);
         return (<div>
-            {data.mqttTopics.data}
+            {renderedData}
         </div>)
     }
+    return (<div>Loading...</div>)
 }
 
 export default controlPanel;
