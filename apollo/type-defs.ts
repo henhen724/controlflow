@@ -41,13 +41,21 @@ type DeleteUserPayload {
     user: User
 }
 
-type DataPacket {
+input MQTTPublishInput {
     topic: String,
-    data: JSON,
+    payload: JSON,
+}
+
+type DataPacket {
+    data: JSON!
+}
+
+type SuccessBoolean {
+    success:Boolean!
 }
 
 type Subscription {
-    mqttTopics(topics:[String]!): DataPacket
+    mqttTopics(topics:[String]!):DataPacket!
 }
 
 type Query {
@@ -63,6 +71,7 @@ type Mutation {
     signOut: Boolean!
     deleteMyself: DeleteUserPayload!
     deleteUser(id: ID!): DeleteUserPayload!
+    mqttPublish(input:MQTTPublishInput): SuccessBoolean!
 }
 `
 export default typeDef;

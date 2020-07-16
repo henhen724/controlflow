@@ -26,7 +26,8 @@ body {
     text-align: center;
 }
 
-@import "./material.scss";
+@import "./material/input.scss";
+@import "./material/switch.scss";
 
 *{
     align-items: center;
@@ -34,8 +35,13 @@ body {
     align-content: center;
 }
 
-.input:invalid{
-    color: $warning
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 2.75rem;            
+    background: $darker;
+    padding-bottom: 0.5rem;
 }
 
 @import "node_modules/bootstrap/scss/functions";

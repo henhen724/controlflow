@@ -3,7 +3,8 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
-import ControlPanel from '../components/ControlPanel';
+import Dashboard, { PanelProps } from '../components/dashboard';
+import { elementType } from 'prop-types';
 
 const ViewerQuery = gql`
   query ViewerQuery {
@@ -32,12 +33,20 @@ const Index = () => {
     return <p>{error.message}</p>
   }
 
-  const dataElement = { topic: "SENSOR", graphProps: { data: [], firstDataKey: "time", secondDataKey: "brightness" } };
+  const dataElement = { topic: "SENSOR", displayProps: { firstDataKey: "timestamp", secondDataKey: "data" }, elemType: "data", displayType: "line-graph" } as PanelProps;
+  const controlElement = {
+    topic: "LEDONOFF", displayProps: {}, elemType: "control", displayType: "switch", formatAndSend: (on: boolean, sendMqttPacket: (packet: any) => any) => {
+      if (on)
+        return sendMqttPacket({ payload: "T" });
+      else
+        return sendMqttPacket({ payload: "F" });
+    },
+  } as PanelProps;
 
   if (viewer) {
     return (
       <div>
-        <ControlPanel dataElements={[dataElement]} />
+        <Dashboard dataElements={[dataElement, controlElement]} />
         <footer>
           You're signed in as {viewer.email}. {' '}
           <Link href="/signout">

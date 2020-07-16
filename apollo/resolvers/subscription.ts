@@ -1,29 +1,28 @@
 import { connect } from 'mqtt';
-import { ISubscriptionGrant } from 'mqtt/types/lib/client';
 import { MQTTPubSub } from 'graphql-mqtt-subscriptions';
 
-const client = connect('mqtt://broker.shiftr.io:1883', { username: process.env.SHIFTER_USERNAME, password: process.env.SHIFTER_PASSWORD, reconnectPeriod: 1000 });
-const onMQTTSubscribe = (subId: number, granted: ISubscriptionGrant[]) => {
+console.log(`${process.env.MQTT_URI}:${process.env.MQTT_PORT}`)
+const client = connect(`${process.env.MQTT_URI}:${process.env.MQTT_PORT}`, { username: process.env.MQTT_USERNAME, password: process.env.MQTT_PASSWORD, reconnectPeriod: 1000 });
+client.on('connect', () => {
+    console.log('Successfully connected to the MQTT server.')
+})
+const onMQTTSubscribe = (subId: number, granted: any[]) => {
     console.log(`Subscription with id ${subId}`);
     console.log(granted);
 }
-const mqttPubSub = new MQTTPubSub({ client, onMQTTSubscribe });
+const publishOptions = (trigger: string, payload: any) => {
+
+}
+export const mqttPubSub = new MQTTPubSub({ client, onMQTTSubscribe });
 
 const Subscription = {
     mqttTopics: {
         resolve: (payload: any) => {
-            var brightness = payload;
-            const packet = {
-                topic: "SENSOR",
-                data: {
-                    brightness,
-                    time: Date.now()
-                },
-            };
-            console.log(packet);
-            return packet;
+            console.log(payload);
+            return { data: payload, }
         },
         subscribe: (_: any, args: { topics: [string] }, context: any) => {
+            console.log(`Subscribing to Topic:`, args.topics);
             return mqttPubSub.asyncIterator(args.topics);
         }
         // async (_: any, args: { topics: [string] }, context: any) => {

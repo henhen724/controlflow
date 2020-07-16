@@ -13,8 +13,10 @@ const Query = {
         return users;
     },
     async viewer(parent: any, args: any, context: any, info: any) {
+        console.log("Viewer query started.")
         const session = await context.session
         if (session) {
+            console.log("viewer found.");
             return await User.findOne({ id: session.id }).exec();
         }
         return

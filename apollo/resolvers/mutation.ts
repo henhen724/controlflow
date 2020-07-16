@@ -4,6 +4,7 @@ import { createUser, validatePassword } from '../../lib/user';
 import { setLoginSession } from '../../lib/auth';
 import { removeTokenCookie } from '../../lib/auth-cookies';
 import fetch from 'isomorphic-unfetch'; //For when I add OAuth back in
+import { mqttPubSub } from "./subscription";
 
 export interface SignUpInput {
     input: {
@@ -16,6 +17,16 @@ export interface SignInInput {
     input: {
         email: string;
         password: string;
+    }
+}
+
+export interface mqttPublishInput {
+    input: {
+        topic: string,
+        payload: {
+            SOLO_STRING: string | undefined,
+            [key: string]: any
+        }
     }
 }
 
@@ -51,6 +62,14 @@ const Mutation = {
     async signOut(parent: any, args: any, context: any, info: any) {
         removeTokenCookie(context.res);
         return true
+    },
+    async mqttPublish(_: any, args: mqttPublishInput, context: any) {
+        const { topic, payload } = args.input;
+        if (payload && payload.SOLO_STRING) {
+            return mqttPubSub.publish(topic, payload.SOLO_STRING);
+        } else {
+            return mqttPubSub.publish(topic, payload);
+        }
     },
 }
 

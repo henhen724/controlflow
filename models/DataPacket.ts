@@ -1,8 +1,13 @@
-import mongoose from 'mongoose';
+import { Schema, Document, model, models } from 'mongoose';
 
 // Defining the typescript interfaces which user will use.
+export interface IData extends Document {
+    experationDate: Date,
+    topic: string,
+    type: JSON
+}
 
-const DataSchema = new mongoose.Schema({
+const DataSchema = new Schema({
     experationDate: {
         type: Date,
         required: false
@@ -12,9 +17,9 @@ const DataSchema = new mongoose.Schema({
         required: [true, "This data packet must have a topic."],
     },
     data: {
-        type: String,
+        type: JSON,
         required: [true, "This data packet has no content/data."],
     },
 })
 
-export default mongoose.models.DataPacket || mongoose.model('DataPacket', DataSchema, 'data');
+export default models.DataPacket || model<IData>('DataPacket', DataSchema, 'data');
