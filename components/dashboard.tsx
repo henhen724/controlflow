@@ -4,7 +4,6 @@ import gql from 'graphql-tag';
 import { useState } from 'react';
 import { useSubscription, useMutation } from '@apollo/react-hooks';
 import { getErrorMessage } from '../lib/form';
-import Index from '../pages';
 
 
 const DataSubscription = gql`
@@ -15,9 +14,9 @@ subscription getData($topicList: [String]!) {
 }
 `
 const SendMqttPacket = gql`
-mutation sendData($topicName:String!, $payload:JSON){
-  mqttPublish(input:{topic:$topicName, payload:$payload}) {
-      success
+mutation sendData($topic:String!, $payload:JSON){
+  mqttPublish(input:{topic:$topic, payload:$payload}) {
+    success
   }
 }
 `
@@ -37,13 +36,13 @@ interface SubRslt {
 }
 
 const dashboard = (props: DashboardProps) => {
+    const [data, setData] = useState<DataByTopic>({});
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [mqttPublish] = useMutation(SendMqttPacket);
     const allTopics = props.dataElements.reduce<string[]>((prevTopics, { topic }) => {
         prevTopics.unshift(topic);
         return prevTopics;
     }, []);
-    const [data, setData] = useState<DataByTopic>({});
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [mqttPublish] = useMutation(SendMqttPacket);
     console.log(allTopics);
     allTopics.forEach(topic => {
         console.log(`Adding ${topic} sub`);

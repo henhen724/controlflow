@@ -30,6 +30,7 @@
     "pages/**/*.ts",
     "pages/**/*.tsx",
     "components/**/*.ts",
-    "components/**/*.tsx",
+    "components/**/*.tsx", 
+    "lib/**/*.ts",
   ]
 }

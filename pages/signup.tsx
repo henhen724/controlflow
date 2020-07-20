@@ -4,7 +4,7 @@ import Link from 'next/link'
 import gql from 'graphql-tag'
 import { useMutation } from '@apollo/react-hooks'
 import { getErrorMessage } from '../lib/form'
-import Field from '../components/field'
+import { Button, TextField, Link as LinkStyle, Container } from '@material-ui/core'
 
 const SignUpMutation = gql`
   mutation SignUpMutation($email: String!, $password: String!) {
@@ -41,30 +41,30 @@ function SignUp() {
     }
   }
 
-  return (
-    <form onSubmit={handleSubmit} className="mat-form">
+  return (<Container maxWidth="sm">
+    <form onSubmit={handleSubmit}>
       <h1>Sign Up</h1>
       {errorMsg && <p>{errorMsg}</p>}
-      <Field
+      <TextField
         name="email"
         type="email"
         autoComplete="email"
         required
         label="Email"
       />
-      <Field
+      <TextField
         name="password"
         type="password"
         autoComplete="password"
         required
         label="Password"
       />
-      <button className="btn btn-info mt-2 mb-2" type="submit">Sign up</button> or{' '}
+      <Button type="submit" variant="contained" color="primary">Sign up</Button> or{' '}
       <Link href="signin">
-        <a className="btn btn-info mt-2 mb-2">Sign in</a>
+        <LinkStyle>Sign in</LinkStyle>
       </Link>
     </form>
-  )
+  </Container>)
 }
 
 export default SignUp

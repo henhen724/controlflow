@@ -1,4 +1,4 @@
-import { Schema, Document, model, Types, models } from 'mongoose';
+import { Schema, Document, model, Model, Types, models } from 'mongoose';
 import { PanelProps } from '../components/dashboard';
 
 // Defining the typescript interfaces which user will use.
@@ -11,7 +11,7 @@ export interface IUser extends Document {
     dashboardProps: PanelProps,
 }
 
-const UserSchema = new Schema({
+const UserSchema = new Schema<IUser>({
     id: {
         type: Types.ObjectId,
         required: [true, 'This user needs an object id.']
@@ -47,6 +47,6 @@ const UserSchema = new Schema({
             required: false,
         }
     }]
-})
+}, { strict: true })
 
-export default models.User || model<IUser>('User', UserSchema, 'users');
+export default models.User as Model<IUser> || model<IUser>('User', UserSchema, 'users');

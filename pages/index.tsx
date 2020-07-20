@@ -3,8 +3,9 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
+import Navabar from '../components/navbar';
 import Dashboard, { PanelProps } from '../components/dashboard';
-import { elementType } from 'prop-types';
+import { Link as MatLink } from "@material-ui/core";
 
 const ViewerQuery = gql`
   query ViewerQuery {
@@ -35,24 +36,19 @@ const Index = () => {
 
   const dataElement = { topic: "SENSOR", displayProps: { firstDataKey: "timestamp", secondDataKey: "data" }, elemType: "data", displayType: "line-graph" } as PanelProps;
   const controlElement = {
-    topic: "LEDONOFF", displayProps: {}, elemType: "control", displayType: "switch", formatAndSend: (on: boolean, sendMqttPacket: (packet: any) => any) => {
+    topic: "LEDONOFF", displayProps: {}, elemType: "control", displayType: "switch", format: (on: boolean) => {
       if (on)
-        return sendMqttPacket({ payload: "T" });
+        return { payload: "T" };
       else
-        return sendMqttPacket({ payload: "F" });
+        return { payload: "F" };
     },
   } as PanelProps;
 
   if (viewer) {
     return (
       <div>
+        <Navabar email={viewer.email} />
         <Dashboard dataElements={[dataElement, controlElement]} />
-        <footer>
-          You're signed in as {viewer.email}. {' '}
-          <Link href="/signout">
-            <a className="btn btn-info mt-2 mb-2">Sign Out</a>
-          </Link>
-        </footer>
       </div>
     )
   }

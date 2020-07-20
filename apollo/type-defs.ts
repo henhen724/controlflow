@@ -42,12 +42,17 @@ type DeleteUserPayload {
 }
 
 input MQTTPublishInput {
-    topic: String,
-    payload: JSON,
+    topic: String!
+    payload: JSON
+}
+
+input RecordTopicInput {
+    topic: String!
+    experationTime: Int!
 }
 
 type DataPacket {
-    data: JSON!
+    data: JSON
 }
 
 type SuccessBoolean {
@@ -58,11 +63,17 @@ type Subscription {
     mqttTopics(topics:[String]!):DataPacket!
 }
 
+type BufferInfo {
+    topic: String!
+    experationTime: Int!
+}
+
 type Query {
     user(id:ID!): User
     userByName(name:String!): [User]!
     users: [User]
     viewer: User
+    runningBuffers: [BufferInfo]
 }
 
 type Mutation {
@@ -71,7 +82,8 @@ type Mutation {
     signOut: Boolean!
     deleteMyself: DeleteUserPayload!
     deleteUser(id: ID!): DeleteUserPayload!
-    mqttPublish(input:MQTTPublishInput): SuccessBoolean!
+    mqttPublish(input:MQTTPublishInput!): SuccessBoolean!
+    recordTopic(input:RecordTopicInput!): SuccessBoolean!
 }
 `
 export default typeDef;

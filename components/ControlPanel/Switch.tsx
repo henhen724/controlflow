@@ -1,10 +1,12 @@
 import { Component, ChangeEvent } from 'react';
-import { ControlPanelProps } from './index';
+import { ControlPanelProps, FullControlPanelProps } from './index';
+import MatSwitch from '@material-ui/core/Switch';
 
 export type SwitchProps = ControlPanelProps<{}, "switch">;
+export type FullSwitchProps = FullControlPanelProps<SwitchProps>;
 
-export class Switch extends Component<{ props: SwitchProps, data: any[], sendMqttPacket: (msg: any) => any }, { onState: boolean }> {
-    constructor(props: { props: SwitchProps, data: any[], sendMqttPacket: (msg: any) => boolean }) {
+export class Switch extends Component<FullSwitchProps, { onState: boolean }> {
+    constructor(props: FullSwitchProps) {
         super(props);
         this.state = {
             onState: false
@@ -12,15 +14,13 @@ export class Switch extends Component<{ props: SwitchProps, data: any[], sendMqt
     }
     switchChange = (e: ChangeEvent<HTMLInputElement>) => {
         e.preventDefault();
-        this.props.props.formatAndSend(!this.state.onState, this.props.sendMqttPacket);
+        this.props.sendMqttPacket({ variables: { payload: this.props.props.format(!this.state.onState), topic: this.props.props.topic } });
         this.setState({
             onState: !this.state.onState
         })
     }
     render() {
-        return (<div className="mat-switch-wraper">
-            <input className="mat-switch" id="checkbox" type="checkbox" onChange={this.switchChange} checked={this.state.onState} />
-            <label className="mat-switch-label" htmlFor="checkbox" />
-        </div>)
+
+        return (<MatSwitch onChange={this.switchChange} checked={this.state.onState} color="secondary" />)
     }
 }

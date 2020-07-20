@@ -3,15 +3,17 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
 import { ApolloServer } from 'apollo-server-express';
-const nextApp = next({ dev: process.env.NODE_ENV !== 'production' });
-const handle = nextApp.getRequestHandler();
+const nextApp = next({ dev: process.env.NODE_ENV !== 'production' }); //This loads all of the enviroment varibles
+
 
 import schema from '../apollo/schema';
 import { getLoginSession } from '../lib/auth';
 import dbConnect from '../lib/dbConnect';
 
-const PORT = process.env.PORT || "3000";
+import rollingBuffer from '../workers/runningBuffer';
+rollingBuffer();
 
+const PORT = process.env.PORT || "3000";
 
 nextApp.prepare().then(() => {
     const expressApp = express();

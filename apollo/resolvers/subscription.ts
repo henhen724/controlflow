@@ -1,11 +1,7 @@
-import { connect } from 'mqtt';
 import { MQTTPubSub } from 'graphql-mqtt-subscriptions';
+import mqttConnect from '../../lib/mqttConnect';
 
-console.log(`${process.env.MQTT_URI}:${process.env.MQTT_PORT}`)
-const client = connect(`${process.env.MQTT_URI}:${process.env.MQTT_PORT}`, { username: process.env.MQTT_USERNAME, password: process.env.MQTT_PASSWORD, reconnectPeriod: 1000 });
-client.on('connect', () => {
-    console.log('Successfully connected to the MQTT server.')
-})
+const client = mqttConnect();
 const onMQTTSubscribe = (subId: number, granted: any[]) => {
     console.log(`Subscription with id ${subId}`);
     console.log(granted);

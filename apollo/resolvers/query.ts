@@ -1,5 +1,6 @@
 import { AuthenticationError, UserInputError } from 'apollo-server-express';
 import User from '../../models/User';
+import TopicBufferInfo from '../../models/TopicBufferInfo';
 
 const Query = {
     async user(id: string) {
@@ -21,6 +22,9 @@ const Query = {
         }
         return
     },
+    async runningBuffers() {
+        return await TopicBufferInfo.find({}).exec();
+    }
 }
 
 export default Query;
