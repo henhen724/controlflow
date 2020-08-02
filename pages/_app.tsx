@@ -13,12 +13,14 @@ import Theme from '../components/Theme';
 export default function MyApp({ Component, pageProps }: AppProps<{ initialApolloState: NormalizedCache }>) {
   const myApolloClient = useApollo(pageProps.initialApolloState);
 
-  return (<>
+  return (<div>
     <Head>
-      <title>Maroon DAQ</title>
+      <title>Wi-DAQ</title>
       <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
       <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
       <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+      <link rel="icon" type="image/svg+xml" href="favicon.svg" sizes="any" />
+      <link rel="alternate icon" href="favicon.ico" />
     </Head>
     <ApolloProvider client={myApolloClient}>
       <Theme>
@@ -26,5 +28,5 @@ export default function MyApp({ Component, pageProps }: AppProps<{ initialApollo
         < Component {...pageProps} />
       </Theme>
     </ApolloProvider>
-  </>);
+  </div>);
 }

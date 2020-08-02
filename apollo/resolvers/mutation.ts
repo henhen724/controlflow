@@ -1,6 +1,8 @@
 import { AuthenticationError, UserInputError } from 'apollo-server-express';
 import User from '../../models/User';
 import TopicBufferInfo from '../../models/TopicBufferInfo';
+import DataPacket from '../../models/DataPacket';
+import Alarm, { IAlarm } from '../../models/Alarm';
 import { createUser, validatePassword } from '../../lib/user';
 import { setLoginSession } from '../../lib/auth';
 import { removeTokenCookie } from '../../lib/auth-cookies';
@@ -35,7 +37,14 @@ export interface recordTopicInput {
     input: {
         topic: string,
         experationTime: number,
+        expires: Boolean,
+        maxSize: number,
+        sizeLimited: Boolean,
     }
+}
+
+export interface setAlarmInput {
+    input: IAlarm
 }
 
 const Mutation = {
@@ -48,13 +57,12 @@ const Mutation = {
         return { user };
     },
     async signIn(parent: any, args: SignInInput, context: any, info: any) {
-        console.log("sign started");
         const { email, password } = args.input;
         const user = await User.find({ email }).exec(); // Find returns an array here I check that there is exactly one match
         if (user.length === 0)
             throw new UserInputError(`There is no users with the email ${email}`, { type: 'USER_DOES_NOT_EXIST' });
         if (user.length > 1) {
-            console.log(`There are some how ${user.length} users with the email ${email}.  Here they are:\n${user}`);
+            console.error(`There are some how ${user.length} users with the email ${email}.  Here they are:\n${user}`);
             throw new Error(`Internal server error, some how multiple people have the email ${email}.`);
         }
         if (await validatePassword(user[0], password)) {
@@ -80,24 +88,68 @@ const Mutation = {
         }
     },
     async recordTopic(_: any, args: recordTopicInput, context: any) {
-        const { topic, experationTime } = args.input;
+        console.log(`Starting topic record for ${args.input.topic}\n%j`, args.input);
+        const { topic, experationTime, maxSize } = args.input;
+        const expires = !!experationTime;
+        const sizeLimited = !!maxSize;
         const bufferInfo = await TopicBufferInfo.find({ topic });
         switch (bufferInfo.length) {
             case 0:
                 const newBufInfo = new TopicBufferInfo({
                     topic,
                     experationTime,
+                    expires,
+                    maxSize,
+                    sizeLimited,
                 })
                 await newBufInfo.save();
                 return { success: true };
             case 1:
                 bufferInfo[0].experationTime = experationTime;
+                bufferInfo[0].expires = expires;
+                bufferInfo[0].maxSize = maxSize;
+                bufferInfo[0].sizeLimited = sizeLimited;
                 await bufferInfo[0].save();
                 return { success: true };
             default:
                 throw new Error(`Topic ${topic} has ${bufferInfo.length} buffer info entries, but topic buffer info must be unique.`);
         }
 
+    },
+    async deleteTopicBuffer(_: any, args: { topic: string }, context: any) {
+        console.log(`Deleteing ${args.topic}`);
+        await TopicBufferInfo.deleteMany({ topic: args.topic }).exec();
+        await DataPacket.deleteMany({ topic: args.topic }).exec();
+        return { success: true };
+    },
+    async setAlarm(_: any, args: setAlarmInput, context: any) {
+        console.log(`Starting topic record for ${args.input.name}\n%j`, args.input);
+        const { name, topics, triggerFunction, actionFunction } = args.input;
+        const alarms = await Alarm.find({ name });
+        switch (alarms.length) {
+            case 0:
+                const newAlarm = new Alarm({
+                    name,
+                    topics,
+                    triggerFunction,
+                    actionFunction
+                })
+                await newAlarm.save();
+                return { success: true };
+            case 1:
+                alarms[0].topics = topics;
+                alarms[0].triggerFunction = triggerFunction;
+                alarms[0].actionFunction = actionFunction;
+                await alarms[0].save();
+                return { success: true };
+            default:
+                throw new Error(`Topic ${name} has ${alarms.length} buffer info entries, but topic buffer info must be unique.`);
+        }
+    },
+    async deleteAlarm(_: any, args: { name: string }, context: any) {
+        console.log(`Deleteing ${args.name}`);
+        await Alarm.deleteMany({ name: args.name }).exec();
+        return { success: true };
     },
 }
 

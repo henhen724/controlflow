@@ -1,10 +1,11 @@
-import { useState } from 'react'
-import { useRouter } from 'next/router'
-import Link from 'next/link'
-import gql from 'graphql-tag'
-import { useMutation } from '@apollo/react-hooks'
-import { getErrorMessage } from '../lib/form'
-import { Button, TextField, Link as LinkStyle, Container } from '@material-ui/core'
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import gql from 'graphql-tag';
+import { useMutation } from '@apollo/react-hooks';
+import { getErrorMessage } from '../lib/form';
+import { Button, TextField, Link as LinkStyle, Container } from '@material-ui/core';
+import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
 const SignUpMutation = gql`
   mutation SignUpMutation($email: String!, $password: String!) {
@@ -16,6 +17,26 @@ const SignUpMutation = gql`
     }
   }
 `
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      margin: theme.spacing(0),
+      padding: theme.spacing(0),
+      position: "relative",
+      textAlign: "center",
+    },
+    paperRoot: {
+      margin: theme.spacing(2),
+      padding: theme.spacing(3),
+      position: "relative",
+      textAlign: "center",
+      backgroundColor: theme.palette.primary.light,
+    },
+    spacerDiv: {
+      paddingBottom: theme.spacing(2),
+    },
+  }))
 
 function SignUp() {
   const [signUp] = useMutation(SignUpMutation)

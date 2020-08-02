@@ -2,9 +2,21 @@ import { DataComponent, UnionDataPanelProps } from './DataPanel/index';
 import { ControlComponent, UnionControlPanelProps } from './ControlPanel/index';
 import gql from 'graphql-tag';
 import { useState } from 'react';
-import { useSubscription, useMutation } from '@apollo/react-hooks';
+import { useSubscription, useMutation, useQuery } from '@apollo/react-hooks';
 import { getErrorMessage } from '../lib/form';
 
+
+const DataQuery = gql`
+query DataQuery($topic:String!) {
+    topicBuffer(topic:$topic) {
+        data
+    }
+}
+`
+
+interface QRslt {
+    topicBuffer: { data: Object }[]
+}
 
 const DataSubscription = gql`
 subscription getData($topicList: [String]!) {
@@ -13,6 +25,11 @@ subscription getData($topicList: [String]!) {
   }
 }
 `
+
+interface SubRslt {
+    mqttTopics: { data: Object }
+}
+
 const SendMqttPacket = gql`
 mutation sendData($topic:String!, $payload:JSON){
   mqttPublish(input:{topic:$topic, payload:$payload}) {
@@ -31,10 +48,6 @@ interface DataByTopic {
     [key: string]: Object[]
 }
 
-interface SubRslt {
-    mqttTopics: { data: Object }
-}
-
 const dashboard = (props: DashboardProps) => {
     const [data, setData] = useState<DataByTopic>({});
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -43,9 +56,15 @@ const dashboard = (props: DashboardProps) => {
         prevTopics.unshift(topic);
         return prevTopics;
     }, []);
-    console.log(allTopics);
     allTopics.forEach(topic => {
-        console.log(`Adding ${topic} sub`);
+        useQuery<QRslt>(DataQuery, {
+            variables: { topic },
+            onCompleted: async res => {
+                console.log(`Recieved query`, res);
+                data[topic] = res.topicBuffer.map(packet => packet.data).reverse();
+                setData(data);
+            }
+        });
         useSubscription<SubRslt>(DataSubscription, {
             variables: { topicList: [topic] },
             onSubscriptionData: async res => {
@@ -93,7 +112,6 @@ const dashboard = (props: DashboardProps) => {
             {renderedData}
         </div>)
     }
-    return (<div>Loading Dashboard...</div>)
 }
 
 export default dashboard;

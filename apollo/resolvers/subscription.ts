@@ -18,7 +18,7 @@ const Subscription = {
             return { data: payload, }
         },
         subscribe: (_: any, args: { topics: [string] }, context: any) => {
-            console.log(`Subscribing to Topic:`, args.topics);
+            console.log(`Subscribing to Topic: ${args.topics}`);
             return mqttPubSub.asyncIterator(args.topics);
         }
         // async (_: any, args: { topics: [string] }, context: any) => {

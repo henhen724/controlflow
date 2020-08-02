@@ -2,6 +2,7 @@ import { DataComponent, DataPanelProps } from './index';
 import { LineChart, Line, CartesianAxis, XAxis, YAxis, CartesianGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, Legend, ResponsiveContainer, } from "recharts";
 import moment from 'moment';
 import { Component } from 'react';
+import { CircularProgress, Container } from '@material-ui/core';
 
 export interface LineGraphDisplayProps {
     width?: number,
@@ -43,7 +44,7 @@ export class LineGraph extends Component<{ props: LineGraphProps, data: any[] },
                 </LineChart>
             </ResponsiveContainer>)
         } else {
-            return (<div>Loading Chart...</div>)
+            return (<Container maxWidth="sm"><h1>Loading Chart</h1><CircularProgress /></Container>)
         }
     }
 }

@@ -88,7 +88,7 @@ export default function theme(props: any) {
                 direction,
                 palette: {
                     primary: {
-                        main: paletteType === 'light' ? '#800000' : red[200],
+                        main: paletteType === 'light' ? '#ff8080' : red[200],
                     },
                     secondary: {
                         main: paletteType === 'light' ? darken(blue.A400, 0.1) : blue[200],

@@ -2,14 +2,29 @@ import { Schema, Document, model, Model, models, Types } from 'mongoose';
 
 // Defining the typescript interfaces which user will use.
 export interface ITopic extends Document {
-    experationTime: number,
+    experationTime?: number,
+    expires: Boolean,
+    maxSize?: number,
+    sizeLimited: Boolean,
     topic: string,
 }
 
 const TopicBuffersInfo = new Schema<ITopic>({
     experationTime: {
-        type: Types.Decimal128,
-        required: [true, "This topic needs an experation time."]
+        type: Number,
+        required: false
+    },
+    expires: {
+        type: Boolean,
+        required: true,
+    },
+    maxSize: { // In Bytes
+        type: Number,
+        required: false
+    },
+    sizeLimited: {
+        type: Boolean,
+        required: true
     },
     topic: {
         type: String,

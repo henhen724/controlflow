@@ -1,11 +1,16 @@
 import React from 'react';
 import Link from 'next/link';
-import { AppBar, Badge, Toolbar, Typography, IconButton, MenuItem, Menu, Button } from '@material-ui/core';
+import { AppBar, Badge, Toolbar, Typography, IconButton, MenuItem, Menu, Button, Tabs, Tab } from '@material-ui/core';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { AccountCircle, Notifications as NotificationsIcon } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
+        svgRoot: {
+            height: theme.spacing(10),
+            width: theme.spacing(6),
+            paddingRight: theme.spacing(1),
+        },
         grow: {
             flexGrow: 1,
         },
@@ -41,12 +46,21 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-interface navbarProps {
-    children: any,
-    email: string
+const a11yProps = (index: number) => {
+    return {
+        id: `simple-tab-${index}`,
+        'aria-controls': `simple-tabpanel-${index}`,
+    };
 }
 
-export default function navbar(props: any) {
+
+interface NavbarProps {
+    email: string,
+    currTab: number,
+    changeTab: (newTab: number) => void,
+}
+
+export default function navbar(props: NavbarProps) {
     const classes = useStyles();
     const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -83,25 +97,15 @@ export default function navbar(props: any) {
         <div className={classes.grow}>
             <AppBar position="static">
                 <Toolbar>
+                    <img src="images/SecondDraft.svg" className={classes.svgRoot} />
                     <Typography className={classes.title} variant="h5" noWrap>
-                        Maroon DAQ
+                        Wi-DAQ
                     </Typography>
                     <div className={classes.grow} />
-                    <Link href="/">
-                        <Button color="inherit">
-                            Dashboard
-                        </Button>
-                    </Link>
-                    <Link href="buffers">
-                        <Button color="inherit">
-                            Data Buffers
-                        </Button>
-                    </Link>
-                    <Link href="alarms">
-                        <Button color="inherit">
-                            Alarms
-                    </Button>
-                    </Link>
+                    <Tabs value={props.currTab} onChange={(e, val) => props.changeTab(val)} aria-label="simple tabs example">
+                        <Tab label="Dashboard" {...a11yProps(0)} />
+                        <Tab label="Data Buffers" {...a11yProps(1)} />
+                    </Tabs>
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
                         <IconButton aria-label="show 17 new notifications" color="inherit">

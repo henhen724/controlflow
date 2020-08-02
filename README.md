@@ -1,4 +1,4 @@
-# Controlflow
+# Wi-DAQ
 
 ## Configuration
 _If you are trying to run this locally, you need to add two enviroment varibles, namely MONGODB\_URI and TOKEN\_SECRET._  

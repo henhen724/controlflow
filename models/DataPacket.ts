@@ -1,27 +1,28 @@
-import { Schema, Document, model, Model, models } from 'mongoose';
+import { Schema, Document, model, Model, models, Types } from 'mongoose';
 
-// Defining the typescript interfaces which user will use.
+
 export interface IData extends Document {
-    experationDate: Number,
+    created: Date,
+    experationDate?: Date,
+    expires: Boolean,
     topic: String,
     data: Object
 }
 
 const DataSchema = new Schema<IData>({
-    experationDate: {
-        type: Number,
+    created: {
+        type: Date,
         default: () => {
-            return Date.now() + 5 * 60 * 1000;
+            return new Date();
         },
-        min: 0,
-        required: false,
+        required: [true, "I need to know when this packet was created."],
     },
     topic: {
         type: String,
         required: [true, "This data packet must have a topic."],
     },
     data: {
-        type: String,
+        type: Object,
         required: [true, "This data packet has no content/data."],
     },
 })

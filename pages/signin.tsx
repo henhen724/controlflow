@@ -4,7 +4,9 @@ import Link from 'next/link';
 import gql from 'graphql-tag';
 import { useMutation, useApolloClient } from '@apollo/react-hooks';
 import { getErrorMessage } from '../lib/form';
-import { TextField, Button, Container } from '@material-ui/core';
+import { TextField, Button, Container, Paper, Grid } from '@material-ui/core';
+import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
+import classes from '*.module.css';
 
 const SignInMutation = gql`
   mutation SignInMutation($email: String!, $password: String!) {
@@ -17,14 +19,35 @@ const SignInMutation = gql`
   }
 `
 
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      margin: theme.spacing(0),
+      padding: theme.spacing(0),
+      position: "relative",
+      textAlign: "center",
+    },
+    paperRoot: {
+      margin: theme.spacing(2),
+      padding: theme.spacing(3),
+      position: "relative",
+      textAlign: "center",
+      backgroundColor: theme.palette.primary.light,
+    },
+    spacerDiv: {
+      paddingBottom: theme.spacing(2),
+    },
+  }))
+
 function SignIn() {
-  const client = useApolloClient()
-  const [signIn] = useMutation(SignInMutation)
+  const client = useApolloClient();
+  const classes = useStyles();
+  const [signIn] = useMutation(SignInMutation);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const router = useRouter()
+  const router = useRouter();
 
   async function handleSubmit(event: any) { //FormEvent<HTMLFormElement>
-    event.preventDefault()
+    event.preventDefault();
 
     const emailElement = event.currentTarget.elements.email;
     const passwordElement = event.currentTarget.elements.password;
@@ -38,39 +61,44 @@ function SignIn() {
         },
       });
       if (data.signIn.user) {
-        await router.push('/')
+        await router.push('/dashboard')
       }
     } catch (error) {
       setErrorMsg(getErrorMessage(error))
     }
   }
 
-  return (
-    <Container maxWidth="sm">
-      <form onSubmit={handleSubmit}>
-        <h1>Sign In</h1>
+  return (<Container maxWidth="sm">
+    <Paper className={classes.paperRoot} elevation={3}>
+      <form className={classes.root} onSubmit={handleSubmit}>
+        <h2>Sign In</h2>
         {errorMsg && <p>{errorMsg}</p>}
         <TextField
           name="email"
           type="email"
           autoComplete="email"
+          fullWidth
           required
           label="Email"
+          color="secondary"
         />
         <TextField
           name="password"
           type="password"
           autoComplete="password"
+          fullWidth
           required
           label="Password"
+          color="secondary"
         />
+        <div className={classes.spacerDiv} />
         <Button type="submit">Sign in</Button> or{' '}
         <Link href="signup">
-          <a className="btn btn-info mt-2 mb-2">Sign up</a>
+          <Button>Sign up</Button>
         </Link>
       </form>
-    </Container>
-  )
+    </Paper>
+  </Container>);
 }
 
 export default SignIn

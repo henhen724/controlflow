@@ -28,17 +28,17 @@ type SignUpPayload {
     user: User!
 }
 
-input SignInInput {
-    email: String!
-    password: String!
-}
-
 type SignInPayload {
     user: User
 }
 
 type DeleteUserPayload {
     user: User
+}
+
+input SignInInput {
+    email: String!
+    password: String!
 }
 
 input MQTTPublishInput {
@@ -48,11 +48,20 @@ input MQTTPublishInput {
 
 input RecordTopicInput {
     topic: String!
-    experationTime: Int!
+    experationTime: Int
+    maxSize: Int
 }
 
 type DataPacket {
     data: JSON
+}
+
+type BufferPacket {
+    topic: String!
+    created: Date!
+    experationTime: Date!
+    expires: Boolean!
+    data: JSON!
 }
 
 type SuccessBoolean {
@@ -65,7 +74,17 @@ type Subscription {
 
 type BufferInfo {
     topic: String!
-    experationTime: Int!
+    expires: Boolean!
+    experationTime: Int
+    sizeLimited: Boolean!
+    maxSize: Int
+}
+
+type Alarm {
+    name: String
+    topics: String[]
+    triggerFunction: String
+    actionFunction: String
 }
 
 type Query {
@@ -74,16 +93,21 @@ type Query {
     users: [User]
     viewer: User
     runningBuffers: [BufferInfo]
+    alarms: [Alarm]
+    topicBuffer(topic:String): [BufferPacket]
 }
 
 type Mutation {
-    signUp(input: SignUpInput!): SignUpPayload!
-    signIn(input: SignInInput!): SignInPayload!
+    signUp(input:SignUpInput!): SignUpPayload!
+    signIn(input:SignInInput!): SignInPayload!
     signOut: Boolean!
     deleteMyself: DeleteUserPayload!
-    deleteUser(id: ID!): DeleteUserPayload!
+    deleteUser(id:ID!): DeleteUserPayload!
     mqttPublish(input:MQTTPublishInput!): SuccessBoolean!
     recordTopic(input:RecordTopicInput!): SuccessBoolean!
+    deleteTopicBuffer(topic: String!): SuccessBoolean!
+    setAlarm(input:Alarm!): SuccessBoolean!
+    deleteAlarm(name:String!): SuccessBoolean!
 }
 `
 export default typeDef;
