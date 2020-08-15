@@ -18,22 +18,22 @@ query AlarmsQuery {
     }
 }
 `
-const RecordTopic = gql`
-mutation RecordTopic($input: RecordTopicInput!) {
-  recordTopic(input: $input) {
+const SetAlarm = gql`
+mutation SetAlarm($input: AlarmInput!) {
+  setAlarm(input: $input) {
     success
   }
 }
 `
-const DeleteTopic = gql`
-mutation DeleteTopicBuffer($topic:String!) {
-    deleteTopicBuffer(topic:$topic) {
+const DeleteAlarm = gql`
+mutation DeleteAlarm($name:String!) {
+    deleteAlarm(topic:$name) {
         success
     }
 }
 `
 
-interface BufferQuery {
+interface AlarmQuery {
     alarms: IAlarm[]
 }
 
@@ -42,65 +42,60 @@ interface TableState {
     data: IAlarm[],
 }
 
-interface BufferPacket {
-    topic: string,
-    experationTime?: number,
-    maxSize?: number,
-}
-
 interface SuccessBoolean {
     success: Boolean
 }
 
 const Alarms = () => {
     // Queries
-    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = useQuery<BufferQuery>(BufferQuery, {
-        onCompleted: (queryData: BufferQuery) => {
-            const buffers = queryData.runningBuffers ? queryData.runningBuffers : [];
+    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = useQuery<AlarmQuery>(AlarmsQuery, {
+        onCompleted: (queryData: AlarmQuery) => {
+            const buffers = queryData.alarms ? queryData.alarms : [];
             setState({ columns: state.columns, data: buffers });
         }
     });
     const refetch = useCallback(() => {
         setTimeout(() => _refetch({
-            onCompleted: (queryData: BufferQuery) => {
-                const buffers = queryData.runningBuffers ? queryData.runningBuffers : [];
+            onCompleted: (queryData: AlarmQuery) => {
+                const buffers = queryData.alarms ? queryData.alarms : [];
                 setState({ columns: state.columns, data: buffers });
             },
         }), 0)
     }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
 
     // Mutations
-    const [sendTopic] = useMutation<SuccessBoolean, { input: BufferPacket }>(RecordTopic);
-    const [deleteTopic] = useMutation<SuccessBoolean, { topic: string }>(DeleteTopic);
+    const [sendTopic] = useMutation<SuccessBoolean, { input: IAlarm }>(SetAlarm);
+    const [deleteTopic] = useMutation<SuccessBoolean, { name: string }>(DeleteAlarm);
 
     // Page state
     const [state, setState] = useState<TableState>({
         columns: [
-            { title: 'Topic Name', field: 'topic', type: 'string', editable: 'onAdd' },
-            { title: 'Current Size', field: 'size', type: 'numeric', editable: 'never' },
+            { title: 'Name', field: 'name', type: 'string', editable: 'onAdd' },
+            { title: 'Trigger Function', field: 'triggerFunction', type: 'string', editable: 'always' },
+            { title: 'Action Function', field: 'actionFunction', type: 'string', editable: 'always' },
         ],
         data: [],
     })
     const [isModalOpen, setModelOpen] = useState<boolean>(false);
-    const [topicToDelete, setTopicToDelete] = useState<string | null>(null);
+    const [nameToDelete, setNameToDelete] = useState<string | null>(null);
 
     const onModalFinish = (accepted: boolean) => {
         setModelOpen(false);
-        console.log(`Accepted: ${accepted}\nTopic to Delete: ${topicToDelete}`);
-        if (accepted && topicToDelete) {
+        console.log(`Accepted: ${accepted}\nTopic to Delete: ${nameToDelete}`);
+        if (accepted && nameToDelete) {
             setState((prevState) => {
-                const data = prevState.data.filter((topicObj: IAlarm) => topicObj.topic !== topicToDelete);
+                const data = prevState.data.filter((alarmObj: IAlarm) => alarmObj.name !== nameToDelete);
                 return { ...prevState, data };
             });
             deleteTopic({
                 variables: {
-                    topic: topicToDelete
+                    name: nameToDelete
                 }
             }).then(success => {
-                setTopicToDelete(null);
+                setNameToDelete(null);
             }).catch(err => getErrorMessage(err))
         } else {
-            setTopicToDelete(null);
+            setNameToDelete(null);
         }
     }
 
@@ -128,16 +123,10 @@ const Alarms = () => {
                                     return { ...prevState, data };
                                 });
                                 var input = {
-                                    topic: newData.topic
-                                } as BufferPacket;
-                                newData.expires = !!newData.expires;
-                                newData.sizeLimited = !!newData.sizeLimited;
-                                if (newData.expires) {
-                                    input.experationTime = newData.experationTime;
-                                }
-                                if (newData.sizeLimited) {
-                                    input.maxSize = newData.maxSize;
-                                }
+                                    name: newData.name
+                                } as IAlarm;
+                                input.triggerFunction = newData.triggerFunction ? newData.triggerFunction : "() => {};";
+                                input.actionFunction = newData.actionFunction ? newData.actionFunction : "() => {};";
                                 console.log(`Sending topic record with`, input);
                                 sendTopic({
                                     variables: {
@@ -147,20 +136,16 @@ const Alarms = () => {
                             }),
                             onRowUpdate: (newData, oldData) => new Promise((resolve) => {
                                 setState((prevState) => {
-                                    const index = prevState.data.findIndex((topicObj: IAlarm) => topicObj.topic === newData.topic);
+                                    const index = prevState.data.findIndex((alarmObj: IAlarm) => alarmObj.name === newData.name);
                                     const data = [...prevState.data]
                                     data[index] = newData;
                                     return { ...prevState, data };
                                 });
                                 var input = {
-                                    topic: newData.topic
-                                } as BufferPacket;
-                                if (newData.expires) {
-                                    input.experationTime = newData.experationTime;
-                                }
-                                if (newData.sizeLimited) {
-                                    input.maxSize = newData.maxSize;
-                                }
+                                    name: newData.name,
+                                } as IAlarm;
+                                input.triggerFunction = newData.triggerFunction ? newData.triggerFunction : "() => {};";
+                                input.actionFunction = newData.actionFunction ? newData.actionFunction : "() => {};";
                                 sendTopic({
                                     variables: {
                                         input
@@ -168,7 +153,7 @@ const Alarms = () => {
                                 }).then(success => resolve(success));
                             }),
                             onRowDelete: (oldData) => new Promise((resolve) => {
-                                setTopicToDelete(oldData.topic);
+                                setNameToDelete(oldData.name);
                                 setModelOpen(true);
                                 resolve();
                             })
@@ -180,7 +165,7 @@ const Alarms = () => {
                         aria-labelledby="alert-dialog-slide-title"
                         aria-describedby="alert-dialog-slide-description"
                     >
-                        <DialogTitle id="alert-dialog-slide-title">{`WARNING: Deleting ${topicToDelete} Data Buffer`}</DialogTitle>
+                        <DialogTitle id="alert-dialog-slide-title">{`WARNING: Deleting ${nameToDelete} Data Buffer`}</DialogTitle>
                         <DialogContent>
                             <DialogContentText id="alert-dialog-slide-description">
                                 All data currently in this buffer will be lost and unrecoverable. Are sure you want to do this?

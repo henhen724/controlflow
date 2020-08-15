@@ -31,4 +31,4 @@ const AlarmSchema = new Schema<IAlarm>({
     },
 }, { strict: true })
 
-export default models.User as Model<IAlarm> || model<IAlarm>('Alarm', AlarmSchema, 'alarms');
+export default models.Alarm as Model<IAlarm> || model<IAlarm>('Alarm', AlarmSchema, 'alarms');

@@ -52,6 +52,21 @@ input RecordTopicInput {
     maxSize: Int
 }
 
+input AlarmInput {
+    name: String!
+    topics: [String]!
+    triggerFunction: String!
+    actionFunction: String!
+}
+
+type Alarm {
+    name: String
+    topics: [String]
+    triggerFunction: String
+    actionFunction: String
+}
+
+
 type DataPacket {
     data: JSON
 }
@@ -80,13 +95,6 @@ type BufferInfo {
     maxSize: Int
 }
 
-type Alarm {
-    name: String
-    topics: String[]
-    triggerFunction: String
-    actionFunction: String
-}
-
 type Query {
     user(id:ID!): User
     userByName(name:String!): [User]!
@@ -106,7 +114,7 @@ type Mutation {
     mqttPublish(input:MQTTPublishInput!): SuccessBoolean!
     recordTopic(input:RecordTopicInput!): SuccessBoolean!
     deleteTopicBuffer(topic: String!): SuccessBoolean!
-    setAlarm(input:Alarm!): SuccessBoolean!
+    setAlarm(input:AlarmInput!): SuccessBoolean!
     deleteAlarm(name:String!): SuccessBoolean!
 }
 `

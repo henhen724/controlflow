@@ -14,6 +14,7 @@ const loadAlarmList = async () => {
 
     alarmList = await Alarm.find({}).exec();
     topicsList = alarmList.reduce((prev: string[], curr: IAlarm) => {
+        console.log(curr);
         for (var i = 0; i < curr.topics.length; i++) {
             if (!prev.find(str => str === curr.topics[i].topic)) {
                 prev.push(curr.topics[i].topic);
@@ -46,4 +47,4 @@ const handleAlarms = async () => {
     setInterval(evaluateTriggers, 1000);
 }
 
-export default handleAlarms;
+export default () => { };//handleAlarms;

@@ -42,12 +42,13 @@ const Query = {
         throw notSignedIn("runningBuffers");
     },
     async alarms(_: any, args: any, context: any) {
-        const session = await context.session
-        if (session) {
-            const buffers = await Alarm.find({}).exec();
-            return buffers;
-        }
-        throw notSignedIn("alarms");
+        // const session = await context.session
+        // if (session) {
+        const buffers = await Alarm.find({}).exec();
+        console.log(buffers);
+        return buffers;
+        // }
+        // throw notSignedIn("alarms");
     },
     async topicBuffer(_: any, args: { topic: string }) {
         return await DataPacket.find({ topic: args.topic }).exec();

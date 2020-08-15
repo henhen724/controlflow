@@ -32,5 +32,6 @@
     "components/**/*.ts",
     "components/**/*.tsx", 
     "lib/**/*.ts",
+    "public/**",
   ]
 }

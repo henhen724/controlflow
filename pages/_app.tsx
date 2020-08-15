@@ -5,7 +5,7 @@ import { NormalizedCache } from 'apollo-cache-inmemory';
 import CssBaseline from '@material-ui/core/CssBaseline';
 
 import { useApollo } from '../apollo/client';
-import Theme from '../components/Theme';
+import Theme from '../components/theme';
 
 
 
