@@ -16,6 +16,7 @@ query BuffersQuery {
         experationTime
         sizeLimited
         maxSize
+        currSize
     }
 }
 `
@@ -78,7 +79,7 @@ const Buffers = () => {
     const [state, setState] = useState<TableState>({
         columns: [
             { title: 'Topic Name', field: 'topic', type: 'string', editable: 'onAdd' },
-            { title: 'Current Size', field: 'size', type: 'numeric', editable: 'never' },
+            { title: 'Current Size', field: 'currSize', type: 'numeric', editable: 'never' },
             { title: 'Packets Expire (T/F)', field: 'expires', type: 'boolean', editable: 'always' },
             { title: 'Experation Time (ms)', field: 'experationTime', type: 'numeric', editable: 'always' },
             { title: 'Is Memory Limited (T/F)', field: 'sizeLimited', type: 'boolean', editable: 'always' },

@@ -1,7 +1,7 @@
 import { DataComponent, UnionDataPanelProps } from './DataPanel/index';
 import { ControlComponent, UnionControlPanelProps } from './ControlPanel/index';
 import gql from 'graphql-tag';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSubscription, useMutation, useQuery } from '@apollo/react-hooks';
 import { getErrorMessage } from '../lib/form';
 
@@ -56,8 +56,9 @@ const dashboard = (props: DashboardProps) => {
         prevTopics.unshift(topic);
         return prevTopics;
     }, []);
+    const topicsRefetch = {} as { [key: string]: (() => any) };
     allTopics.forEach(topic => {
-        useQuery<QRslt>(DataQuery, {
+        const { refetch } = useQuery<QRslt>(DataQuery, {
             variables: { topic },
             onCompleted: async res => {
                 console.log(`Recieved query`, res);
@@ -65,6 +66,7 @@ const dashboard = (props: DashboardProps) => {
                 setData(data);
             }
         });
+        topicsRefetch[topic] = refetch;
         useSubscription<SubRslt>(DataSubscription, {
             variables: { topicList: [topic] },
             onSubscriptionData: async res => {
@@ -92,6 +94,9 @@ const dashboard = (props: DashboardProps) => {
             }
         });
     });
+    useEffect(() => allTopics.forEach(topic => {
+        topicsRefetch[topic]();
+    }));
     const renderedData = props.dataElements.map((PanelElementProps, index) => {
         var panel = (<h1>Error:No panel loaded</h1>);
         switch (PanelElementProps.elemType) {

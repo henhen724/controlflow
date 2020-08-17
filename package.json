@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "nodemon",
-    "build": "next build && tsc --project tsconfig.server.json",
+    "build": "rm -r dist && next build && tsc --project tsconfig.server.json && cp -r public dist/public",
     "start": "cross-env NODE_ENV=production node dist/server/index.js"
   },
   "dependencies": {

@@ -93,6 +93,7 @@ type BufferInfo {
     experationTime: Int
     sizeLimited: Boolean!
     maxSize: Int
+    currSize: Int
 }
 
 type Query {

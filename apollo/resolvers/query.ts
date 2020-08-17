@@ -3,8 +3,18 @@ import User from '../../models/User';
 import TopicBufferInfo from '../../models/TopicBufferInfo';
 import DataPacket from '../../models/DataPacket';
 import Alarm from '../../models/Alarm';
+import findBufferSize from '../../lib/findBufferSize';
 
 const notSignedIn = (route: string) => new AuthenticationError(`You need to be signed in to query ${route}`);
+
+interface BufferFullInfo {
+    experationTime?: number,
+    expires: Boolean,
+    maxSize?: number,
+    sizeLimited: Boolean,
+    topic: string,
+    currSize?: number,
+}
 
 const Query = {
     async user(id: string) {
@@ -37,7 +47,13 @@ const Query = {
         const session = await context.session
         if (session) {
             const buffers = await TopicBufferInfo.find({}).exec();
-            return buffers;
+            const bufferMoreInfo = [] as BufferFullInfo[];
+            for (var i = 0; i < buffers.length; i++) {
+                const buffer = buffers[i] as BufferFullInfo;
+                buffer.currSize = (await findBufferSize(buffer.topic)).total_size;
+                bufferMoreInfo.push(buffer);
+            }
+            return bufferMoreInfo;
         }
         throw notSignedIn("runningBuffers");
     },

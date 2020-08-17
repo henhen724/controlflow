@@ -12,24 +12,27 @@ client.on("message", (msgTopic, message) => {
     if (topicBufferInfos) {
         const bufferInfo = topicBufferInfos.find(({ topic }) => topic === msgTopic);
         if (bufferInfo) {
-            const msgObj = JSON.parse(message.toString())
-            if (msgObj) {
-                // TODO: Frequency record control
-                // TODO: Add an only on change record
-                // TODO: Add an memory limit mangager
-                const currTime = new Date();
-                let newPacketObj = {
-                    created: currTime,
-                    expires: bufferInfo.expires,
-                    experationDate: undefined as Date | undefined,
-                    topic: msgTopic,
-                    data: msgObj,
-                };
-                if (bufferInfo.expires && bufferInfo.experationTime) {
-                    newPacketObj.experationDate = new Date(currTime.getDate() + bufferInfo.experationTime);
+            try {
+                const msgObj = JSON.parse(message.toString())
+                if (msgObj) {
+                    // TODO: Frequency record control
+                    // TODO: Add an only on change record
+                    const currTime = new Date();
+                    let newPacketObj = {
+                        created: currTime,
+                        expires: bufferInfo.expires,
+                        experationDate: undefined as Date | undefined,
+                        topic: msgTopic,
+                        data: msgObj,
+                    };
+                    if (bufferInfo.expires && bufferInfo.experationTime) {
+                        newPacketObj.experationDate = new Date(currTime.getDate() + bufferInfo.experationTime);
+                    }
+                    const newPacket = new DataPacket(newPacketObj);
+                    newPacket.save();
                 }
-                const newPacket = new DataPacket(newPacketObj);
-                newPacket.save();
+            } catch (err) {
+                console.error(`ERROR:\n${message.toString()}\nThis was not proper JSON.  See following error stack:`, err);
             }
         }
     }
