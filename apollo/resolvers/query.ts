@@ -2,7 +2,8 @@ import { AuthenticationError, UserInputError } from 'apollo-server-express';
 import User from '../../models/User';
 import TopicBufferInfo from '../../models/TopicBufferInfo';
 import DataPacket from '../../models/DataPacket';
-import Alarm from '../../models/Alarm';
+import Watchdog from '../../models/Watchdog';
+import Notification from '../../models/Notification';
 import findBufferSize from '../../lib/findBufferSize';
 
 const notSignedIn = (route: string) => new AuthenticationError(`You need to be signed in to query ${route}`);
@@ -57,17 +58,22 @@ const Query = {
         }
         throw notSignedIn("runningBuffers");
     },
-    async alarms(_: any, args: any, context: any) {
+    async watchdogs(_: any, args: any, context: any) {
         // const session = await context.session
         // if (session) {
-        const buffers = await Alarm.find({}).exec();
-        console.log(buffers);
+        const buffers = await Watchdog.find({}).exec();
         return buffers;
         // }
-        // throw notSignedIn("alarms");
+        // throw notSignedIn("Watchdogs");
     },
     async topicBuffer(_: any, args: { topic: string }) {
         return await DataPacket.find({ topic: args.topic }).exec();
+    },
+    async notifications() {
+        return await Notification.find({}).exec();
+    },
+    async notificationById(_: any, args: { id: string }) {
+        return await Notification.findById(args.id).exec();
     }
 }
 

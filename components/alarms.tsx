@@ -5,72 +5,73 @@ import MaterialTable, { Column, MTableToolbar } from 'material-table';
 import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@material-ui/core';
 import { Replay as ReplayIcon } from '@material-ui/icons';
 
-import { IAlarm } from '../models/Alarm';
+import { IWatchdog } from '../models/Watchdog';
 
 import { getErrorMessage } from '../lib/form';
 
-const AlarmsQuery = gql`
-query AlarmsQuery {
-    alarms {
+const WatchdogsQuery = gql`
+query WatchdogsQuery {
+    Watchdogs {
         topics
         triggerFunction
         actionFunction
     }
 }
 `
-const SetAlarm = gql`
-mutation SetAlarm($input: AlarmInput!) {
-  setAlarm(input: $input) {
+const SetWatchdog = gql`
+mutation SetWatchdog($input: WatchdogInput!) {
+  setWatchdog(input: $input) {
     success
   }
 }
 `
-const DeleteAlarm = gql`
-mutation DeleteAlarm($name:String!) {
-    deleteAlarm(topic:$name) {
+const DeleteWatchdog = gql`
+mutation DeleteWatchdog($name:String!) {
+    deleteWatchdog(topic:$name) {
         success
     }
 }
 `
 
-interface AlarmQuery {
-    alarms: IAlarm[]
+interface WatchdogQuery {
+    Watchdogs: IWatchdog[]
 }
 
 interface TableState {
-    columns: Array<Column<IAlarm>>,
-    data: IAlarm[],
+    columns: Array<Column<IWatchdog>>,
+    data: IWatchdog[],
 }
 
 interface SuccessBoolean {
     success: Boolean
 }
 
-const Alarms = () => {
+const Watchdogs = () => {
     // Queries
-    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = useQuery<AlarmQuery>(AlarmsQuery, {
-        onCompleted: (queryData: AlarmQuery) => {
-            const buffers = queryData.alarms ? queryData.alarms : [];
+    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = useQuery<WatchdogQuery>(WatchdogsQuery, {
+        onCompleted: (queryData: WatchdogQuery) => {
+            const buffers = queryData.Watchdogs ? queryData.Watchdogs : [];
             setState({ columns: state.columns, data: buffers });
         }
     });
     const refetch = useCallback(() => {
         setTimeout(() => _refetch({
-            onCompleted: (queryData: AlarmQuery) => {
-                const buffers = queryData.alarms ? queryData.alarms : [];
+            onCompleted: (queryData: WatchdogQuery) => {
+                const buffers = queryData.Watchdogs ? queryData.Watchdogs : [];
                 setState({ columns: state.columns, data: buffers });
             },
         }), 0)
     }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
 
     // Mutations
-    const [sendTopic] = useMutation<SuccessBoolean, { input: IAlarm }>(SetAlarm);
-    const [deleteTopic] = useMutation<SuccessBoolean, { name: string }>(DeleteAlarm);
+    const [sendTopic] = useMutation<SuccessBoolean, { input: IWatchdog }>(SetWatchdog);
+    const [deleteTopic] = useMutation<SuccessBoolean, { name: string }>(DeleteWatchdog);
 
     // Page state
     const [state, setState] = useState<TableState>({
         columns: [
             { title: 'Name', field: 'name', type: 'string', editable: 'onAdd' },
+            { title: 'TopicName (Comma Seperated)', field: 'topics', type: 'string', editable: 'always' },
             { title: 'Trigger Function', field: 'triggerFunction', type: 'string', editable: 'always' },
             { title: 'Action Function', field: 'actionFunction', type: 'string', editable: 'always' },
         ],
@@ -84,7 +85,7 @@ const Alarms = () => {
         console.log(`Accepted: ${accepted}\nTopic to Delete: ${nameToDelete}`);
         if (accepted && nameToDelete) {
             setState((prevState) => {
-                const data = prevState.data.filter((alarmObj: IAlarm) => alarmObj.name !== nameToDelete);
+                const data = prevState.data.filter((WatchdogObj: IWatchdog) => WatchdogObj.name !== nameToDelete);
                 return { ...prevState, data };
             });
             deleteTopic({
@@ -108,7 +109,7 @@ const Alarms = () => {
         return (
             <div>
                 <Container>
-                    <MaterialTable title="Data Buffers" columns={state.columns} data={state.data}
+                    <MaterialTable title="Watchdog Alarms" columns={state.columns} data={state.data}
                         components={{
                             Toolbar: props => (<div>
                                 <MTableToolbar {...props} />
@@ -123,10 +124,10 @@ const Alarms = () => {
                                     return { ...prevState, data };
                                 });
                                 var input = {
-                                    name: newData.name
-                                } as IAlarm;
-                                input.triggerFunction = newData.triggerFunction ? newData.triggerFunction : "() => {};";
-                                input.actionFunction = newData.actionFunction ? newData.actionFunction : "() => {};";
+                                    name: newData.name,
+                                    topics: newData.topics,
+                                    messageString: newData.messageString ? newData.messageString : `${newData.name} has gone off!`,
+                                } as IWatchdog;
                                 console.log(`Sending topic record with`, input);
                                 sendTopic({
                                     variables: {
@@ -136,21 +137,21 @@ const Alarms = () => {
                             }),
                             onRowUpdate: (newData, oldData) => new Promise((resolve) => {
                                 setState((prevState) => {
-                                    const index = prevState.data.findIndex((alarmObj: IAlarm) => alarmObj.name === newData.name);
-                                    const data = [...prevState.data]
-                                    data[index] = newData;
+                                    const data = [...prevState.data];
+                                    data.push(newData);
                                     return { ...prevState, data };
                                 });
                                 var input = {
                                     name: newData.name,
-                                } as IAlarm;
-                                input.triggerFunction = newData.triggerFunction ? newData.triggerFunction : "() => {};";
-                                input.actionFunction = newData.actionFunction ? newData.actionFunction : "() => {};";
+                                    topics: newData.topics,
+                                    messageString: newData.messageString,
+                                } as IWatchdog;
+                                console.log(`Sending topic record with`, input);
                                 sendTopic({
                                     variables: {
                                         input
                                     }
-                                }).then(success => resolve(success));
+                                }).then(success => resolve(success)).catch(err => console.error(err));
                             }),
                             onRowDelete: (oldData) => new Promise((resolve) => {
                                 setNameToDelete(oldData.name);
@@ -186,4 +187,4 @@ const Alarms = () => {
     }
 }
 
-export default Alarms;
+export default Watchdogs;

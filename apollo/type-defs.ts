@@ -52,18 +52,16 @@ input RecordTopicInput {
     maxSize: Int
 }
 
-input AlarmInput {
+input WatchdogInput {
     name: String!
     topics: [String]!
-    triggerFunction: String!
-    actionFunction: String!
+    messageString: String!
 }
 
-type Alarm {
+type Watchdog {
     name: String
     topics: [String]
-    triggerFunction: String
-    actionFunction: String
+    messageString: String
 }
 
 
@@ -96,14 +94,26 @@ type BufferInfo {
     currSize: Int
 }
 
+type Notification {
+    id: String!
+    name: String!
+    topic: String
+    message: String
+    mqttMessage: String
+    recieved: Date!
+    viewed: Boolean
+}
+
 type Query {
     user(id:ID!): User
     userByName(name:String!): [User]!
     users: [User]
     viewer: User
     runningBuffers: [BufferInfo]
-    alarms: [Alarm]
+    watchdogs: [Watchdog]
     topicBuffer(topic:String): [BufferPacket]
+    notifications: [Notification]
+    notificationById(id:String): Notification
 }
 
 type Mutation {
@@ -115,8 +125,8 @@ type Mutation {
     mqttPublish(input:MQTTPublishInput!): SuccessBoolean!
     recordTopic(input:RecordTopicInput!): SuccessBoolean!
     deleteTopicBuffer(topic: String!): SuccessBoolean!
-    setAlarm(input:AlarmInput!): SuccessBoolean!
-    deleteAlarm(name:String!): SuccessBoolean!
+    setWatchdog(input:WatchdogInput!): SuccessBoolean!
+    deleteWatchdog(name:String!): SuccessBoolean!
 }
 `
 export default typeDef;

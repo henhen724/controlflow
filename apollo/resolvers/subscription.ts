@@ -3,8 +3,8 @@ import mqttConnect from '../../lib/mqttConnect';
 
 const client = mqttConnect();
 const onMQTTSubscribe = (subId: number, granted: any[]) => {
-    console.log(`Subscription with id ${subId}`);
-    console.log(granted);
+    // console.log(`Subscription with id ${subId}`);
+    // console.log(granted);
 }
 const publishOptions = (trigger: string, payload: any) => {
 
@@ -14,11 +14,10 @@ export const mqttPubSub = new MQTTPubSub({ client, onMQTTSubscribe });
 const Subscription = {
     mqttTopics: {
         resolve: (payload: any) => {
-            console.log(payload);
             return { data: payload, }
         },
         subscribe: (_: any, args: { topics: [string] }, context: any) => {
-            console.log(`Subscribing to Topic: ${args.topics}`);
+            // console.log(`Subscribing to Topic: ${args.topics}`);
             return mqttPubSub.asyncIterator(args.topics);
         }
         // async (_: any, args: { topics: [string] }, context: any) => {

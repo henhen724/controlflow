@@ -46,18 +46,9 @@ const useStyles = makeStyles((theme: Theme) =>
     }),
 );
 
-const a11yProps = (index: number) => {
-    return {
-        id: `simple-tab-${index}`,
-        'aria-controls': `simple-tabpanel-${index}`,
-    };
-}
-
 
 interface NavbarProps {
     email: string,
-    currTab: number,
-    changeTab: (newTab: number) => void,
 }
 
 export default function navbar(props: NavbarProps) {
@@ -101,11 +92,6 @@ export default function navbar(props: NavbarProps) {
                     <Typography className={classes.title} variant="h5" noWrap>
                         Wi-DAQ
                     </Typography>
-                    <div className={classes.grow} />
-                    <Tabs value={props.currTab} onChange={(e, val) => props.changeTab(val)} aria-label="simple tabs example">
-                        <Tab label="Dashboard" {...a11yProps(0)} />
-                        <Tab label="Data Buffers" {...a11yProps(1)} />
-                    </Tabs>
                     <div className={classes.grow} />
                     <div className={classes.sectionDesktop}>
                         <IconButton aria-label="show 17 new notifications" color="inherit">

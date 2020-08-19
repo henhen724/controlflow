@@ -53,8 +53,10 @@ nextApp.prepare().then(() => {
         if (staticFiles.indexOf(pathname.split("/")[1]) > -1) {
             const filePath = join(publicFolderPath, pathname);
             console.log(`Serving ${filePath}`);
+            // console.log(fs.readFileSync(filePath).toString());
             nextApp.serveStatic(req, res, filePath);
         } else {
+            console.log(`Looking for the ${pathname} component path.`);
             nextApp.render(req, res, pathname, query);
         }
     })

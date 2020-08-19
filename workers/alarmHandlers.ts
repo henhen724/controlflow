@@ -1,50 +1,39 @@
 import dbConnect from "../lib/dbConnect";
-import Alarm, { IAlarm } from "../models/Alarm";
-import DataPacket, { IData } from "../models/DataPacket";
-// import { fork } from "child_process";
+import mqttConnect from '../lib/mqttConnect';
+import Watchdog, { IWatchdog } from "../models/Watchdog";
+import Notification, { INotification } from '../models/Notification';
 
-// const evaluationHandler = fork(`${__dirname}/alarmEvaluatorProcess.ts`); TODO: Add process seperation
+const client = mqttConnect();
 
-let alarmList = null as null | IAlarm[];
-let topicsList = null as null | string[];
-let relaventBuffers = {} as { [key: string]: IData[] };
+let currWatchdogs = null as IWatchdog[] | null;
+let topics = null as string[] | null;
 
-const loadAlarmList = async () => {
-    dbConnect();
-
-    alarmList = await Alarm.find({}).exec();
-    topicsList = alarmList.reduce((prev: string[], curr: IAlarm) => {
-        console.log(curr);
-        for (var i = 0; i < curr.topics.length; i++) {
-            if (!prev.find(str => str === curr.topics[i].topic)) {
-                prev.push(curr.topics[i].topic);
+client.on("message", (msgTopic, message) => {
+    if (currWatchdogs && topics && topics.find(topic => topic === msgTopic)) {
+        currWatchdogs.forEach(currWatch => {
+            if (currWatch.topics.find(topic => topic === msgTopic)) {
+                new Notification({
+                    name: currWatch.name,
+                    topic: msgTopic,
+                    message: currWatch.messageString,
+                    mqttMessage: message.toString(),
+                });
             }
-        }
-        return prev;
-    }, []);
-}
+        });
+    }
+});
 
-const evaluateTriggers = async () => {
-    dbConnect();
+export const updateTopicSubsriptions = async () => {
+    await dbConnect();
 
-    if (alarmList && topicsList) {
-        for (var i = 0; i < topicsList.length; i++) {
-            relaventBuffers[topicsList[i]] = await DataPacket.find({ topic: topicsList[i] });
-        }
-        for (var i = 0; i < alarmList.length; i++) {
-            const triggerFunction = eval(alarmList[i].triggerFunction);
-            const rslt = triggerFunction(relaventBuffers);
-            if (rslt) {
-                const actionFunction = eval(alarmList[i].actionFunction);
-                actionFunction(relaventBuffers);
-            }
-        }
+    currWatchdogs = await Watchdog.find().exec();
+    topics = currWatchdogs.reduce((topicsSoFar, { topics }) => topicsSoFar.concat(topics), [] as string[]);
+    if (topics.length !== 0) {
+        client.subscribe(topics, err => {
+            if (err)
+                console.error(err);
+        })
     }
 }
 
-const handleAlarms = async () => {
-    setInterval(loadAlarmList, 1000);
-    setInterval(evaluateTriggers, 1000);
-}
-
-export default () => { };//handleAlarms;
+export default updateTopicSubsriptions;

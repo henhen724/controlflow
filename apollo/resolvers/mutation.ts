@@ -2,7 +2,7 @@ import { AuthenticationError, UserInputError } from 'apollo-server-express';
 import User from '../../models/User';
 import TopicBufferInfo from '../../models/TopicBufferInfo';
 import DataPacket from '../../models/DataPacket';
-import Alarm, { IAlarm } from '../../models/Alarm';
+import Watchdog, { IWatchdog } from '../../models/Watchdog';
 import { createUser, validatePassword } from '../../lib/user';
 import { setLoginSession } from '../../lib/auth';
 import { removeTokenCookie } from '../../lib/auth-cookies';
@@ -43,8 +43,8 @@ export interface recordTopicInput {
     }
 }
 
-export interface setAlarmInput {
-    input: IAlarm
+export interface setWatchdogInput {
+    input: IWatchdog
 }
 
 const Mutation = {
@@ -122,33 +122,31 @@ const Mutation = {
         await DataPacket.deleteMany({ topic: args.topic }).exec();
         return { success: true };
     },
-    async setAlarm(_: any, args: setAlarmInput, context: any) {
+    async setWatchdog(_: any, args: setWatchdogInput, context: any) {
         console.log(`Starting topic record for ${args.input.name}\n%j`, args.input);
-        const { name, topics, triggerFunction, actionFunction } = args.input;
-        const alarms = await Alarm.find({ name });
-        switch (alarms.length) {
+        const { name, topics, messageString } = args.input;
+        const watchdogs = await Watchdog.find({ name });
+        switch (watchdogs.length) {
             case 0:
-                const newAlarm = new Alarm({
+                const newWatchdog = new Watchdog({
                     name,
                     topics,
-                    triggerFunction,
-                    actionFunction
+                    messageString,
                 })
-                await newAlarm.save();
+                await newWatchdog.save();
                 return { success: true };
             case 1:
-                alarms[0].topics = topics;
-                alarms[0].triggerFunction = triggerFunction;
-                alarms[0].actionFunction = actionFunction;
-                await alarms[0].save();
+                watchdogs[0].topics = topics;
+                watchdogs[0].messageString = messageString;
+                await watchdogs[0].save();
                 return { success: true };
             default:
-                throw new Error(`Topic ${name} has ${alarms.length} buffer info entries, but topic buffer info must be unique.`);
+                throw new Error(`Topic ${name} has ${watchdogs.length} buffer info entries, but topic buffer info must be unique.`);
         }
     },
-    async deleteAlarm(_: any, args: { name: string }, context: any) {
+    async deleteWatchdog(_: any, args: { name: string }, context: any) {
         console.log(`Deleteing ${args.name}`);
-        await Alarm.deleteMany({ name: args.name }).exec();
+        await Watchdog.deleteMany({ name: args.name }).exec();
         return { success: true };
     },
 }
