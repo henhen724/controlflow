@@ -1,4 +1,6 @@
 import express from 'express';
+import mongoose from 'mongoose';
+import { MongoError } from 'mongodb';
 import { createServer } from 'http';
 import { parse } from 'url';
 import { join } from 'path';
@@ -10,7 +12,6 @@ const nextApp = next({ dev: process.env.NODE_ENV !== 'production', conf: { publi
 
 import schema from '../apollo/schema';
 import { getLoginSession } from '../lib/auth';
-import dbConnect from '../lib/dbConnect';
 
 //TODO: Add a MQTT state request bundle. (Ask every mqtt client with an on change type packet to post its current state.)
 //TODO: Update name to Wi- DAQ
@@ -33,9 +34,24 @@ fs.readdir(publicFolderPath, (err, files) => {
 });
 
 
-nextApp.prepare().then(() => {
+const startServer = async () => {
+    await nextApp.prepare();
+    await mongoose.connect(`${process.env.MONGODB_PROTO}${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_DOMAIN}`,
+        {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useCreateIndex: true,
+        },
+        (err: MongoError) => {
+            if (err) {
+                console.error(err);
+            } else {
+                console.log(`🗃️ Connected to the database at ${process.env.MONGODB_PROTO}${process.env.MONGODB_DOMAIN}`);
+            }
+        }
+    );
+
     const expressApp = express();
-    dbConnect();
     const apollo = new ApolloServer({
         schema,
         context: (ctx) => {
@@ -69,4 +85,6 @@ nextApp.prepare().then(() => {
         console.log(`🛸 GraphQL API ready at http://localhost:${PORT}${apollo.graphqlPath}`);
         console.log(`👽 Subscriptions ready at ws://localhost:${PORT}${apollo.subscriptionsPath}`);
     })
-})
+}
+
+startServer();

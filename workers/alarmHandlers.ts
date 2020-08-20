@@ -1,4 +1,3 @@
-import dbConnect from "../lib/dbConnect";
 import mqttConnect from '../lib/mqttConnect';
 import Watchdog, { IWatchdog } from "../models/Watchdog";
 import Notification, { INotification } from '../models/Notification';
@@ -24,8 +23,6 @@ client.on("message", (msgTopic, message) => {
 });
 
 export const updateTopicSubsriptions = async () => {
-    await dbConnect();
-
     currWatchdogs = await Watchdog.find().exec();
     topics = currWatchdogs.reduce((topicsSoFar, { topics }) => topicsSoFar.concat(topics), [] as string[]);
     if (topics.length !== 0) {

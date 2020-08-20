@@ -1,5 +1,4 @@
 import DataPacket, { IData } from '../models/DataPacket';
-import dbConnect from '../lib/dbConnect';
 import mqttConnect from '../lib/mqttConnect';
 import findBufferSize from '../lib/findBufferSize';
 import TopicBufferInfos, { ITopic } from '../models/TopicBufferInfo';
@@ -39,9 +38,6 @@ client.on("message", (msgTopic, message) => {
 });
 
 export const removeExpiredPackets = async () => {
-    await dbConnect();
-
-
     if (topicBufferInfos) {
         for (var i = 0; i < topicBufferInfos.length; i++) {
             const bufferInfo = topicBufferInfos[i];
@@ -75,8 +71,6 @@ export const removePacketsOverMemLimit = async () => {
 }
 
 export const updateTopicSubsriptions = async () => {
-    await dbConnect();
-
     topicBufferInfos = await TopicBufferInfos.find().exec();
     const topics = topicBufferInfos.map(({ topic, experationTime }) => topic);
     if (topics.length !== 0) {

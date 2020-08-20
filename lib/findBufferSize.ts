@@ -1,11 +1,8 @@
 import { calculateObjectSize } from 'bson';
-import dbConnect from './dbConnect';
 import DataPacket from '../models/DataPacket';
 
 const findBufferSize = async (topic: string) => {
-    dbConnect();
-
-    const numOfPackets = await DataPacket.count({ topic });
+    const numOfPackets = await DataPacket.estimatedDocumentCount({ topic });
     const examplePacket = await DataPacket.findOne({ topic });
     var packetSize = 1000;
     if (examplePacket) {
