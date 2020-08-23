@@ -1,14 +1,17 @@
 {
-  "name": "controlflow",
+  "name": "wi-daq",
   "version": "0.0.1",
   "scripts": {
-    "dev": "nodemon",
+    "server-dev": "nodemon server/index.ts",
+    "worker-dev": "nodemon workers/index.ts",
     "build": "next build && tsc --project tsconfig.server.json && cp -r public dist",
-    "start": "node dist/server/index.js"
+    "server-start": "node dist/server/index.js",
+    "worker-start": "node dist/workers/index.js"
   },
   "dependencies": {
     "@apollo/react-common": "^3.1.4",
     "@apollo/react-hooks": "^3.1.5",
+    "@date-io/core": "^2.8.0",
     "@hapi/iron": "6.0.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
@@ -42,6 +45,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "recharts": "^1.8.5",
+    "subscriptions-transport-ws": "^0.9.18",
     "uuid": "8.1.0",
     "ws": "^7.3.0"
   },
@@ -51,6 +55,7 @@
     "@types/mongoose": "^5.7.28",
     "@types/node": "^14.0.14",
     "@types/react": "^16.9.41",
+    "dotenv": "^8.2.0",
     "nodemon": "^2.0.4",
     "ts-node": "^8.10.2",
     "typescript": "^4.0.0-dev.20200729"

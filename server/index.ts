@@ -16,11 +16,6 @@ import { getLoginSession } from '../lib/auth';
 //TODO: Add a MQTT state request bundle. (Ask every mqtt client with an on change type packet to post its current state.)
 //TODO: Update name to Wi- DAQ
 
-import rollingBuffer from '../workers/runningBuffer';
-import handleAlarms from '../workers/alarmHandlers';
-rollingBuffer();
-handleAlarms();
-
 const PORT = process.env.PORT || "3000";
 const publicFolderPath = join(__dirname, '../public');
 let staticFiles = [] as string[];

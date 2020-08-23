@@ -1,7 +1,7 @@
 import { MQTTPubSub } from 'graphql-mqtt-subscriptions';
 import mqttConnect from '../../lib/mqttConnect';
 
-const client = mqttConnect();
+const client = mqttConnect(`👽📡🌡️ Server connected to the MQTT server at ${process.env.MQTT_URI}`);
 const onMQTTSubscribe = (subId: number, granted: any[]) => {
     // console.log(`Subscription with id ${subId}`);
     // console.log(granted);

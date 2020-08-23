@@ -1,41 +1,41 @@
 import DataPacket, { IData } from '../models/DataPacket';
-import mqttConnect from '../lib/mqttConnect';
+import { MqttClient } from 'mqtt';
 import findBufferSize from '../lib/findBufferSize';
 import TopicBufferInfos, { ITopic } from '../models/TopicBufferInfo';
 
-const client = mqttConnect();
-
 let topicBufferInfos = null as ITopic[] | null;
 
-client.on("message", (msgTopic, message) => {
-    if (topicBufferInfos) {
-        const bufferInfo = topicBufferInfos.find(({ topic }) => topic === msgTopic);
-        if (bufferInfo) {
-            try {
-                const msgObj = JSON.parse(message.toString())
-                if (msgObj) {
-                    // TODO: Frequency record control
-                    // TODO: Add an only on change record
-                    const currTime = new Date();
-                    let newPacketObj = {
-                        created: currTime,
-                        expires: bufferInfo.expires,
-                        experationDate: undefined as Date | undefined,
-                        topic: msgTopic,
-                        data: msgObj,
-                    };
-                    if (bufferInfo.expires && bufferInfo.experationTime) {
-                        newPacketObj.experationDate = new Date(currTime.getDate() + bufferInfo.experationTime);
+export const attachBufferLister = (client: MqttClient) => {
+    client.on("message", (msgTopic, message) => {
+        if (topicBufferInfos) {
+            const bufferInfo = topicBufferInfos.find(({ topic }) => topic === msgTopic);
+            if (bufferInfo) {
+                try {
+                    const msgObj = JSON.parse(message.toString())
+                    if (msgObj) {
+                        // TODO: Frequency record control
+                        // TODO: Add an only on change record
+                        const currTime = new Date();
+                        let newPacketObj = {
+                            created: currTime,
+                            expires: bufferInfo.expires,
+                            experationDate: undefined as Date | undefined,
+                            topic: msgTopic,
+                            data: msgObj,
+                        };
+                        if (bufferInfo.expires && bufferInfo.experationTime) {
+                            newPacketObj.experationDate = new Date(currTime.getDate() + bufferInfo.experationTime);
+                        }
+                        const newPacket = new DataPacket(newPacketObj);
+                        newPacket.save();
                     }
-                    const newPacket = new DataPacket(newPacketObj);
-                    newPacket.save();
+                } catch (err) {
+                    console.error(`ERROR:\n${message.toString()}\nThis was not proper JSON.  See following error stack:`, err);
                 }
-            } catch (err) {
-                console.error(`ERROR:\n${message.toString()}\nThis was not proper JSON.  See following error stack:`, err);
             }
         }
-    }
-});
+    });
+}
 
 export const removeExpiredPackets = async () => {
     if (topicBufferInfos) {
@@ -70,7 +70,7 @@ export const removePacketsOverMemLimit = async () => {
     }
 }
 
-export const updateTopicSubsriptions = async () => {
+export const updateTopicSubsriptions = async (client: MqttClient) => {
     topicBufferInfos = await TopicBufferInfos.find().exec();
     const topics = topicBufferInfos.map(({ topic, experationTime }) => topic);
     if (topics.length !== 0) {
@@ -81,9 +81,9 @@ export const updateTopicSubsriptions = async () => {
     }
 }
 
-export default () => {
+export default (client: MqttClient) => {
+    attachBufferLister(client);
     setInterval(removeExpiredPackets, 1000);
     setInterval(removePacketsOverMemLimit, 1000);
-    setInterval(updateTopicSubsriptions, 1000);
-
+    setInterval(() => updateTopicSubsriptions(client), 1000);
 }

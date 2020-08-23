@@ -1,5 +1,8 @@
 {
     "watch": ["server", "workers", "pages", "public","models", "lib", "components", "apollo"],
-    "exec": "ts-node --project tsconfig.server.json server/index.ts",
+    "execMap": {
+      "ts":"ts-node --project tsconfig.server.json",
+      "js":"node"
+    },
     "ext": "js ts"
   }
