@@ -5,10 +5,10 @@ import { useQuery } from '@apollo/react-hooks';
 import Navabar from '../../components/navbar';
 import Dashboard, { PanelProps } from '../../components/dashboard';
 import Buffers from '../../components/buffers';
+import Alarms from '../../components/alarms';
 import { CircularProgress, BottomNavigation, BottomNavigationAction, Paper } from '@material-ui/core';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import { Timeline as TimelineIcon, Storage as StorageIcon } from '@material-ui/icons';
-import theme from '../../components/theme';
+import { Timeline as TimelineIcon, Storage as StorageIcon, Alarm as AlarmIcon } from '@material-ui/icons';
 
 const ViewerQuery = gql`
   query ViewerQuery {
@@ -65,14 +65,19 @@ const Index = () => {
     } as PanelProps;
 
     if (viewer) {
-        var component = <Dashboard dataElements={[dataElement, controlElement]} />;
+        var component = <div />;
         switch (tab) {
             case "dashboard":
+                component = <Dashboard dataElements={[dataElement, controlElement]} />;
                 break;
             case "data-buffers":
                 component = <Buffers />;
                 break;
+            case "alarms":
+                component = <Alarms />;
+                break;
         }
+        console.log(component);
         return (
             <div>
                 <Navabar email={viewer.email} />
@@ -81,6 +86,7 @@ const Index = () => {
                     <BottomNavigation value={tab} onChange={(e, val) => changeTab(val)} className={classes.navFooter}>
                         <BottomNavigationAction label="Dashboard" value="dashboard" icon={<TimelineIcon />} />
                         <BottomNavigationAction label="Data Buffers" value="data-buffers" icon={<StorageIcon />} />
+                        <BottomNavigationAction label="Alarms" value="alarms" icon={<AlarmIcon />} />
                     </BottomNavigation>
                 </Paper>
             </div >

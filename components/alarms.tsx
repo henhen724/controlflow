@@ -11,10 +11,10 @@ import { getErrorMessage } from '../lib/form';
 
 const WatchdogsQuery = gql`
 query WatchdogsQuery {
-    Watchdogs {
+    watchdogs {
+        name
         topics
-        triggerFunction
-        actionFunction
+        messageString
     }
 }
 `
@@ -27,65 +27,71 @@ mutation SetWatchdog($input: WatchdogInput!) {
 `
 const DeleteWatchdog = gql`
 mutation DeleteWatchdog($name:String!) {
-    deleteWatchdog(topic:$name) {
+    deleteWatchdog(name:$name) {
         success
     }
 }
 `
 
+interface WatchdogDisplay {
+    name: string,
+    topics: string[],
+    topicsString?: string,
+    messageString: string,
+}
+
 interface WatchdogQuery {
-    Watchdogs: IWatchdog[]
+    watchdogs: IWatchdog[]
 }
 
 interface TableState {
-    columns: Array<Column<IWatchdog>>,
-    data: IWatchdog[],
+    columns: Array<Column<WatchdogDisplay>>,
+    data: WatchdogDisplay[],
 }
 
 interface SuccessBoolean {
     success: Boolean
 }
 
-const Watchdogs = () => {
-    // Queries
-    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = useQuery<WatchdogQuery>(WatchdogsQuery, {
-        onCompleted: (queryData: WatchdogQuery) => {
-            const buffers = queryData.Watchdogs ? queryData.Watchdogs : [];
-            setState({ columns: state.columns, data: buffers });
-        }
-    });
-    const refetch = useCallback(() => {
-        setTimeout(() => _refetch({
-            onCompleted: (queryData: WatchdogQuery) => {
-                const buffers = queryData.Watchdogs ? queryData.Watchdogs : [];
-                setState({ columns: state.columns, data: buffers });
-            },
-        }), 0)
-    }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
-
-    // Mutations
-    const [sendTopic] = useMutation<SuccessBoolean, { input: IWatchdog }>(SetWatchdog);
-    const [deleteTopic] = useMutation<SuccessBoolean, { name: string }>(DeleteWatchdog);
-
+const AlarmsPage = () => {
     // Page state
     const [state, setState] = useState<TableState>({
         columns: [
             { title: 'Name', field: 'name', type: 'string', editable: 'onAdd' },
-            { title: 'TopicName (Comma Seperated)', field: 'topics', type: 'string', editable: 'always' },
-            { title: 'Trigger Function', field: 'triggerFunction', type: 'string', editable: 'always' },
-            { title: 'Action Function', field: 'actionFunction', type: 'string', editable: 'always' },
+            { title: 'Topics (Comma Seperated)', field: 'topicsString', type: 'string', editable: 'always' },
+            { title: 'Alarm Message', field: 'messageString', type: 'string', editable: 'always' },
         ],
         data: [],
     })
     const [isModalOpen, setModelOpen] = useState<boolean>(false);
     const [nameToDelete, setNameToDelete] = useState<string | null>(null);
 
+    // Queries
+    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = useQuery<WatchdogQuery>(WatchdogsQuery, {
+        onCompleted: (queryData: WatchdogQuery) => {
+            const buffers = queryData.watchdogs ? queryData.watchdogs : [];
+            const buffToDisplay = buffers.map(buf => {
+                const newBuf = buf as WatchdogDisplay;
+                newBuf.topicsString = buf.topics.join(",");
+                return newBuf;
+            })
+            setState({ columns: state.columns, data: buffToDisplay });
+        }
+    });
+    const refetch = useCallback(() => {
+        setTimeout(() => _refetch(), 0);
+    }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
+
+    // Mutations
+    const [sendTopic] = useMutation<SuccessBoolean, { input: IWatchdog }>(SetWatchdog);
+    const [deleteTopic] = useMutation<SuccessBoolean, { name: string }>(DeleteWatchdog);
+
     const onModalFinish = (accepted: boolean) => {
         setModelOpen(false);
         console.log(`Accepted: ${accepted}\nTopic to Delete: ${nameToDelete}`);
         if (accepted && nameToDelete) {
             setState((prevState) => {
-                const data = prevState.data.filter((WatchdogObj: IWatchdog) => WatchdogObj.name !== nameToDelete);
+                const data = prevState.data.filter((WatchdogObj) => WatchdogObj.name !== nameToDelete);
                 return { ...prevState, data };
             });
             deleteTopic({
@@ -104,7 +110,7 @@ const Watchdogs = () => {
     if (bufferLoading) {
         return (<Container maxWidth="sm"><h1>Buffer Info Loading</h1><CircularProgress /></ Container>)
     } else if (bufferError) {
-        return (<h1>Buffer Query Error: {bufferError}</h1>)
+        return (<h1>Buffer Query Error: {getErrorMessage(bufferError)}</h1>)
     } else {
         return (
             <div>
@@ -125,7 +131,7 @@ const Watchdogs = () => {
                                 });
                                 var input = {
                                     name: newData.name,
-                                    topics: newData.topics,
+                                    topics: newData.topicsString && newData.topicsString !== '' ? newData.topicsString.split(",") : [],
                                     messageString: newData.messageString ? newData.messageString : `${newData.name} has gone off!`,
                                 } as IWatchdog;
                                 console.log(`Sending topic record with`, input);
@@ -143,8 +149,8 @@ const Watchdogs = () => {
                                 });
                                 var input = {
                                     name: newData.name,
-                                    topics: newData.topics,
-                                    messageString: newData.messageString,
+                                    topics: newData.topicsString && newData.topicsString !== '' ? newData.topicsString.split(",") : [],
+                                    messageString: newData.messageString ? newData.messageString : `${newData.name} has gone off!`,
                                 } as IWatchdog;
                                 console.log(`Sending topic record with`, input);
                                 sendTopic({
@@ -187,4 +193,4 @@ const Watchdogs = () => {
     }
 }
 
-export default Watchdogs;
+export default AlarmsPage;
