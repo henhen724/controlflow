@@ -21,7 +21,7 @@ function createIsomorphLink() {
       credentials: 'same-origin',
     })
     const wsLink = new WebSocketLink({
-      uri: `ws://localhost:${PORT}/graphql`,
+      uri: `ws://${window.location.host}/graphql`,
       options: {
         reconnect: true,
       }
