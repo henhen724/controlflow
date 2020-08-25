@@ -8,7 +8,7 @@ import fs from 'fs';
 import next from 'next';
 import { ApolloServer } from 'apollo-server-express';
 const nextApp = next({ dev: process.env.NODE_ENV !== 'production', conf: { publicDirectory: true } }); //This loads all of the enviroment varibles
-
+const nextHandler = nextApp.getRequestHandler();
 
 import schema from '../apollo/schema';
 import { getLoginSession } from '../lib/auth';
@@ -49,11 +49,7 @@ const startServer = async () => {
     });
     apollo.applyMiddleware({ app: expressApp, path: '/graphql' });
     expressApp.use(express.static('public'));
-    expressApp.all('*', (req, res) => {
-        const { pathname, query } = parse(req.url, true);
-        if (!pathname) throw new Error(`Failed to parse url ${req.url}.`); //Apparently, url.parse can failed 🤔
-        nextApp.render(req, res, pathname, query);
-    })
+    expressApp.all('*', (req, res) => nextHandler(req, res));
 
     const httpServer = createServer(expressApp);
     apollo.installSubscriptionHandlers(httpServer);

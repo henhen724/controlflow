@@ -4,9 +4,9 @@
   "scripts": {
     "server-dev": "nodemon server/index.ts",
     "worker-dev": "nodemon workers/index.ts",
-    "build": "next build && tsc --project tsconfig.server.json && cp -r public dist",
-    "server-start": "node dist/server/index.js",
-    "worker-start": "node dist/workers/index.js"
+    "build": "next build && tsc --project tsconfig.server.json",
+    "server-start": "cross-env NODE_ENV=production node dist/server/index.js",
+    "worker-start": "cross-env NODE_ENV=production node dist/workers/index.js"
   },
   "dependencies": {
     "@apollo/react-common": "^3.1.4",
@@ -29,6 +29,7 @@
     "bootstrap": "^4.5.0",
     "bson": "^4.0.4",
     "cookie": "^0.4.1",
+    "cross-env": "^7.0.2",
     "graphql": "14",
     "graphql-mqtt-subscriptions": "^1.2.0",
     "graphql-scalars": "^1.2.1",
