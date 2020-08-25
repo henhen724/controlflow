@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
-import { ApolloClient } from 'apollo-client'
-import { ApolloLink, split } from 'apollo-link'
-import { getMainDefinition } from 'apollo-utilities'
-import { InMemoryCache, NormalizedCache, NormalizedCacheObject } from 'apollo-cache-inmemory'
+import { useMemo } from 'react';
+import { ApolloClient } from 'apollo-client';
+import { ApolloLink, split } from 'apollo-link';
+import { getMainDefinition } from 'apollo-utilities';
+import { InMemoryCache, NormalizedCache, NormalizedCacheObject } from 'apollo-cache-inmemory';
 
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
@@ -10,22 +10,22 @@ const PORT = process.env.PORT || "3000";
 
 function createIsomorphLink() {
   if (typeof window === 'undefined') {
-    const { SchemaLink } = require('apollo-link-schema')
-    const { schema } = require('./schema')
-    return new SchemaLink({ schema })
+    const { SchemaLink } = require('apollo-link-schema');
+    const { schema } = require('./schema');
+    return new SchemaLink({ schema });
   } else {
-    const { HttpLink } = require('apollo-link-http')
-    const { WebSocketLink } = require('apollo-link-ws')
+    const { HttpLink } = require('apollo-link-http');
+    const { WebSocketLink } = require('apollo-link-ws');
+    const { SubscriptionClient } = require('subscriptions-transport-ws');
     const httpLink = new HttpLink({
       uri: '/graphql',
       credentials: 'same-origin',
+    });
+    console.log(`ws://${window.location.host}/graphql`);
+    const wsClient = new SubscriptionClient(`ws://${window.location.host}/graphql`, {
+      reconnect: true,
     })
-    const wsLink = new WebSocketLink({
-      uri: `ws://${window.location.host}/graphql`,
-      options: {
-        reconnect: true,
-      }
-    })
+    const wsLink = new WebSocketLink(wsClient);
     const termLink = split(
       ({ query }) => {
         const definition = getMainDefinition(query);
