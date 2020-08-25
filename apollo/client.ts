@@ -21,11 +21,17 @@ function createIsomorphLink() {
       uri: '/graphql',
       credentials: 'same-origin',
     });
-    console.log(`ws://${window.location.host}/graphql`);
-    const wsClient = new SubscriptionClient(`ws://${window.location.host}/graphql`, {
-      reconnect: true,
-    })
-    const wsLink = new WebSocketLink(wsClient);
+    var WEBSOCKET_URI = `ws://${window.location.host}/graphql`;
+    if (window.location.protocol === 'https') {
+      WEBSOCKET_URI = `wss://${window.location.host}/graphql`;
+    }
+    console.log(WEBSOCKET_URI);
+    const wsLink = new WebSocketLink({
+      uri: WEBSOCKET_URI,
+      options: {
+        reconnect: true,
+      }
+    });
     const termLink = split(
       ({ query }) => {
         const definition = getMainDefinition(query);
