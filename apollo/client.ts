@@ -21,10 +21,7 @@ function createIsomorphLink() {
       uri: '/graphql',
       credentials: 'same-origin',
     });
-    var WEBSOCKET_URI = `ws://${window.location.host}/graphql`;
-    if (window.location.protocol === 'https') {
-      WEBSOCKET_URI = `wss://${window.location.host}/graphql`;
-    }
+    const WEBSOCKET_URI = process.env.NODE_ENV === 'production' ? `wss://${window.location.host}/graphql` : `ws://${window.location.host}/graphql`;
     console.log(WEBSOCKET_URI);
     const wsLink = new WebSocketLink({
       uri: WEBSOCKET_URI,
