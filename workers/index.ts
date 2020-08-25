@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { MongoError } from 'mongodb';
-import handleAlarms from '../workers/runningBuffer';
-import rollingBuffer from '../workers/alarmHandlers';
+import rollingBuffer, { bufferListner } from '../workers/runningBuffer';
+import handleAlarms, { alarmListner } from '../workers/alarmHandlers';
 import mqttConnect from '../lib/mqttConnect';
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config({ path: '.env.local' })
@@ -27,6 +27,10 @@ const runWorkers = async () => {
 
     rollingBuffer(client);
     handleAlarms(client);
+    client.on("message", (msgTopic, message) => {
+        bufferListner(msgTopic, message);
+        alarmListner(msgTopic, message);
+    });
 }
 
 runWorkers();
