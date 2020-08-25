@@ -17,16 +17,6 @@ import { getLoginSession } from '../lib/auth';
 //TODO: Update name to Wi- DAQ
 
 const PORT = process.env.PORT || "3000";
-const publicFolderPath = join(__dirname, '../public');
-let staticFiles = [] as string[];
-fs.readdir(publicFolderPath, (err, files) => {
-    if (err) {
-        console.error(err)
-    } else {
-        console.log(files);
-        staticFiles = files;
-    }
-});
 
 
 const startServer = async () => {
@@ -58,18 +48,11 @@ const startServer = async () => {
         },
     });
     apollo.applyMiddleware({ app: expressApp, path: '/graphql' });
+    expressApp.use(express.static('public'));
     expressApp.all('*', (req, res) => {
         const { pathname, query } = parse(req.url, true);
         if (!pathname) throw new Error(`Failed to parse url ${req.url}.`); //Apparently, url.parse can failed 🤔
-        if (staticFiles.indexOf(pathname.split("/")[1]) > -1) {
-            const filePath = join(publicFolderPath, pathname);
-            console.log(`Serving ${filePath}`);
-            // console.log(fs.readFileSync(filePath).toString());
-            nextApp.serveStatic(req, res, filePath);
-        } else {
-            console.log(`Looking for the ${pathname} component path.`);
-            nextApp.render(req, res, pathname, query);
-        }
+        nextApp.render(req, res, pathname, query);
     })
 
     const httpServer = createServer(expressApp);
