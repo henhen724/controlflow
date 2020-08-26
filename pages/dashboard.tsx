@@ -4,7 +4,7 @@ import Head from 'next/head';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
 import Navbar from '../components/Navbar';
-import Dashboard, { PanelProps } from '../components/dashboard';
+import LiveData, { PanelProps } from '../components/livedata';
 import Buffers from '../components/buffers';
 import Alarms from '../components/alarms';
 import { CircularProgress, BottomNavigation, BottomNavigationAction, Paper } from '@material-ui/core';
@@ -66,7 +66,7 @@ const Index = () => {
         return <p>{error.message}</p>
     }
 
-    const dataElement = { topic: "Teensy1/TC0", displayProps: { firstDataKey: "timestamp", secondDataKey: "data" }, elemType: "data", displayType: "line-graph" } as PanelProps;
+    const dataElement = { topic: "SENSOR", displayProps: { firstDataKey: "timestamp", secondDataKey: "data" }, elemType: "data", displayType: "line-graph" } as PanelProps;
     const controlElement = {
         topic: "LEDONOFF", displayProps: {}, elemType: "control", displayType: "switch", format: (on: boolean) => {
             if (on)
@@ -80,7 +80,7 @@ const Index = () => {
         var component = <div />;
         switch (tab) {
             case "live-data":
-                component = <Dashboard dataElements={[dataElement, controlElement]} />;
+                component = <LiveData dataElements={[dataElement, controlElement]} />;
                 break;
             case "data-buffers":
                 component = <Buffers />;
