@@ -1,6 +1,5 @@
 import React from 'react';
 import { ThemeProvider as MuiThemeProvider, createMuiTheme, darken, } from '@material-ui/core/styles';
-import useMediaQuery from '@material-ui/core/useMediaQuery';
 import { red, blue } from '@material-ui/core/colors';
 import { getCookie, setCookie } from '../lib/style-cookies';
 
@@ -58,10 +57,7 @@ export default function theme(props: any) {
                 throw new Error(`Unrecognized type ${action.type}`);
         }
     }, themeInitialOptions);
-
-    const prefersDarkMode = useMediaQuery<"dark" | "light">('(prefers-color-scheme: dark)');
-    const preferredType = prefersDarkMode ? 'dark' : 'light';
-    const { dense, direction, paletteColors, paletteType = preferredType, spacing } = themeOptions;
+    const { dense, direction, paletteColors, paletteType = 'dark', spacing } = themeOptions;
 
     React.useEffect(() => {
         if (process.browser) {
@@ -89,13 +85,18 @@ export default function theme(props: any) {
                 palette: {
                     primary: {
                         main: paletteType === 'light' ? '#ff8080' : red[200],
+                        light: '#ff8080',
+                        dark: red[200],
                     },
                     secondary: {
                         main: paletteType === 'light' ? darken(blue.A400, 0.1) : blue[200],
+                        light: darken(blue.A400, 0.1),
+                        dark: blue[200],
                     },
                     type: paletteType,
                     background: {
                         default: paletteType === 'light' ? '#fcfcfc' : '#333333',
+                        paper: paletteType === 'light' ? '#d0d0d0' : '#535353',
                     },
                     ...paletteColors,
                 },
@@ -104,7 +105,10 @@ export default function theme(props: any) {
         );
         return nextTheme;
     }, [dense, direction, paletteColors, paletteType, spacing]);
-    return (<MuiThemeProvider theme={theme}>
-        <DispatchContext.Provider value={{ state: themeOptions, dispatch }}>{children}</DispatchContext.Provider>
-    </MuiThemeProvider>)
+    return (
+        <MuiThemeProvider theme={theme}>
+            <DispatchContext.Provider value={{ state: themeOptions, dispatch }}>
+                {children}
+            </DispatchContext.Provider>
+        </MuiThemeProvider>);
 }

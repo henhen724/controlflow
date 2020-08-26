@@ -4,6 +4,7 @@ import gql from 'graphql-tag';
 import { CircularProgress, Container, Grid, Paper } from '@material-ui/core';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import { INotification } from '../../models/Notification';
+import Navbar from '../../components/Navbar';
 
 const SingleNotificationQuery = gql`
 query SingleNotificationQuery($id:String){
@@ -54,12 +55,15 @@ const aNotification = () => {
             console.log(data.notificationById);
             const { name, topic, message, mqttMessage, recieved } = data.notificationById;
             console.log(typeof recieved);
-            return (<Paper className={classes.paper}><Grid container>
-                <Grid item xs={6}>{name}</Grid><Grid item xs={6}>Topic: {topic}</Grid>
-                <Grid item xs={12}>{message}</Grid>
-                <Grid item xs={12}>{mqttMessage}</Grid>
-                <Grid item xs={12}>{recieved} </Grid>
-            </Grid></Paper >);
+            return (<>
+                <Navbar />
+                <Paper className={classes.paper}><Grid container>
+                    <Grid item xs={6}>{name}</Grid><Grid item xs={6}>Topic: {topic}</Grid>
+                    <Grid item xs={12}>{message}</Grid>
+                    <Grid item xs={12}>{mqttMessage}</Grid>
+                    <Grid item xs={12}>{recieved} </Grid>
+                </Grid></Paper >
+            </>);
         } else {
             return (<Container maxWidth="sm"><h2>Sorry, but that notification id isn't valid</h2>Error 404</Container>);
         }

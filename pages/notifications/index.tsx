@@ -3,6 +3,7 @@ import Link from 'next/link';
 import gql from 'graphql-tag';
 import { CircularProgress, Container, List, ListItem, ListItemText } from '@material-ui/core';
 import { INotification } from '../../models/Notification';
+import Navbar from '../../components/Navbar';
 
 const NotificationsQuery = gql`
 query NotificationQuery{
@@ -28,14 +29,19 @@ const notficationList = () => {
         return (<Container maxWidth="sm"><h1>Loading Notifications</h1><CircularProgress /></ Container>);
     }
     else if (data) {
-        const notficationList = data.notifications.map(notofication => {
+        const notficationList = data.notifications.reverse().map(notofication => {
             return (<Link href={`/notifications/${notofication.id}`}><ListItem>
                 <ListItemText primary={notofication.name} secondary={notofication.message} />
             </ListItem></Link>)
         });
-        return (<Container maxWidth="sm"><List>
-            {notficationList}
-        </List></Container>);
+        return (<>
+            <Navbar />
+            <Container maxWidth="sm">
+                <List>
+                    {notficationList}
+                </List>
+            </Container>
+        </>);
     } else {
         return (<Container maxWidth="sm"><h1>An error has occured</h1>{error}</ Container>);
     }

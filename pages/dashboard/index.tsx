@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
-import Navabar from '../../components/navbar';
+import Navbar from '../../components/Navbar';
 import Dashboard, { PanelProps } from '../../components/dashboard';
 import Buffers from '../../components/buffers';
 import Alarms from '../../components/alarms';
@@ -80,7 +80,7 @@ const Index = () => {
         console.log(component);
         return (
             <div>
-                <Navabar email={viewer.email} />
+                <Navbar />
                 {component}
                 <Paper className={classes.paperFooter}>
                     <BottomNavigation value={tab} onChange={(e, val) => changeTab(val)} className={classes.navFooter}>

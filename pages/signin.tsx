@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(3),
       position: "relative",
       textAlign: "center",
-      backgroundColor: theme.palette.primary.light,
+      backgroundColor: theme.palette.primary.main,
     },
     spacerDiv: {
       paddingBottom: theme.spacing(2),
