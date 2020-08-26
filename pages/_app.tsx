@@ -20,11 +20,15 @@ export default function MyApp({ Component, pageProps }: AppProps<{ initialApollo
     }
   })
 
-  return (
+  return (<>
+    <Head>
+      <title>Wi-DAQ</title>
+    </Head>
     <ApolloProvider client={myApolloClient}>
       <Theme>
         <CssBaseline />
         <Component {...pageProps} />
       </Theme>
-    </ApolloProvider>);
+    </ApolloProvider>
+  </>);
 }
