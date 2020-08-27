@@ -127,6 +127,8 @@ type Mutation {
     deleteTopicBuffer(topic: String!): SuccessBoolean!
     setWatchdog(input:WatchdogInput!): SuccessBoolean!
     deleteWatchdog(name:String!): SuccessBoolean!
+    viewNotification(id:String!): SuccessBoolean!
+    deleteNotification(id:String): SuccessBoolean!
 }
 `
 export default typeDef;

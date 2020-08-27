@@ -20,10 +20,7 @@ interface ThemeState {
     spacing: number
 }
 
-interface ThemeContext {
-    state: ThemeState
-    dispatch: ({ type, payload }: { type: string, payload: any }) => void;
-}
+type ThemeContext = ({ type, payload }: { type: string, payload: any }) => void;
 
 type ContextProps = ThemeContext | (() => never);
 
@@ -107,8 +104,13 @@ export default function theme(props: any) {
     }, [dense, direction, paletteColors, paletteType, spacing]);
     return (
         <MuiThemeProvider theme={theme}>
-            <DispatchContext.Provider value={{ state: themeOptions, dispatch }}>
+            <DispatchContext.Provider value={dispatch}>
                 {children}
             </DispatchContext.Provider>
         </MuiThemeProvider>);
+}
+
+export const useChangeTheme = () => {
+    const dispatch = React.useContext(DispatchContext);
+    return React.useCallback((options) => dispatch({ type: 'CHANGE', payload: options }), [dispatch]);
 }

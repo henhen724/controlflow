@@ -7,6 +7,8 @@ import { getErrorMessage } from '../../lib/form';
 import { AccountCircle } from '@material-ui/icons';
 import { CircularProgress } from '@material-ui/core';
 
+import NotificationBell from './notificationBell';
+
 const NavViewerQuery = gql`
   query NavViewerQuery {
     viewer {
@@ -16,7 +18,7 @@ const NavViewerQuery = gql`
   }
 `
 
-export default function userProfileMenu() {
+export default function userProfileMenu(props: { wraperClass: string }) {
     const { data: viewerData, loading, error } = useQuery(NavViewerQuery);
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -85,7 +87,8 @@ export default function userProfileMenu() {
                 </Link>
             </Menu>
         );
-        return (<>
+        return (<div className={props.wraperClass}>
+            <NotificationBell />
             <IconButton
                 edge="end"
                 aria-label="account of current user"
@@ -96,6 +99,6 @@ export default function userProfileMenu() {
             >
                 <AccountCircle />
             </IconButton>
-            {renderMenu}</>)
+            {renderMenu}</div>)
     }
 }

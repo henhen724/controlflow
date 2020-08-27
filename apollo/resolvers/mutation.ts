@@ -3,6 +3,7 @@ import User from '../../models/User';
 import TopicBufferInfo from '../../models/TopicBufferInfo';
 import DataPacket from '../../models/DataPacket';
 import Watchdog, { IWatchdog } from '../../models/Watchdog';
+import Notification, { INotification } from '../../models/Notification';
 import { createUser, validatePassword } from '../../lib/user';
 import { setLoginSession } from '../../lib/auth';
 import { removeTokenCookie } from '../../lib/auth-cookies';
@@ -149,6 +150,14 @@ const Mutation = {
         await Watchdog.deleteMany({ name: args.name }).exec();
         return { success: true };
     },
+    async viewNotification(_: any, args: { id: string }) {
+        await Notification.findOneAndUpdate({ id: args.id }, { viewed: true });
+        return { success: true };
+    },
+    async deleteNotification(_: any, args: { id: string }) {
+        await Notification.findByIdAndDelete(args.id);
+        return { success: true };
+    }
 }
 
 export default Mutation;

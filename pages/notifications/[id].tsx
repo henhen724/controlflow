@@ -1,8 +1,9 @@
 import { useQuery } from '@apollo/react-hooks';
 import { useRouter } from 'next/router';
 import gql from 'graphql-tag';
-import { CircularProgress, Container, Grid, Paper } from '@material-ui/core';
+import { Container, CircularProgress, Card, CardContent, CardActionArea, CardActions, IconButton, Typography } from '@material-ui/core';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
+import { Delete as DeleteIcon } from '@material-ui/icons';
 import { INotification } from '../../models/Notification';
 import Navbar from '../../components/Navbar';
 
@@ -21,19 +22,12 @@ query SingleNotificationQuery($id:String){
 `
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
-        root: {
-            flexGrow: 1,
+        contentRoot: {
+            display: "inline",
         },
-        headingPaper: {
-            padding: theme.spacing(0),
-            textAlign: 'center',
-            color: theme.palette.text.secondary,
-        },
-        paper: {
-            padding: theme.spacing(2),
-            textAlign: 'center',
-            color: theme.palette.text.secondary,
-        },
+        halfRow: {
+            width: "50%"
+        }
     }),
 );
 
@@ -57,18 +51,31 @@ const aNotification = () => {
             console.log(typeof recieved);
             return (<>
                 <Navbar />
-                <Paper className={classes.paper}><Grid container>
-                    <Grid item xs={6}>{name}</Grid><Grid item xs={6}>Topic: {topic}</Grid>
-                    <Grid item xs={12}>{message}</Grid>
-                    <Grid item xs={12}>{mqttMessage}</Grid>
-                    <Grid item xs={12}>{recieved} </Grid>
-                </Grid></Paper >
+                <Card>
+                    <CardContent>
+                        <Typography variant="subtitle1" color="textSecondary" className={classes.halfRow}>Name</Typography>
+                        <Typography component="h4" variant="h4" className={classes.halfRow}>{name}</Typography>
+                        <Typography variant="subtitle1" color="textSecondary" className={classes.halfRow}>Topic</Typography>
+                        <Typography component="h4" variant="h4" className={classes.halfRow}>{topic}</Typography>
+                        <Typography variant="subtitle2" color="textSecondary" className={classes.halfRow}>Message</Typography>
+                        <Typography component="h5" variant="h5" className={classes.halfRow}>{message}</Typography>
+                        <Typography variant="subtitle2" color="textSecondary" className={classes.halfRow}>MQTT Message</Typography>
+                        <Typography component="h5" variant="h5">{mqttMessage}</Typography>
+                        <Typography variant="subtitle2" color="textSecondary">Time Recieved</Typography>
+                        <Typography component="h5" variant="h5">{recieved}</Typography>
+                    </CardContent>
+                    <CardActions disableSpacing>
+                        <IconButton>
+                            <DeleteIcon />
+                        </IconButton>
+                    </CardActions>
+                </Card>
             </>);
         } else {
             return (<Container maxWidth="sm"><h2>Sorry, but that notification id isn't valid</h2>Error 404</Container>);
         }
     } else {
-        return (<Container maxWidth="sm"><h1>An error has occured</h1>{error}</ Container>);
+        return (<Container maxWidth="sm"><h1>An error has occured</h1>{getErrorMessage(error)}</ Container>);
     }
 }
 

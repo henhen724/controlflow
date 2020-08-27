@@ -1,7 +1,8 @@
 import React from 'react';
-import { AppBar, Badge, Toolbar, Typography, IconButton } from '@material-ui/core';
-import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import { Notifications as NotificationsIcon } from '@material-ui/icons';
+import { AppBar, Badge, Toolbar, Typography, IconButton, Tooltip } from '@material-ui/core';
+import { makeStyles, useTheme, Theme, createStyles } from '@material-ui/core/styles';
+import { Notifications as NotificationsIcon, Brightness2TwoTone, Brightness7TwoTone } from '@material-ui/icons';
+import { useChangeTheme } from '../theme';
 
 import UserProfileMenu from './userProfileMenu';
 
@@ -51,7 +52,14 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function navbar() {
     const classes = useStyles();
+    const theme = useTheme();
 
+    const changeTheme = useChangeTheme();
+    const handleTogglePaletteType = () => {
+        const paletteType = theme.palette.type === 'light' ? 'dark' : 'light';
+
+        changeTheme({ paletteType });
+    };
 
     return (
         <div className={classes.grow}>
@@ -62,14 +70,18 @@ export default function navbar() {
                         Wi-DAQ
                     </Typography>
                     <div className={classes.grow} />
-                    <div className={classes.sectionDesktop}>
-                        <IconButton aria-label="show 17 new notifications" color="inherit">
-                            <Badge badgeContent={0} color="secondary">
-                                <NotificationsIcon />
-                            </Badge>
+                    <Tooltip title="Toggle Light and Dark Mode" className={classes.sectionDesktop}>
+                        <IconButton
+                            color="inherit"
+                            onClick={handleTogglePaletteType}
+                            aria-label="toggleTheme"
+                            data-ga-event-category="header"
+                            data-ga-event-action="dark"
+                        >
+                            {theme.palette.type === 'light' ? <Brightness2TwoTone /> : <Brightness7TwoTone />}
                         </IconButton>
-                        <UserProfileMenu />
-                    </div>
+                    </Tooltip>
+                    <UserProfileMenu wraperClass={classes.sectionDesktop} />
                 </Toolbar>
             </AppBar>
         </div>
