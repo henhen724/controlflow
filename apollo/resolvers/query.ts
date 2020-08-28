@@ -5,6 +5,7 @@ import DataPacket from '../../models/DataPacket';
 import Watchdog from '../../models/Watchdog';
 import Notification from '../../models/Notification';
 import findBufferSize from '../../lib/findBufferSize';
+import { TableSortLabel } from '@material-ui/core';
 
 const notSignedIn = (route: string) => new AuthenticationError(`You need to be signed in to query ${route}`);
 
@@ -70,7 +71,7 @@ const Query = {
         return await DataPacket.find({ topic: args.topic }).exec();
     },
     async notifications() {
-        return await Notification.find({}).sort({ "recieved": "desc" }).exec();
+        return (await Notification.find({}).sort({ "recieved": "desc" }).exec());
     },
     async notificationById(_: any, args: { id: string }) {
         return await Notification.findById(args.id).exec();
