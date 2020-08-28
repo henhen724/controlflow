@@ -5,7 +5,7 @@ import MaterialTable, { Column, MTableToolbar } from 'material-table';
 import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@material-ui/core';
 import { Replay as ReplayIcon } from '@material-ui/icons';
 
-import { getErrorMessage } from '../lib/form';
+import { getErrorMessage } from '../lib/errorFormating';
 import { ITopic } from '../models/TopicBufferInfo';
 
 const BufferQuery = gql`

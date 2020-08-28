@@ -70,7 +70,7 @@ const Query = {
         return await DataPacket.find({ topic: args.topic }).exec();
     },
     async notifications() {
-        return await Notification.find({}).exec();
+        return await Notification.find({}).sort({ "recieved": "desc" }).exec();
     },
     async notificationById(_: any, args: { id: string }) {
         return await Notification.findById(args.id).exec();

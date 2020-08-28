@@ -1,26 +1,13 @@
 import { useState, MouseEvent } from 'react';
-import gql from 'graphql-tag';
-import { useQuery } from '@apollo/react-hooks';
 import Link from 'next/link';
 import { IconButton, MenuItem, Menu } from '@material-ui/core';
-import { getErrorMessage } from '../../lib/form';
 import { AccountCircle } from '@material-ui/icons';
-import { CircularProgress } from '@material-ui/core';
 
-import NotificationBell from './notificationBell';
+interface userAvatarProps {
+    email?: string
+}
 
-const NavViewerQuery = gql`
-  query NavViewerQuery {
-    viewer {
-        id
-        email
-    }
-  }
-`
-
-export default function userProfileMenu(props: { wraperClass: string }) {
-    const { data: viewerData, loading, error } = useQuery(NavViewerQuery);
-
+export default (props: userAvatarProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     const isMenuOpen = Boolean(anchorEl);
@@ -35,12 +22,7 @@ export default function userProfileMenu(props: { wraperClass: string }) {
 
     const menuId = 'primary-search-account-menu';
 
-    if (loading) {
-        return (<CircularProgress />)
-    } else if (error) {
-        console.error(error);
-        return (<h1>PROFILE ERROR:{getErrorMessage(error)}</h1>);
-    } else if (!viewerData.viewer) {
+    if (!props.email) {
         const renderMenu = (
             <Menu
                 anchorEl={anchorEl}
@@ -80,15 +62,14 @@ export default function userProfileMenu(props: { wraperClass: string }) {
                 open={isMenuOpen}
                 onClose={handleMenuClose}
             >
-                <MenuItem>Your signed in as {viewerData.viewer.email}</MenuItem>
+                <MenuItem>Your signed in as {props.email}</MenuItem>
                 <MenuItem onClick={handleMenuClose}>My account</MenuItem>
                 <Link href={'/signout'}>
                     <MenuItem onClick={handleMenuClose} button={true}>Sign Out</MenuItem>
                 </Link>
             </Menu>
         );
-        return (<div className={props.wraperClass}>
-            <NotificationBell />
+        return (<>
             <IconButton
                 edge="end"
                 aria-label="account of current user"
@@ -99,6 +80,6 @@ export default function userProfileMenu(props: { wraperClass: string }) {
             >
                 <AccountCircle />
             </IconButton>
-            {renderMenu}</div>)
+            {renderMenu}</>)
     }
 }

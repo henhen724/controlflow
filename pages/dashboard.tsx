@@ -91,7 +91,6 @@ const Index = () => {
             default:
                 changeTab("live-data");
         }
-        console.log(component);
         return (
             <div>
                 <Navbar />

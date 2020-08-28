@@ -79,10 +79,7 @@ type BufferPacket {
 
 type SuccessBoolean {
     success:Boolean!
-}
-
-type Subscription {
-    mqttTopics(topics:[String]!):DataPacket!
+    message:String
 }
 
 type BufferInfo {
@@ -94,14 +91,29 @@ type BufferInfo {
     currSize: Int
 }
 
+enum ChangeType {
+    insert
+    delete
+}
+
 type Notification {
     id: String!
-    name: String!
+    name: String
     topic: String
     message: String
     mqttMessage: String
     recieved: Date!
     viewed: Boolean
+}
+
+type NotificiationChange {
+    notification: Notification,
+    type: ChangeType
+}
+
+type Subscription {
+    mqttTopics(topics:[String]!):DataPacket!
+    notificationChange: NotificiationChange!
 }
 
 type Query {
@@ -128,7 +140,7 @@ type Mutation {
     setWatchdog(input:WatchdogInput!): SuccessBoolean!
     deleteWatchdog(name:String!): SuccessBoolean!
     viewNotification(id:String!): SuccessBoolean!
-    deleteNotification(id:String): SuccessBoolean!
+    deleteNotification(id:String!): SuccessBoolean!
 }
 `
 export default typeDef;

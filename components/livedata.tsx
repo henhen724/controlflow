@@ -3,7 +3,7 @@ import { ControlComponent, UnionControlPanelProps } from './ControlPanel/index';
 import gql from 'graphql-tag';
 import { useState, useEffect } from 'react';
 import { useSubscription, useMutation, useQuery } from '@apollo/react-hooks';
-import { getErrorMessage } from '../lib/form';
+import { getErrorMessage } from '../lib/errorFormating';
 
 
 const DataQuery = gql`
@@ -61,7 +61,7 @@ const dashboard = (props: DashboardProps) => {
         const { refetch } = useQuery<QRslt>(DataQuery, {
             variables: { topic },
             onCompleted: async res => {
-                console.log(`Recieved query`, res);
+                // console.log(`Recieved query`, res);
                 data[topic] = res.topicBuffer.map(packet => packet.data).reverse();
                 setData(data);
             }
@@ -78,7 +78,6 @@ const dashboard = (props: DashboardProps) => {
                 if (subData) {
                     if (subData.data && subData.data.mqttTopics) {
                         const message = subData.data.mqttTopics.data;
-                        console.log(message);
                         if (data[topic]) {
                             data[topic].unshift(message);
                             setData(data);

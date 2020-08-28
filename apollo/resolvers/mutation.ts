@@ -151,8 +151,14 @@ const Mutation = {
         return { success: true };
     },
     async viewNotification(_: any, args: { id: string }) {
-        await Notification.findOneAndUpdate({ id: args.id }, { viewed: true });
-        return { success: true };
+        const notification = await Notification.findById(args.id);
+        if (notification) {
+            notification.viewed = true;
+            await notification.save();
+            return { success: true };
+        } else {
+            return { success: false, message: "No such notification." }
+        }
     },
     async deleteNotification(_: any, args: { id: string }) {
         await Notification.findByIdAndDelete(args.id);

@@ -7,7 +7,7 @@ import { Replay as ReplayIcon } from '@material-ui/icons';
 
 import { IWatchdog } from '../models/Watchdog';
 
-import { getErrorMessage } from '../lib/form';
+import { getErrorMessage } from '../lib/errorFormating';
 
 const WatchdogsQuery = gql`
 query WatchdogsQuery {

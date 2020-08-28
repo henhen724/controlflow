@@ -1,10 +1,9 @@
 import React from 'react';
-import { AppBar, Badge, Toolbar, Typography, IconButton, Tooltip } from '@material-ui/core';
+import { AppBar, Toolbar, Typography } from '@material-ui/core';
 import { makeStyles, useTheme, Theme, createStyles } from '@material-ui/core/styles';
-import { Notifications as NotificationsIcon, Brightness2TwoTone, Brightness7TwoTone } from '@material-ui/icons';
 import { useChangeTheme } from '../theme';
 
-import UserProfileMenu from './userProfileMenu';
+import IconMenu from './iconMenu';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -70,18 +69,9 @@ export default function navbar() {
                         Wi-DAQ
                     </Typography>
                     <div className={classes.grow} />
-                    <Tooltip title="Toggle Light and Dark Mode" className={classes.sectionDesktop}>
-                        <IconButton
-                            color="inherit"
-                            onClick={handleTogglePaletteType}
-                            aria-label="toggleTheme"
-                            data-ga-event-category="header"
-                            data-ga-event-action="dark"
-                        >
-                            {theme.palette.type === 'light' ? <Brightness2TwoTone /> : <Brightness7TwoTone />}
-                        </IconButton>
-                    </Tooltip>
-                    <UserProfileMenu wraperClass={classes.sectionDesktop} />
+                    <div className={classes.sectionDesktop}>
+                        <IconMenu />
+                    </div>
                 </Toolbar>
             </AppBar>
         </div>
