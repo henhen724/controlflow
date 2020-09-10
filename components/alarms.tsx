@@ -162,7 +162,7 @@ const AlarmsPage = () => {
                             onRowDelete: (oldData) => new Promise((resolve) => {
                                 setNameToDelete(oldData.name);
                                 setModelOpen(true);
-                                resolve();
+                                resolve(true);
                             })
                         }} />
                     <Dialog

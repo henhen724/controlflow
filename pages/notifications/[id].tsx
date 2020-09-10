@@ -11,7 +11,7 @@ import { getErrorMessage } from '../../lib/errorFormating';
 const SingleNotificationQuery = gql`
 query SingleNotificationQuery($id:String){
     notificationById(id:$id){
-        id,
+        _id,
         name,
         topic,
         message,

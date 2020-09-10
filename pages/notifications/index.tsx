@@ -8,7 +8,7 @@ import Navbar from '../../components/Navbar';
 const NotificationsQuery = gql`
 query NotificationQuery{
     notifications{
-        id,
+        _id,
         name,
         topic,
         message,
@@ -30,7 +30,7 @@ const notficationList = () => {
     }
     else if (data) {
         const notficationList = data.notifications.reverse().map(notofication => {
-            return (<Link href={`/notifications/${notofication.id}`}><ListItem>
+            return (<Link href={`/notifications/${notofication._id}`}><ListItem>
                 <ListItemText primary={notofication.name} secondary={notofication.message} />
             </ListItem></Link>)
         });

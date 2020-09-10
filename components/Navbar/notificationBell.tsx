@@ -11,7 +11,7 @@ import { CircularProgress } from '@material-ui/core';
 const NotificationsQuery = gql`
 query NotificationQuery{
     notifications{
-        id
+        _id
         name
         message
         viewed
@@ -29,15 +29,22 @@ mutation ViewNotification($id:String!){
 const NotificationSubscription = gql`
 subscription NotificationSubscription{
     notificationChange {
-        notification {
-            id
+      __typename
+      ... on NotoInsert {
+        fullDocument {
+            _id
             name
             message
             viewed
         }
-        type
+      }
+      ... on NotoDelete {
+        documentKey {
+            _id
+        }
+      }
     }
-} 
+}
 `
 
 
@@ -50,43 +57,60 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 interface notification {
-    id: string,
+    _id: string,
     name?: string,
     message?: string,
     viewed?: Boolean,
 }
 
-interface NotoData {
+interface NotoQData {
     notifications: notification[]
+}
+
+interface NotoInsert {
+    __typename: "NotoInsert",
+    fullDocument: notification
+}
+
+interface NotoDelete {
+    __typename: "NotoDelete",
+    documentKey: {
+        _id: string,
+    }
+}
+
+interface NotoSData {
+    notificationChange: NotoInsert | NotoDelete
 }
 
 export default function notificationBell() {
     const [notifications, setNotifications] = useState<notification[]>([]);
     // console.log(notifications);
-    useSubscription<{ notificationChange: { notification: notification, type: string } }>(NotificationSubscription, {
+    useSubscription<NotoSData>(NotificationSubscription, {
         onSubscriptionData: ({ subscriptionData: data }) => {
             console.log("Got Notification");
             console.log(data);
             if (data.data) {
                 const notificationChange = data.data.notificationChange;
                 console.log(data.data);
-                if (notificationChange.type === 'insert') {
-                    notifications.push(notificationChange.notification)
-                    setNotifications(notifications);
-                } else {
-                    const newNotifications = notifications.filter(noto => noto.id !== notificationChange.notification.id);
-                    setNotifications(newNotifications);
+                switch (notificationChange.__typename) {
+                    case "NotoInsert":
+                        notifications.push(notificationChange.fullDocument)
+                        setNotifications(notifications);
+                        break;
+                    case "NotoDelete":
+                        const newNotifications = notifications.filter(noto => noto._id !== notificationChange.documentKey._id);
+                        setNotifications(newNotifications);
+                        break;
                 }
             } else if (data.error) {
                 console.error(data.error);
             }
         }
     });
-    useQuery<NotoData>(NotificationsQuery,
+    useQuery<NotoQData>(NotificationsQuery,
         {
             onCompleted: (data) => {
-                console.log("Ran query");
-                console.log(data);
                 setNotifications(data.notifications.filter(noto => noto.name && noto.message));
             }
         });
@@ -106,10 +130,10 @@ export default function notificationBell() {
     const menuId = 'notification-menu';
     const numberUnread = notifications.reduce((prev, curr) => curr.viewed ? prev : prev + 1, 0);
     const menuItems = notifications.map(noto => (<Link
-        href={`/notifications/${noto.id}`}
-        key={noto.id}
+        href={`/notifications/${noto._id}`}
+        key={noto._id}
     >
-        <MenuItem onClick={() => viewNoto({ variables: { id: noto.id } })}>
+        <MenuItem onClick={() => viewNoto({ variables: { id: noto._id } })}>
             <Card className={noto.viewed ? "" : classes.unviewedNotification} >
                 <CardContent>
                     <Typography variant="h5" component="h2">

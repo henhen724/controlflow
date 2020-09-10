@@ -1,6 +1,6 @@
 import { serialize, parse } from 'cookie';
 
-const TOKEN_NAME = 'wi_daq_token'
+const TOKEN_NAME = 'wi_daq_token';
 
 export const MAX_AGE = 60 * 60 * 8 // 8 hours
 

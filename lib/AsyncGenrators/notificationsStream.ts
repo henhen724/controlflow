@@ -1,9 +1,10 @@
-import Notification, { INotification } from '../../models/Notification';
-import stream from './index';
-const notificationStream = () => {
+import { on } from 'events';
+import Notification from '../../models/Notification';
+
+const getNotificationStream = () => {
     const notificationEmitter = Notification.watch();
 
-    return stream(notificationEmitter, "change", (change) => change.operationType === 'insert' || change.operationType === 'delete');
+    return on(notificationEmitter, "change");
 }
 
-export default notificationStream;
+export default getNotificationStream;

@@ -3,7 +3,7 @@ import User from '../../models/User';
 import TopicBufferInfo from '../../models/TopicBufferInfo';
 import DataPacket from '../../models/DataPacket';
 import Watchdog, { IWatchdog } from '../../models/Watchdog';
-import Notification, { INotification } from '../../models/Notification';
+import Notification from '../../models/Notification';
 import { createUser, validatePassword } from '../../lib/user';
 import { setLoginSession } from '../../lib/auth';
 import { removeTokenCookie } from '../../lib/auth-cookies';

@@ -4,7 +4,7 @@ import { IncomingMessage } from 'http';
 
 const TOKEN_SECRET = process.env.TOKEN_SECRET
 if (!TOKEN_SECRET)
-  throw Error("Token secret is not intialized.");
+  throw new Error("Token secret is not intialized.");
 
 export interface session {
   id: string,
@@ -25,7 +25,7 @@ export async function getLoginSession(req: undefined | IncomingMessage): Promise
   const token = getTokenCookie(req)
   if (!token) return
 
-  const session = await Iron.unseal(token, TOKEN_SECRET!, Iron.defaults)
+  const session = await Iron.unseal(token, TOKEN_SECRET!, Iron.defaults);
   const expiresAt = session.createdAt + session.maxAge * 1000
 
   // Validate the expiration date of the session

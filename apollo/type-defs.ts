@@ -97,7 +97,7 @@ enum ChangeType {
 }
 
 type Notification {
-    id: String!
+    _id: String!
     name: String
     topic: String
     message: String
@@ -106,14 +106,23 @@ type Notification {
     viewed: Boolean
 }
 
-type NotificiationChange {
-    notification: Notification,
-    type: ChangeType
+type NotoInsert {
+    fullDocument: Notification!
 }
+
+type documentKey {
+    _id: String!
+}
+
+type NotoDelete {
+    documentKey: documentKey!
+}
+
+union NotoChange  = NotoInsert | NotoDelete
 
 type Subscription {
     mqttTopics(topics:[String]!):DataPacket!
-    notificationChange: NotificiationChange!
+    notificationChange: NotoChange
 }
 
 type Query {
