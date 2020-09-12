@@ -17,9 +17,7 @@ const Subscription = {
         }
     },
     notificationChange: {
-        resolve: (payload: any) => {
-            return payload[0]
-        },
+        resolve: (payload: any) => payload[0],
         subscribe: getNotificationStream
     }
 }

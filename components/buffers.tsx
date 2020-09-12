@@ -176,7 +176,7 @@ const Buffers = () => {
                             onRowDelete: (oldData) => new Promise((resolve) => {
                                 setTopicToDelete(oldData.topic);
                                 setModelOpen(true);
-                                resolve();
+                                resolve(true);
                             })
                         }} />
                     <Dialog

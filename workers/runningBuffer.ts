@@ -1,7 +1,7 @@
 import DataPacket, { IData } from '../models/DataPacket';
 import { MqttClient } from 'mqtt';
 import findBufferSize from '../lib/findBufferSize';
-import TopicBufferInfos, { ITopic } from '../models/TopicBufferInfo';
+import TopicBufferInfo, { ITopic } from '../models/TopicBufferInfo';
 
 let topicBufferInfos = null as ITopic[] | null;
 
@@ -69,10 +69,21 @@ export const removePacketsOverMemLimit = async () => {
 }
 
 export const updateTopicSubsriptions = async (client: MqttClient) => {
-    topicBufferInfos = await TopicBufferInfos.find().exec();
-    const topics = topicBufferInfos.map(({ topic, experationTime }) => topic);
-    if (topics.length !== 0) {
-        client.subscribe(topics, err => {
+    const newTopicBufferInfos = await TopicBufferInfo.find().exec();
+    var oldTopics = [] as string[];
+    if (topicBufferInfos)
+        oldTopics = topicBufferInfos.map(({ topic }) => topic);
+    const newTopics = newTopicBufferInfos.map(({ topic }) => topic);
+    const addedTopics = newTopics.filter(topic => !oldTopics.includes(topic));
+    const removedTopics = oldTopics.filter(topic => !newTopics.includes(topic));
+    if (addedTopics.length !== 0) {
+        client.subscribe(addedTopics, err => {
+            if (err)
+                console.error(err);
+        })
+    }
+    if (removedTopics.length !== 0) {
+        client.unsubscribe(removedTopics, err => {
             if (err)
                 console.error(err);
         })

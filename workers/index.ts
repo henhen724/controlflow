@@ -23,7 +23,7 @@ const runWorkers = async () => {
         }
     );
 
-    const client = mqttConnect(`🤖📡🌡️ Server connected to the MQTT server at ${process.env.MQTT_URI}`);
+    const client = mqttConnect(`🤖`, "Worker");
 
     rollingBuffer(client);
     handleAlarms(client);

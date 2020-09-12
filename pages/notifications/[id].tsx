@@ -4,7 +4,6 @@ import gql from 'graphql-tag';
 import { Container, CircularProgress, Paper, Grid, IconButton, Typography } from '@material-ui/core';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import { Delete as DeleteIcon, LocalConvenienceStoreOutlined } from '@material-ui/icons';
-import { INotification } from '../../models/Notification';
 import Navbar from '../../components/Navbar';
 import { getErrorMessage } from '../../lib/errorFormating';
 

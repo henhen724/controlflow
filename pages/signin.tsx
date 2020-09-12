@@ -6,7 +6,6 @@ import { useMutation, useApolloClient } from '@apollo/react-hooks';
 import { getErrorMessage } from '../lib/errorFormating';
 import { TextField, Button, Container, Paper, Grid } from '@material-ui/core';
 import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
-import classes from '*.module.css';
 
 const SignInMutation = gql`
   mutation SignInMutation($email: String!, $password: String!) {

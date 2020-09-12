@@ -24,6 +24,10 @@ const UserSchema = new Schema<IUser>({
         type: String,
         required: [true, 'User needs a salt for password encryption.']
     },
+    created: {
+        type: Date,
+        default: () => new Date()
+    },
     email: {
         type: String,
         required: [true, 'This user needs a email.'],

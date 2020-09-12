@@ -8,4 +8,7 @@
       "noEmit": false
     },
     "include": ["server/**/*.ts", "models/**/*.ts", "lib/**/*.ts", "apollo/**/*.ts", "workers/**/*.ts"],
+    "typedocOptions": {
+      "out": "docs"
+    }
   }

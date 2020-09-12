@@ -5,7 +5,6 @@ const gqlCustomTypes = {
     Date: GraphQLDate,
     NotoChange: {
         __resolveType: (obj: any) => {
-            console.log(obj);
             switch (obj.operationType) {
                 case "insert":
                     return 'NotoInsert';

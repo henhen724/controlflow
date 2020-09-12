@@ -1,12 +1,4 @@
 import { gql } from 'apollo-server-express';
-import mongoose from 'mongoose';
-
-export interface user {
-    id: mongoose.Types.ObjectId,
-    hash: string,
-    salt: string,
-    email: string,
-}
 
 const typeDef = gql`
 
