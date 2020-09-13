@@ -1,4 +1,4 @@
-import DataPacket, { IData } from '../server/models/DataPacket';
+import DataPacket from '../server/models/DataPacket';
 import { MqttClient } from 'mqtt';
 import findBufferSize from '../server/lib/findBufferSize';
 import TopicBufferInfo, { ITopic } from '../server/models/TopicBufferInfo';

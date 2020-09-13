@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "lib": [
       "dom",
       "dom.iterable",
@@ -24,14 +26,15 @@
     ".next",
     "out",
     "next.config.js",
+    "server",
+    "worker"
   ],
   "include": [
     "next-env.d.ts",
     "pages/**/*.ts",
     "pages/**/*.tsx",
     "components/**/*.ts",
-    "components/**/*.tsx", 
-    "server/lib/**/*.ts",
+    "components/**/*.tsx",
   ],
   "typedocOptions": {
     "out": "docs"

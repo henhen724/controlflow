@@ -1,30 +1,14 @@
-import { Schema, Document, model, Model, models, Types } from 'mongoose';
+import { models } from 'mongoose';
+import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
 
-
-export interface IData extends Document {
-    created: Date,
-    experationDate?: Date,
-    expires: Boolean,
-    topic: String,
-    data: Object
+@modelOptions({ schemaOptions: { collection: 'data' } })
+class DataPacket {
+    @prop({ default: Date.now, required: true })
+    public created!: Date;
+    @prop({ required: true })
+    public topic!: String;
+    @prop({ required: true })
+    public data!: Object;
 }
 
-const DataSchema = new Schema<IData>({
-    created: {
-        type: Date,
-        default: () => {
-            return new Date();
-        },
-        required: [true, "I need to know when this packet was created."],
-    },
-    topic: {
-        type: String,
-        required: [true, "This data packet must have a topic."],
-    },
-    data: {
-        type: Object,
-        required: [true, "This data packet has no content/data."],
-    },
-})
-
-export default models.DataPacket as Model<IData> || model<IData>('DataPacket', DataSchema, 'data');
+export default models.DataPacket as ReturnModelType<typeof DataPacket, {}> || getModelForClass(DataPacket);

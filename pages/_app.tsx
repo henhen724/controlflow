@@ -10,8 +10,8 @@ import Head from 'next/head';
 
 
 // This default export is required in a new `pages/_app.js` file.
-export default function MyApp({ Component, pageProps }: AppProps<{ initialApolloState: NormalizedCache }>) {
-  const myApolloClient = useApollo(pageProps.initialApolloState);
+export default function MyApp(props: AppProps<{ initialApolloState: NormalizedCache }>) {
+  const myApolloClient = useApollo(props.pageProps.initialApolloState);
 
   useEffect(() => {
     const jssStyles = document.querySelector('#jss-server-side');
@@ -27,7 +27,7 @@ export default function MyApp({ Component, pageProps }: AppProps<{ initialApollo
     <ApolloProvider client={myApolloClient}>
       <Theme>
         <CssBaseline />
-        <Component {...pageProps} />
+        <props.Component {...props.pageProps} />
       </Theme>
     </ApolloProvider>
   </>);

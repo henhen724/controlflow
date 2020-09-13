@@ -1,4 +1,4 @@
-import Iron from '@hapi/iron'
+import Iron from '@hapi/iron' // TODO: Switch to JWT
 import { MAX_AGE, setTokenCookie, getTokenCookie } from './auth-cookies'
 import { IncomingMessage } from 'http';
 

@@ -1,17 +1,18 @@
 import { MqttClient } from 'mqtt';
-import DeviceInfo from '../server/models/Device';
+import Device from '../server/models/Device';
 
-export const topicNetworkListner = (msgTopic: string, messageStr: string) => {
+export const topicNetworkListner = async (msgTopic: string, messageStr: Buffer) => {
+    // console.log(`${msgTopic}:${messageStr.toString()}`);
     let message = null;
     try {
-        message = JSON.parse(messageStr);
+        message = JSON.parse(messageStr.toString());
     } catch (err) {
         console.error(`Wi DAQ internal topic posted a non-json string.  Here is the message:\n${messageStr}`);
         console.error(err);
     }
     switch (msgTopic) {
         case "__widaq_info__":
-            DeviceInfo.create(message, (err: any) => {
+            Device.updateOne({ ip: message.ip }, message, { upsert: true, runValidators: true }, (err: any) => {
                 if (err) console.error(err);
             });
             break;
@@ -19,7 +20,7 @@ export const topicNetworkListner = (msgTopic: string, messageStr: string) => {
 }
 
 export default (client: MqttClient) => {
-    client.subscribe(["__widaq_state__"], err => {
+    client.subscribe(["__widaq_info__"], err => {
         if (err)
             console.error(err);
     });

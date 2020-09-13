@@ -26,7 +26,7 @@ const UserSchema = new Schema<IUser>({
     },
     created: {
         type: Date,
-        default: () => new Date()
+        default: Date.now
     },
     email: {
         type: String,

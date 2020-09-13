@@ -3,7 +3,7 @@ import { ControlComponent, UnionControlPanelProps } from './ControlPanel/index';
 import gql from 'graphql-tag';
 import { useState, useEffect } from 'react';
 import { useSubscription, useMutation, useQuery } from '@apollo/react-hooks';
-import { getErrorMessage } from '../server/lib/errorFormating';
+import { getErrorMessage } from './errorFormating';
 
 
 const DataQuery = gql`

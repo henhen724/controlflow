@@ -29,7 +29,7 @@ const NotificationSchema = new Schema<INotification>({
     },
     recieved: {
         type: Date,
-        default: () => new Date(),
+        default: Date.now,
     },
     viewed: {
         type: Boolean,
