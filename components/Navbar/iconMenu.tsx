@@ -1,6 +1,6 @@
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
-import { getErrorMessage } from '../../lib/errorFormating';
+import { getErrorMessage } from '../../server/lib/errorFormating';
 import { CircularProgress } from '@material-ui/core';
 
 import BrightnessIcon from './brightnessIcon';

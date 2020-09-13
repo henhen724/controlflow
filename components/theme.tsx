@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider as MuiThemeProvider, createMuiTheme, darken, } from '@material-ui/core/styles';
 import { red, blue } from '@material-ui/core/colors';
-import { getCookie, setCookie } from '../lib/style-cookies';
+import { getCookie, setCookie } from '../server/lib/style-cookies';
 
 const themeInitialOptions = {
     dense: false,

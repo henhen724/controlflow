@@ -1,5 +1,5 @@
 import { MqttClient } from 'mqtt';
-import DeviceInfo from '../models/DeviceInfo';
+import DeviceInfo from '../server/models/Device';
 
 export const topicNetworkListner = (msgTopic: string, messageStr: string) => {
     let message = null;
@@ -11,7 +11,7 @@ export const topicNetworkListner = (msgTopic: string, messageStr: string) => {
     }
     switch (msgTopic) {
         case "__widaq_info__":
-            DeviceInfo.create(message, (err, device) => {
+            DeviceInfo.create(message, (err: any) => {
                 if (err) console.error(err);
             });
             break;

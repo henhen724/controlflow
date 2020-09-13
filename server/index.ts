@@ -1,17 +1,15 @@
+// TODO: Fix static file serving AGAIN
 import express from 'express';
 import mongoose from 'mongoose';
 import { MongoError } from 'mongodb';
 import { createServer } from 'http';
-import { parse } from 'url';
-import { join } from 'path';
-import fs from 'fs';
 import next from 'next';
 import { ApolloServer } from 'apollo-server-express';
 const nextApp = next({ dev: process.env.NODE_ENV !== 'production', conf: { publicDirectory: true } }); //This loads all of the enviroment varibles
 const nextHandler = nextApp.getRequestHandler();
 
-import schema from '../apollo/schema';
-import { getLoginSession } from '../lib/auth';
+import schema from './apollo/schema';
+import { getLoginSession } from './lib/auth';
 
 //TODO: Add a MQTT state request bundle. (Ask every mqtt client with an on change type packet to post its current state.)
 //TODO: Update name to Wi- DAQ

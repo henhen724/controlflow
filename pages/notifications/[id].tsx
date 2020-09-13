@@ -5,7 +5,7 @@ import { Container, CircularProgress, Paper, Grid, IconButton, Typography } from
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import { Delete as DeleteIcon, LocalConvenienceStoreOutlined } from '@material-ui/icons';
 import Navbar from '../../components/Navbar';
-import { getErrorMessage } from '../../lib/errorFormating';
+import { getErrorMessage } from '../../server/lib/errorFormating';
 
 const SingleNotificationQuery = gql`
 query SingleNotificationQuery($id:String){

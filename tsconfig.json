@@ -31,6 +31,9 @@
     "pages/**/*.tsx",
     "components/**/*.ts",
     "components/**/*.tsx", 
-    "lib/**/*.ts",
-  ]
+    "server/lib/**/*.ts",
+  ],
+  "typedocOptions": {
+    "out": "docs"
+  }
 }

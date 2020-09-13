@@ -1,7 +1,7 @@
-import DataPacket, { IData } from '../models/DataPacket';
+import DataPacket, { IData } from '../server/models/DataPacket';
 import { MqttClient } from 'mqtt';
-import findBufferSize from '../lib/findBufferSize';
-import TopicBufferInfo, { ITopic } from '../models/TopicBufferInfo';
+import findBufferSize from '../server/lib/findBufferSize';
+import TopicBufferInfo, { ITopic } from '../server/models/TopicBufferInfo';
 
 let topicBufferInfos = null as ITopic[] | null;
 

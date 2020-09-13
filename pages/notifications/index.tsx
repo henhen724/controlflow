@@ -2,7 +2,7 @@ import { useQuery } from '@apollo/react-hooks';
 import Link from 'next/link';
 import gql from 'graphql-tag';
 import { CircularProgress, Container, List, ListItem, ListItemText } from '@material-ui/core';
-import { INotification } from '../../models/Notification';
+import { INotification } from '../../server/models/Notification';
 import Navbar from '../../components/Navbar';
 
 const NotificationsQuery = gql`

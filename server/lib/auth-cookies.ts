@@ -28,9 +28,9 @@ export function removeTokenCookie(res: any) {
 
 export function parseCookies(req: any): undefined | { [key: string]: string } {
   // For API Routes we don't need to parse the cookies.
-  if (req?.cookies) return req!.cookies;
+  if (req.cookies) return req!.cookies;
   // For pages we do need to parse the cookies.
-  const cookie = req.headers?.cookie;
+  const cookie = req.headers.cookie;
   try {
     return parse(cookie || '');
   } catch (err) {

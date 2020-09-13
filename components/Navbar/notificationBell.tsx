@@ -4,7 +4,7 @@ import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks';
 import Link from 'next/link';
 import { IconButton, MenuItem, Menu, Badge, Typography, Card, CardContent } from '@material-ui/core';
 import { makeStyles, useTheme, Theme, createStyles } from '@material-ui/core/styles';
-import { getErrorMessage } from '../../lib/errorFormating';
+import { getErrorMessage } from '../../server/lib/errorFormating';
 import { Notifications as NotificationsIcon } from '@material-ui/icons';
 import { CircularProgress } from '@material-ui/core';
 

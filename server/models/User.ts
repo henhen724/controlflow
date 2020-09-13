@@ -1,5 +1,5 @@
 import { Schema, Document, model, Model, Types, models } from 'mongoose';
-import { PanelProps } from '../components/livedata';
+import { PanelProps } from '../../components/livedata';
 
 // Defining the typescript interfaces which user will use.
 

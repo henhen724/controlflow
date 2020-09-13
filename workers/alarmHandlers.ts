@@ -1,6 +1,6 @@
 import { MqttClient } from 'mqtt';
-import Watchdog, { IWatchdog } from "../models/Watchdog";
-import Notification, { INotification } from '../models/Notification';
+import Watchdog, { IWatchdog } from "../server/models/Watchdog";
+import Notification, { INotification } from '../server/models/Notification';
 
 let currWatchdogs = null as IWatchdog[] | null;
 let topics = null as string[] | null;
