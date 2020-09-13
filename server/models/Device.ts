@@ -1,6 +1,5 @@
 import { models } from 'mongoose';
 import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
-import { URL } from 'url';
 
 @modelOptions({ schemaOptions: { collection: 'devices' } })
 class Device {

@@ -5,7 +5,7 @@ import { MongoError } from 'mongodb';
 import { createServer } from 'http';
 import next from 'next';
 import { ApolloServer } from 'apollo-server-express';
-const nextApp = next({ dev: process.env.NODE_ENV !== 'production', conf: { publicDirectory: true } }); //This loads all of the enviroment varibles
+const nextApp = next({ dev: process.env.NODE_ENV !== 'production' }); //This loads all of the enviroment varibles
 const nextHandler = nextApp.getRequestHandler();
 
 import schema from './apollo/schema';
