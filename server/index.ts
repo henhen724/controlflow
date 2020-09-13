@@ -1,4 +1,3 @@
-// TODO: Fix static file serving AGAIN
 import express from 'express';
 import mongoose from 'mongoose';
 import { MongoError } from 'mongodb';
