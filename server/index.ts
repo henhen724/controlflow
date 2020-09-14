@@ -8,7 +8,7 @@ const nextApp = next({ dev: process.env.NODE_ENV !== 'production' }); //This loa
 const nextHandler = nextApp.getRequestHandler();
 
 import schema from './apollo/schema';
-import { getLoginSession } from './lib/auth';
+import { getSession } from './lib/auth';
 
 //TODO: Add a MQTT state request bundle. (Ask every mqtt client with an on change type packet to post its current state.)
 //TODO: Update name to Wi- DAQ
@@ -38,7 +38,7 @@ const startServer = async () => {
         schema,
         context: (ctx) => {
             return {
-                session: getLoginSession(ctx.req),
+                session: getSession(ctx.req, ctx.res),
                 req: ctx.req,
                 res: ctx.res,
             }

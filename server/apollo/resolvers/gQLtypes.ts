@@ -1,8 +1,8 @@
-import { GraphQLJSON, GraphQLDate } from 'graphql-scalars';
+import { GraphQLJSON, GraphQLTimestamp } from 'graphql-scalars';
 
 const gqlCustomTypes = {
     JSON: GraphQLJSON,
-    Date: GraphQLDate,
+    Timestamp: GraphQLTimestamp,
     NotoChange: {
         __resolveType: (obj: any) => {
             switch (obj.operationType) {

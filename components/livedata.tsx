@@ -1,9 +1,8 @@
-import { DataComponent, UnionDataPanelProps } from './DataPanel/index';
-import { ControlComponent, UnionControlPanelProps } from './ControlPanel/index';
 import gql from 'graphql-tag';
 import { useState, useEffect } from 'react';
 import { useSubscription, useMutation, useQuery } from '@apollo/react-hooks';
 import { getErrorMessage } from './errorFormating';
+import { UnionPanelSettings, UnionPanelProps, getPanelFromProps } from './Panel';
 
 
 const DataQuery = gql`
@@ -38,10 +37,8 @@ mutation sendData($topic:String!, $payload:JSON){
 }
 `
 
-export type PanelProps = UnionDataPanelProps | UnionControlPanelProps;
-
 interface DashboardProps {
-    dataElements: PanelProps[],
+    dataElements: UnionPanelSettings[],
 }
 
 interface DataByTopic {
@@ -96,18 +93,10 @@ const dashboard = (props: DashboardProps) => {
     useEffect(() => allTopics.forEach(topic => {
         topicsRefetch[topic]();
     }));
-    const renderedData = props.dataElements.map((PanelElementProps, index) => {
+    const renderedData = props.dataElements.map((settings, index) => {
         var panel = (<h1>Error:No panel loaded</h1>);
-        switch (PanelElementProps.elemType) {
-            case "data":
-                panel = (<DataComponent props={PanelElementProps} data={data} />);
-                break;
-            case "control":
-                panel = (<ControlComponent props={PanelElementProps} sendMqttPacket={mqttPublish} data={data} />);
-                break;
-        }
         return (<div className="panel-wraper" key={index.toString() + "-panel"}>
-            {panel}
+            {getPanelFromProps({ settings, data, mqttPublish } as UnionPanelProps)}
         </div>)
     });
     if (true) {

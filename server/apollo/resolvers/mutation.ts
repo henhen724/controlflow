@@ -4,9 +4,7 @@ import TopicBufferInfo from '../../models/TopicBufferInfo';
 import DataPacket from '../../models/DataPacket';
 import Watchdog, { IWatchdog } from '../../models/Watchdog';
 import Notification from '../../models/Notification';
-import { createUser, validatePassword } from '../../lib/user';
-import { setLoginSession } from '../../lib/auth';
-import { removeTokenCookie } from '../../lib/auth-cookies';
+import { setSession, deleteSession } from '../../lib/auth';
 import fetch from 'isomorphic-unfetch'; //For when I add OAuth back in
 import { mqttPubSub } from "./subscription";
 
@@ -50,11 +48,13 @@ export interface setWatchdogInput {
 
 const Mutation = {
     async signUp(parent: any, args: SignUpInput, context: any, info: any) {
-        const user = await createUser(args.input);
-        const nameConflict = await User.find({ name: user.email });
+        const nameConflict = await User.find({ name: args.input.email });
         if (nameConflict.length !== 0)
-            throw new UserInputError(`An account already exists for ${user.email}.`, { type: 'USER_EXISTS' });
-        await new User(user);
+            throw new UserInputError(`An account already exists for ${args.input.email}.`, { type: 'USER_EXISTS' });
+        const user = new User(args.input);
+        await user.save((err: any) => {
+            if (err) throw new UserInputError(err);
+        });
         return { user };
     },
     async signIn(parent: any, args: SignInInput, context: any, info: any) {
@@ -66,10 +66,8 @@ const Mutation = {
             console.error(`There are some how ${user.length} users with the email ${email}.  Here they are:\n${user}`);
             throw new Error(`Internal server error, some how multiple people have the email ${email}.`);
         }
-        if (await validatePassword(user[0], password)) {
-            const session = { id: user[0].id, email: user[0].email }
-
-            await setLoginSession(context.res, session);
+        if (user[0].validatePassword(password)) {
+            await setSession(context.res, user[0]);
 
             return { user: user[0] };
         }
@@ -77,7 +75,7 @@ const Mutation = {
             throw new AuthenticationError('Sorry, that password isn\'t correct.');
     },
     async signOut(parent: any, args: any, context: any, info: any) {
-        removeTokenCookie(context.res);
+        deleteSession(context.res);
         return true
     },
     async mqttPublish(_: any, args: mqttPublishInput, context: any) {

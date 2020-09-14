@@ -4,7 +4,8 @@ import Head from 'next/head';
 import gql from 'graphql-tag';
 import { useQuery } from '@apollo/react-hooks';
 import Navbar from '../components/Navbar';
-import LiveData, { PanelProps } from '../components/livedata';
+import LiveData from '../components/livedata';
+import { UnionPanelSettings } from '../components/Panel';
 import Buffers from '../components/buffers';
 import Alarms from '../components/alarms';
 import { CircularProgress, BottomNavigation, BottomNavigationAction, Paper } from '@material-ui/core';
@@ -56,6 +57,7 @@ const Index = () => {
 
     useEffect(() => {
         if (shouldRedirect) {
+            console.log("Redirecting from dashboard to sign in");
             router.push('/signin')
         } else {
 
@@ -66,15 +68,20 @@ const Index = () => {
         return <p>{error.message}</p>
     }
 
-    const dataElement = { topic: "SENSOR", displayProps: { firstDataKey: "timestamp", secondDataKey: "data" }, elemType: "data", displayType: "line-graph" } as PanelProps;
+    const dataElement = { topic: "SENSOR", displayProps: { firstDataKey: "timestamp", secondDataKey: "data" }, elemType: "data", displayType: "line-graph" } as UnionPanelSettings;
     const controlElement = {
-        topic: "LEDONOFF", displayProps: {}, elemType: "control", displayType: "switch", format: (on: boolean) => {
-            if (on)
-                return { payload: "T" };
-            else
-                return { payload: "F" };
+        topic: "LEDONOFF",
+        displayProps: {
+            format: (on: boolean) => {
+                if (on)
+                    return { payload: "T" };
+                else
+                    return { payload: "F" };
+            }
         },
-    } as PanelProps;
+        elemType: "control",
+        displayType: "switch"
+    } as UnionPanelSettings;
 
     if (viewer) {
         var component = <div />;

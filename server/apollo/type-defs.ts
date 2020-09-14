@@ -2,7 +2,7 @@ import { gql } from 'apollo-server-express';
 
 const typeDef = gql`
 
-scalar Date
+scalar Timestamp
 
 scalar JSON
 
@@ -63,8 +63,8 @@ type DataPacket {
 
 type BufferPacket {
     topic: String!
-    created: Date!
-    experationTime: Date!
+    created: Timestamp!
+    experationTime: Timestamp!
     expires: Boolean!
     data: JSON!
 }
@@ -94,7 +94,7 @@ type Notification {
     topic: String
     message: String
     mqttMessage: String
-    recieved: Date!
+    recieved: Timestamp!
     viewed: Boolean
 }
 
