@@ -1,36 +1,27 @@
 import { Schema, Document, model, Model, models, Types } from 'mongoose';
+import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
+import { QueryMethod } from '@typegoose/typegoose/lib/types';
 
-// Defining the typescript interfaces which user will use.
-export interface ITopic extends Document {
-    experationTime?: number,
-    expires: Boolean,
-    maxSize?: number,
-    sizeLimited: Boolean,
-    topic: string,
+interface BufferQueries {
+    findByTopic: QueryMethod<typeof findByTopic>
 }
 
-const TopicBuffersInfo = new Schema<ITopic>({
-    experationTime: {
-        type: Number,
-        required: false
-    },
-    expires: {
-        type: Boolean,
-        required: true,
-    },
-    maxSize: { // In Bytes
-        type: Number,
-        required: false
-    },
-    sizeLimited: {
-        type: Boolean,
-        required: true
-    },
-    topic: {
-        type: String,
-        required: [true, "Topic string missing from topic object."],
-        unique: [true, "This topic all ready has an info object"],
-    }
-}, { strict: true })
+function findByTopic(this: ReturnModelType<typeof BufferInfo, BufferQueries>, topic: string) {
+    return this.findOne({ topic });
+}
 
-export default models.TopicBuffersInfo as Model<ITopic> || model<ITopic>('TopicBuffersInfo', TopicBuffersInfo, 'buffer-info');
+@modelOptions({ schemaOptions: { collection: 'buffer-info' } })
+export class BufferInfo {
+    @prop({ required: true, unique: true })
+    topic!: string;
+    @prop({ required: false })
+    experationTime?: number;
+    @prop({ required: true })
+    expires!: Boolean;
+    @prop({ required: false })
+    maxSize?: number;
+    @prop({ required: true })
+    sizeLimited!: Boolean;
+}
+
+export default models.TopicBuffersInfo as ReturnModelType<typeof BufferInfo, BufferQueries> || getModelForClass(BufferInfo);

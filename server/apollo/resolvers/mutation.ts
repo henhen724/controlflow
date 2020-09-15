@@ -2,7 +2,7 @@ import { AuthenticationError, UserInputError } from 'apollo-server-express';
 import User from '../../models/User';
 import TopicBufferInfo from '../../models/TopicBufferInfo';
 import DataPacket from '../../models/DataPacket';
-import Watchdog, { IWatchdog } from '../../models/Watchdog';
+import WatchdogModel, { Watchdog } from '../../models/Watchdog';
 import Notification from '../../models/Notification';
 import { setSession, deleteSession } from '../../lib/auth';
 import fetch from 'isomorphic-unfetch'; //For when I add OAuth back in
@@ -43,7 +43,7 @@ export interface recordTopicInput {
 }
 
 export interface setWatchdogInput {
-    input: IWatchdog
+    input: Watchdog
 }
 
 const Mutation = {
@@ -124,10 +124,10 @@ const Mutation = {
     async setWatchdog(_: any, args: setWatchdogInput, context: any) {
         console.log(`Starting topic record for ${args.input.name}\n%j`, args.input);
         const { name, topics, messageString } = args.input;
-        const watchdogs = await Watchdog.find({ name });
+        const watchdogs = await WatchdogModel.find({ name });
         switch (watchdogs.length) {
             case 0:
-                const newWatchdog = new Watchdog({
+                const newWatchdog = new WatchdogModel({
                     name,
                     topics,
                     messageString,
@@ -145,7 +145,7 @@ const Mutation = {
     },
     async deleteWatchdog(_: any, args: { name: string }, context: any) {
         console.log(`Deleteing ${args.name}`);
-        await Watchdog.deleteMany({ name: args.name }).exec();
+        await WatchdogModel.deleteMany({ name: args.name }).exec();
         return { success: true };
     },
     async viewNotification(_: any, args: { id: string }) {

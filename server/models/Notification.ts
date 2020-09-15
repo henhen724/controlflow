@@ -1,40 +1,23 @@
-import { Schema, Document, model, Model, models, Types } from 'mongoose';
+import { models } from 'mongoose';
+import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
 
-
-export interface INotification extends Document {
-    name: String,
-    topic: String,
-    message: String,
-    mqttMessage?: String,
-    received: Date,
-    viewed: Boolean,
+@modelOptions({ schemaOptions: { collection: 'notifications' } })
+export class Notification {
+    _id!: string;
+    @prop({ required: true })
+    name!: string;
+    @prop({ required: true })
+    topic!: string;
+    @prop({ required: true })
+    message!: string;
+    @prop({ required: true })
+    mqttMessage!: string;
+    @prop({ default: Date.now })
+    received!: Date;
+    @prop({
+        default: false
+    })
+    viewed!: boolean;
 }
 
-const NotificationSchema = new Schema<INotification>({
-    name: {
-        type: String,
-        required: true,
-    },
-    topic: {
-        type: String,
-        required: true,
-    },
-    message: {
-        type: String,
-        required: true,
-    },
-    mqttMessage: {
-        type: Object,
-        required: false,
-    },
-    recieved: {
-        type: Date,
-        default: Date.now,
-    },
-    viewed: {
-        type: Boolean,
-        default: false,
-    },
-})
-
-export default models.Notification as Model<INotification> || model<INotification>('Notification', NotificationSchema, 'notifications');
+export default models.Notification as ReturnModelType<typeof Notification, {}> || getModelForClass(Notification);

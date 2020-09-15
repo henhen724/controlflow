@@ -1,8 +1,8 @@
 import { MqttClient } from 'mqtt';
-import Watchdog, { IWatchdog } from "../server/models/Watchdog";
-import Notification, { INotification } from '../server/models/Notification';
+import WatchdogModel, { Watchdog } from "../server/models/Watchdog";
+import Notification from '../server/models/Notification';
 
-let currWatchdogs = null as IWatchdog[] | null;
+let currWatchdogs = null as Watchdog[] | null;
 let topics = null as string[] | null;
 
 export const alarmListner = (msgTopic: string, message: Buffer) => {
@@ -23,7 +23,7 @@ export const alarmListner = (msgTopic: string, message: Buffer) => {
 }
 
 export const updateTopicSubsriptions = async (client: MqttClient) => {
-    currWatchdogs = await Watchdog.find().exec();
+    currWatchdogs = await WatchdogModel.find().exec();
     topics = currWatchdogs.reduce((topicsSoFar, { topics }) => topicsSoFar.concat(topics), [] as string[]);
     if (topics.length !== 0) {
         client.subscribe(topics, err => {

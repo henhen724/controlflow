@@ -5,7 +5,7 @@ import MaterialTable, { Column, MTableToolbar } from 'material-table';
 import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@material-ui/core';
 import { Replay as ReplayIcon } from '@material-ui/icons';
 
-import { IWatchdog } from '../server/models/Watchdog';
+import { Watchdog } from '../server/models/Watchdog';
 
 import { getErrorMessage } from './errorFormating';
 
@@ -41,7 +41,7 @@ interface WatchdogDisplay {
 }
 
 interface WatchdogQuery {
-    watchdogs: IWatchdog[]
+    watchdogs: Watchdog[]
 }
 
 interface TableState {
@@ -83,7 +83,7 @@ const AlarmsPage = () => {
     }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
 
     // Mutations
-    const [sendTopic] = useMutation<SuccessBoolean, { input: IWatchdog }>(SetWatchdog);
+    const [sendTopic] = useMutation<SuccessBoolean, { input: Watchdog }>(SetWatchdog);
     const [deleteTopic] = useMutation<SuccessBoolean, { name: string }>(DeleteWatchdog);
 
     const onModalFinish = (accepted: boolean) => {
@@ -133,7 +133,7 @@ const AlarmsPage = () => {
                                     name: newData.name,
                                     topics: newData.topicsString && newData.topicsString !== '' ? newData.topicsString.split(",") : [],
                                     messageString: newData.messageString ? newData.messageString : `${newData.name} has gone off!`,
-                                } as IWatchdog;
+                                } as Watchdog;
                                 console.log(`Sending topic record with`, input);
                                 sendTopic({
                                     variables: {
@@ -151,7 +151,7 @@ const AlarmsPage = () => {
                                     name: newData.name,
                                     topics: newData.topicsString && newData.topicsString !== '' ? newData.topicsString.split(",") : [],
                                     messageString: newData.messageString ? newData.messageString : `${newData.name} has gone off!`,
-                                } as IWatchdog;
+                                } as Watchdog;
                                 console.log(`Sending topic record with`, input);
                                 sendTopic({
                                     variables: {

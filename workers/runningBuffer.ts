@@ -1,9 +1,9 @@
 import DataPacket from '../server/models/DataPacket';
 import { MqttClient } from 'mqtt';
 import findBufferSize from '../server/lib/findBufferSize';
-import TopicBufferInfo, { ITopic } from '../server/models/TopicBufferInfo';
+import BufferInfoModel, { BufferInfo } from '../server/models/TopicBufferInfo';
 
-let topicBufferInfos = null as ITopic[] | null;
+let topicBufferInfos = null as BufferInfo[] | null;
 
 export const bufferListner = (msgTopic: string, message: Buffer) => {
     if (topicBufferInfos) {
@@ -69,7 +69,7 @@ export const removePacketsOverMemLimit = async () => {
 }
 
 export const updateTopicSubsriptions = async (client: MqttClient) => {
-    const newTopicBufferInfos = await TopicBufferInfo.find().exec();
+    const newTopicBufferInfos = await BufferInfoModel.find().exec();
     var oldTopics = [] as string[];
     if (topicBufferInfos)
         oldTopics = topicBufferInfos.map(({ topic }) => topic);

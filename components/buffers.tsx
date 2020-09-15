@@ -6,7 +6,7 @@ import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent
 import { Replay as ReplayIcon } from '@material-ui/icons';
 
 import { getErrorMessage } from './errorFormating';
-import { ITopic } from '../server/models/TopicBufferInfo';
+import { BufferInfo } from '../server/models/TopicBufferInfo';
 
 const BufferQuery = gql`
 query BuffersQuery {
@@ -36,12 +36,12 @@ mutation DeleteTopicBuffer($topic:String!) {
 `
 
 interface BufferQuery {
-    runningBuffers: ITopic[]
+    runningBuffers: BufferInfo[]
 }
 
 interface TableState {
-    columns: Array<Column<ITopic>>,
-    data: ITopic[],
+    columns: Array<Column<BufferInfo>>,
+    data: BufferInfo[],
 }
 
 interface BufferPacket {
@@ -95,7 +95,7 @@ const Buffers = () => {
         console.log(`Accepted: ${accepted}\nTopic to Delete: ${topicToDelete}`);
         if (accepted && topicToDelete) {
             setState((prevState) => {
-                const data = prevState.data.filter((topicObj: ITopic) => topicObj.topic !== topicToDelete);
+                const data = prevState.data.filter((topicObj: BufferInfo) => topicObj.topic !== topicToDelete);
                 return { ...prevState, data };
             });
             deleteTopic({
@@ -153,7 +153,7 @@ const Buffers = () => {
                             }),
                             onRowUpdate: (newData, oldData) => new Promise((resolve) => {
                                 setState((prevState) => {
-                                    const index = prevState.data.findIndex((topicObj: ITopic) => topicObj.topic === newData.topic);
+                                    const index = prevState.data.findIndex((topicObj: BufferInfo) => topicObj.topic === newData.topic);
                                     const data = [...prevState.data]
                                     data[index] = newData;
                                     return { ...prevState, data };
