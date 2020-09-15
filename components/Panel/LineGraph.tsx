@@ -31,9 +31,9 @@ export const LineGraph = (props: LineGraphProps) => {
     if (data) {
         return (<ResponsiveContainer width={width!.toString() + "%"} height={height}>
             <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <XAxis type="number" dataKey={firstDataKey} tickFormatter={(unixTime) => moment(unixTime).tz("America/New_York").format('h:mm:ss a')} domain={["dataMin", "dataMax"]} />
+                <XAxis type="number" dataKey={firstDataKey} tickFormatter={(unixTime) => moment.tz(unixTime, moment.tz.guess()).format('h:mm:ss a')} domain={["dataMin", "dataMax"]} />
                 <YAxis />
-                <Tooltip contentStyle={{ background: theme.palette.background.default }} labelFormatter={(value) => moment.tz(value, "America/New_York").format('h:mm:ss a z')} />
+                <Tooltip contentStyle={{ background: theme.palette.background.default }} labelFormatter={(value) => moment.tz(value, moment.tz.guess()).format('h:mm:ss a z')} />
                 <Legend />
                 <Line type="monotone" dataKey={secondDataKey} activeDot={{ r: 0 }} />
             </LineChart>

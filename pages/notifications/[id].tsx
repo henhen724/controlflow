@@ -83,7 +83,7 @@ const aNotification = () => {
                         <Typography variant="subtitle2" color="textSecondary">MQTT Message</Typography>
                         <Typography component="h5" variant="h5">{mqttMessage}</Typography>
                         <Typography variant="subtitle2" color="textSecondary">Time Recieved</Typography>
-                        <Typography component="h5" variant="h5">{moment.tz(recieved, "America/New_York").format("h:mm:ss a z on MM/DD/YYYY")}</Typography>
+                        <Typography component="h5" variant="h5">{moment.tz(recieved, moment.tz.guess()).format("h:mm:ss a z on MM/DD/YYYY")}</Typography>
                         <IconButton onClick={handleDeleteClick}>
                             <DeleteIcon />
                         </IconButton>
