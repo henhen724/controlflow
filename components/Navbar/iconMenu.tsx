@@ -4,6 +4,7 @@ import { getErrorMessage } from '../errorFormating';
 import { CircularProgress } from '@material-ui/core';
 
 import BrightnessIcon from './brightnessIcon';
+import DashboardIcon from './dashboardIcon';
 import NotificationBell from './notificationBell';
 import UserAvatar from './userAvatar';
 
@@ -34,7 +35,9 @@ export default function userProfileMenu() {
         </>);
     } else {
         return (<>
+
             <BrightnessIcon />
+            <DashboardIcon />
             <NotificationBell />
             <UserAvatar email={viewerData.viewer.email} />
         </>);

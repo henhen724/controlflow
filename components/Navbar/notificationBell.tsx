@@ -2,7 +2,7 @@ import { useState, MouseEvent } from 'react';
 import gql from 'graphql-tag';
 import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks';
 import Link from 'next/link';
-import { IconButton, MenuItem, Menu, Badge, Typography, Card, CardContent } from '@material-ui/core';
+import { IconButton, MenuItem, Menu, Badge, Typography, Tooltip, Card, CardContent } from '@material-ui/core';
 import { makeStyles, useTheme, Theme, createStyles } from '@material-ui/core/styles';
 import { getErrorMessage } from '../errorFormating';
 import { Notifications as NotificationsIcon } from '@material-ui/icons';
@@ -160,17 +160,20 @@ export default function notificationBell() {
         </Menu>
     );
     return (<>
-        <IconButton
-            aria-label="Notifications"
-            color="inherit"
-            edge="end"
-            aria-controls={menuId}
-            aria-haspopup="true"
-            onClick={handleMenuOpen}
-        >
-            <Badge badgeContent={numberUnread} color="secondary">
-                <NotificationsIcon />
-            </Badge>
-        </IconButton>
-        {renderMenu}</>)
+        <Tooltip title="Notifications">
+            <IconButton
+                aria-label="Notifications"
+                color="inherit"
+                edge="end"
+                aria-controls={menuId}
+                aria-haspopup="true"
+                onClick={handleMenuOpen}
+            >
+                <Badge badgeContent={numberUnread} color="secondary">
+                    <NotificationsIcon />
+                </Badge>
+            </IconButton>
+        </Tooltip>
+        {renderMenu}
+    </>)
 }

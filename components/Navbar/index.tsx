@@ -51,14 +51,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export default function navbar() {
     const classes = useStyles();
-    const theme = useTheme();
-
-    const changeTheme = useChangeTheme();
-    const handleTogglePaletteType = () => {
-        const paletteType = theme.palette.type === 'light' ? 'dark' : 'light';
-
-        changeTheme({ paletteType });
-    };
 
     return (
         <div className={classes.grow}>
