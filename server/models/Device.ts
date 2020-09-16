@@ -2,6 +2,15 @@ import { models } from 'mongoose';
 import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
 import { URL } from 'url';
 
+interface deviceSchema {
+    in: {
+        [key: string]: Object;
+    }
+    out: {
+        [key: string]: Object;
+    }
+}
+
 @modelOptions({ schemaOptions: { collection: 'devices' } })
 class Device {
     @prop({ default: Date.now, required: true })
@@ -31,8 +40,18 @@ class Device {
         this.secure = newURL.protocol === 'https:';
     }
 
+    @prop({ required: true })
+    name!: string;
+    @prop({ required: true, enum: ['aix', 'darwin', 'freebsd', 'linux', 'openbsd', 'sunos', 'win32'] })
+    platform!: string;
+    @prop({ required: true })
+    osName!: string;
+
     @prop({ default: {} })
     deviceSchema!: Object;
+
+    @prop({ default: false })
+    connected!: boolean
 }
 
 

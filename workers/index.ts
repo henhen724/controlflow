@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { MongoError } from 'mongodb';
 import rollingBuffer, { bufferListner } from './runningBuffer';
 import handleAlarms, { alarmListner } from './alarmHandlers';
-import topicNetworkStart, { topicNetworkListner } from './topicNetwork';
+import topicNetworkStart, { topicNetworkListner } from './deviceNetwork';
 import mqttConnect from '../server/lib/mqttConnect';
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config({ path: '.env.local' })

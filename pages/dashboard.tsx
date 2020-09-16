@@ -8,9 +8,10 @@ import LiveData from '../components/livedata';
 import { UnionPanelSettings } from '../components/Panel';
 import Buffers from '../components/buffers';
 import Alarms from '../components/alarms';
+import DeviceNetwork from '../components/devicenetwork';
 import { CircularProgress, BottomNavigation, BottomNavigationAction, Paper } from '@material-ui/core';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
-import { Timeline as TimelineIcon, Storage as StorageIcon, Alarm as AlarmIcon } from '@material-ui/icons';
+import { Timeline as TimelineIcon, Storage as StorageIcon, Alarm as AlarmIcon, WifiTethering as NetworkIcon } from '@material-ui/icons';
 
 const ViewerQuery = gql`
   query ViewerQuery {
@@ -95,6 +96,9 @@ const Index = () => {
             case "alarms":
                 component = <Alarms />;
                 break;
+            case "device-network":
+                component = <DeviceNetwork />
+                break;
             default:
                 changeTab("live-data");
         }
@@ -107,6 +111,7 @@ const Index = () => {
                         <BottomNavigationAction label="Live Data and Control" value="live-data" icon={<TimelineIcon />} />
                         <BottomNavigationAction label="Data Buffers" value="data-buffers" icon={<StorageIcon />} />
                         <BottomNavigationAction label="Alarms" value="alarms" icon={<AlarmIcon />} />
+                        <BottomNavigationAction label="Network Viewer" value="device-network" icon={<NetworkIcon />} />
                     </BottomNavigation>
                 </Paper>
             </div >

@@ -45,7 +45,7 @@ interface DataByTopic {
     [key: string]: Object[]
 }
 
-const dashboard = (props: DashboardProps) => {
+const livedata = (props: DashboardProps) => {
     const [data, setData] = useState<DataByTopic>({});
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
     const [mqttPublish] = useMutation(SendMqttPacket);
@@ -107,4 +107,4 @@ const dashboard = (props: DashboardProps) => {
     }
 }
 
-export default dashboard;
+export default livedata;

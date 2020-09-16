@@ -12,9 +12,14 @@ export const topicNetworkListner = async (msgTopic: string, messageStr: Buffer) 
     }
     switch (msgTopic) {
         case "__widaq_info__":
+            message.connected = true;
             Device.updateOne({ ip: message.ip }, message, { upsert: true, runValidators: true }, (err: any) => {
                 if (err) console.error(err);
             });
+            break;
+        case "__widaq_disconnect__":
+            message.connected = false;
+            Device.deleteOne({ ip: message.ip });
             break;
     }
 }

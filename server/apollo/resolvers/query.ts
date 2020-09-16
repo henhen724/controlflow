@@ -4,6 +4,7 @@ import TopicBufferInfo from '../../models/TopicBufferInfo';
 import DataPacket from '../../models/DataPacket';
 import Watchdog from '../../models/Watchdog';
 import Notification from '../../models/Notification';
+import Device from '../../models/Device';
 import findBufferSize from '../../lib/findBufferSize';
 
 const notSignedIn = (route: string) => new AuthenticationError(`You need to be signed in to query ${route}`);
@@ -73,6 +74,9 @@ const Query = {
     },
     async notificationById(_: any, args: { id: string }) {
         return await Notification.findById(args.id).exec();
+    },
+    async devices() {
+        return await Device.find({}).exec();
     }
 }
 

@@ -83,6 +83,20 @@ type BufferInfo {
     currSize: Int
 }
 
+scalar IPv4
+
+type Device {
+    ip: IPv4!
+    port: Int!
+    secure: Boolean!
+    uri: String!
+    name: String!
+    platform: String!
+    osName: String!
+    deviceSchema: JSON!
+    connected: Boolean!
+}
+
 enum ChangeType {
     insert
     delete
@@ -127,6 +141,7 @@ type Query {
     topicBuffer(topic:String): [BufferPacket]
     notifications: [Notification]
     notificationById(id:String): Notification
+    devices: [Device]
 }
 
 type Mutation {

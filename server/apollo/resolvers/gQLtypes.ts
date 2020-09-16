@@ -1,6 +1,7 @@
-import { GraphQLJSON, GraphQLTimestamp } from 'graphql-scalars';
+import { GraphQLJSON, GraphQLTimestamp, GraphQLIPv4 } from 'graphql-scalars';
 
 const gqlCustomTypes = {
+    IPv4: GraphQLIPv4,
     JSON: GraphQLJSON,
     Timestamp: GraphQLTimestamp,
     NotoChange: {

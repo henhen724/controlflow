@@ -1,4 +1,4 @@
-import { Schema, Document, model, Model, Types, models } from 'mongoose';
+import { models, Schema } from 'mongoose';
 import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
 
 
@@ -6,7 +6,7 @@ import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoos
 export class Watchdog {
     @prop({ required: true })
     name!: string;
-    @prop({ required: true })
+    @prop({ required: true, type: Schema.Types.Mixed })
     topics!: string[];
     @prop({ required: true })
     messageString!: string;
