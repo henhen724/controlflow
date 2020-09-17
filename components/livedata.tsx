@@ -58,7 +58,7 @@ const livedata = (props: DashboardProps) => {
         const { refetch } = useQuery<QRslt>(DataQuery, {
             variables: { topic },
             onCompleted: async res => {
-                // console.log(`Recieved query`, res);
+                // console.log(`Received query`, res);
                 data[topic] = res.topicBuffer.map(packet => packet.data).reverse();
                 setData(data);
             }

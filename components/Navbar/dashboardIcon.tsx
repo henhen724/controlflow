@@ -3,13 +3,16 @@ import { IconButton, Tooltip } from '@material-ui/core';
 import { Dashboard as DashboardIcon } from '@material-ui/icons';
 import Link from 'next/link';
 
-export default () => {
+const DashIcon = () => {
 
-    return (<Tooltip title="Toggle Light and Dark Mode">
+    return (
         <Link href="/dashboard">
-            <IconButton color="inherit">
-                <DashboardIcon />
-            </IconButton>
-        </Link>
-    </Tooltip>)
+            <Tooltip title="Toggle Light and Dark Mode">
+                <IconButton color="inherit">
+                    <DashboardIcon />
+                </IconButton>
+            </Tooltip>
+        </Link >);
 }
+
+export default DashIcon;

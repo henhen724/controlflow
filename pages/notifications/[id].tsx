@@ -16,7 +16,7 @@ query SingleNotificationQuery($id:String){
         topic,
         message,
         mqttMessage,
-        recieved,
+        received,
         viewed,
     }
 }
@@ -69,7 +69,7 @@ const aNotification = () => {
         return (<Container maxWidth="sm"><h1>An error has occured</h1>{getErrorMessage(error)}</ Container>);
     } else if (data) {
         if (data.notificationById) {
-            const { name, topic, message, mqttMessage, recieved } = data.notificationById;
+            const { name, topic, message, mqttMessage, received } = data.notificationById;
             return (<>
                 <Navbar />
                 <Paper>
@@ -82,8 +82,8 @@ const aNotification = () => {
                         <Typography component="h5" variant="h5">{message}</Typography>
                         <Typography variant="subtitle2" color="textSecondary">MQTT Message</Typography>
                         <Typography component="h5" variant="h5">{mqttMessage}</Typography>
-                        <Typography variant="subtitle2" color="textSecondary">Time Recieved</Typography>
-                        <Typography component="h5" variant="h5">{moment.tz(recieved, moment.tz.guess()).format("h:mm:ss a z on MM/DD/YYYY")}</Typography>
+                        <Typography variant="subtitle2" color="textSecondary">Time Received</Typography>
+                        <Typography component="h5" variant="h5">{moment.tz(received, moment.tz.guess()).format("h:mm:ss a z on MM/DD/YYYY")}</Typography>
                         <IconButton onClick={handleDeleteClick}>
                             <DeleteIcon />
                         </IconButton>

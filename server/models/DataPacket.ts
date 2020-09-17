@@ -1,4 +1,4 @@
-import { models } from 'mongoose';
+import { models, Schema } from 'mongoose';
 import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
 
 @modelOptions({ schemaOptions: { collection: 'data' } })

@@ -7,7 +7,7 @@ interface userAvatarProps {
     email?: string
 }
 
-export default (props: userAvatarProps) => {
+const userAvi = (props: userAvatarProps) => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
     const isMenuOpen = Boolean(anchorEl);
@@ -83,3 +83,5 @@ export default (props: userAvatarProps) => {
             {renderMenu}</>)
     }
 }
+
+export default userAvi;

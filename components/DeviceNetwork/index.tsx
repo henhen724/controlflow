@@ -2,6 +2,7 @@ import gql from 'graphql-tag';
 import { useState, useEffect } from 'react';
 import { useSubscription, useMutation, useQuery } from '@apollo/react-hooks';
 import { Button, CircularProgress, Container } from '@material-ui/core';
+import DeviceNode, { device } from './DeviceNode';
 
 
 const GetDevices = gql`
@@ -15,22 +16,7 @@ query GetDevices {
   }
 }
 `
-interface deviceSchema {
-    in: {
-        [key: string]: Object
-    }
-    out: {
-        [key: string]: Object
-    }
-}
 
-interface device {
-    uri: string;
-    deviceSchema: deviceSchema;
-    name: string;
-    osName: string;
-    platform: string;
-}
 
 interface QRslt {
     devices: device[]
@@ -67,7 +53,7 @@ const devicenetwork = (props: any) => {
     if (network) {
         const redneredDevices = network.map(device => {
             console.log(device);
-            return (<div key={device.uri}> {device.uri} In Topics: {Object.keys(device.deviceSchema.in)} Out Topics: {Object.keys(device.deviceSchema.out)}<Button color="secondary" onClick={() => window.open(`${device.uri}/widaq/ssh`, "_blank")}>Remote Terminal</Button></div>)
+            return <DeviceNode device={device} />
         })
         return (<Container>
             {redneredDevices}

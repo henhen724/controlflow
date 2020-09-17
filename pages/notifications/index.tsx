@@ -13,7 +13,7 @@ query NotificationQuery{
         topic,
         message,
         mqttMessage,
-        recieved,
+        received,
         viewed,
     }
 }

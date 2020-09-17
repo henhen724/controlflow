@@ -8,7 +8,7 @@ import LiveData from '../components/livedata';
 import { UnionPanelSettings } from '../components/Panel';
 import Buffers from '../components/buffers';
 import Alarms from '../components/alarms';
-import DeviceNetwork from '../components/devicenetwork';
+import DeviceNetwork from '../components/DeviceNetwork';
 import { CircularProgress, BottomNavigation, BottomNavigationAction, Paper } from '@material-ui/core';
 import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import { Timeline as TimelineIcon, Storage as StorageIcon, Alarm as AlarmIcon, WifiTethering as NetworkIcon } from '@material-ui/icons';

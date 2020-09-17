@@ -23,6 +23,7 @@ export default function MyApp(props: AppProps<{ initialApolloState: NormalizedCa
   return (<>
     <Head>
       <title>Wi-DAQ</title>
+      <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width" />
     </Head>
     <ApolloProvider client={myApolloClient}>
       <Theme>

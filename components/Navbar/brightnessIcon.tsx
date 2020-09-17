@@ -4,7 +4,7 @@ import { useTheme } from '@material-ui/core/styles';
 import { Brightness2TwoTone, Brightness7TwoTone } from '@material-ui/icons';
 import { useChangeTheme } from '../theme';
 
-export default () => {
+const brightnessIcon = () => {
     const theme = useTheme();
     const changeTheme = useChangeTheme();
     const handleTogglePaletteType = () => {
@@ -25,3 +25,5 @@ export default () => {
         </IconButton>
     </Tooltip>)
 }
+
+export default brightnessIcon;

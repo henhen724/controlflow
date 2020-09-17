@@ -108,7 +108,7 @@ type Notification {
     topic: String
     message: String
     mqttMessage: String
-    recieved: Timestamp!
+    received: Timestamp!
     viewed: Boolean
 }
 
@@ -142,6 +142,7 @@ type Query {
     notifications: [Notification]
     notificationById(id:String): Notification
     devices: [Device]
+    deviceByIp(ip:String): Device
 }
 
 type Mutation {
