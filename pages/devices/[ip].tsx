@@ -1,7 +1,7 @@
 import { useQuery } from '@apollo/react-hooks';
 import { useRouter } from 'next/router';
 import gql from 'graphql-tag';
-import { Container, CircularProgress } from '@material-ui/core';
+import { Container, CircularProgress, Typography } from '@material-ui/core';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Navbar from '../../components/Navbar';
 import { getErrorMessage } from '../../components/errorFormating';
@@ -54,10 +54,14 @@ const aDevice = () => {
         return (<Container maxWidth="sm"><h1>An error has occured</h1>{getErrorMessage(error)}</ Container>);
     } else if (data) {
         if (data.deviceByIp) {
-            const { deviceSchema } = data.deviceByIp;
+            const { deviceSchema, name, osName } = data.deviceByIp;
             return (<>
                 <Navbar />
-                <DisplaySchema schema={deviceSchema} />
+                <Container>
+                    <Typography component="h1" variant="h3">{name}</Typography>
+                    <Typography component="h3" variant="caption" gutterBottom>Operating System: {osName}</Typography>
+                    <DisplaySchema schema={deviceSchema} />
+                </Container>
             </>);
         } else {
             return (<Container maxWidth="sm"><h2>Sorry, but no know device has that IP.</h2>Error 404</Container>);
