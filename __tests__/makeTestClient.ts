@@ -2,9 +2,6 @@ import { ApolloServer } from 'apollo-server';
 import { createTestClient } from 'apollo-server-testing';
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import chai from "chai";
-
-const should = chai.should();
 
 let server: any, query: any, mutate: any;
 export { server, query, mutate };
