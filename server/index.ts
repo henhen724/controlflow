@@ -7,7 +7,7 @@ import { ApolloServer } from 'apollo-server-express';
 const nextApp = next({ dev: process.env.NODE_ENV !== 'production' }); //This loads all of the enviroment varibles
 const nextHandler = nextApp.getRequestHandler();
 
-import schema from './apollo/schema';
+import makeSchema from './apollo/schema';
 import { getSession } from './lib/auth';
 
 // Making all models into apollo data sources
@@ -35,6 +35,7 @@ const startServer = async () => {
     );
 
     const expressApp = express();
+    const schema = await makeSchema();
     const apollo = new ApolloServer({
         schema,
         context: (ctx) => {

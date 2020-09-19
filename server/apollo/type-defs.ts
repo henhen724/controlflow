@@ -64,8 +64,6 @@ type DataPacket {
 type BufferPacket {
     topic: String!
     created: Timestamp!
-    experationTime: Timestamp!
-    expires: Boolean!
     data: JSON!
 }
 
@@ -95,11 +93,6 @@ type Device {
     osName: String!
     deviceSchema: JSON!
     connected: Boolean!
-}
-
-enum ChangeType {
-    insert
-    delete
 }
 
 type Notification {

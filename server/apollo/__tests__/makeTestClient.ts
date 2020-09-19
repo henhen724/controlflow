@@ -2,14 +2,15 @@ import { ApolloServer } from 'apollo-server';
 import { createTestClient } from 'apollo-server-testing';
 import dotenv from "dotenv";
 import mongoose from "mongoose";
+import makeSchema from "../schema";
 
 let server: any, query: any, mutate: any;
 export { server, query, mutate };
 
-const makeTestClient = () => {
+const makeTestClient = async () => {
     dotenv.config({ path: './.env.local' });
-    mongoose.connect(`${process.env.MONGODB_PROTO}${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_DOMAIN}`, { useNewUrlParser: true, useUnifiedTopology: true });
-    const schema = require("../server/apollo/schema");
+    await mongoose.connect(`${process.env.MONGODB_PROTO}${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_DOMAIN}`, { useNewUrlParser: true, useUnifiedTopology: true });
+    const schema = await makeSchema();
     server = new ApolloServer({
         schema,
         context: (ctx) => {

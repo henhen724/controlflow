@@ -1,5 +1,5 @@
 import { models } from 'mongoose';
-import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
+import { prop, modelOptions, getModelForClass, ReturnModelType, queryMethod } from '@typegoose/typegoose';
 import { QueryMethod } from '@typegoose/typegoose/lib/types';
 import { UnionPanelSettings } from '../../components/Panel/index';
 import crypto from 'crypto';
@@ -14,14 +14,6 @@ export interface session {
 }
 
 export const sessionExpTime = 1000 * 60 * 60 * 8;
-
-interface UserQueries {
-    findByEmail: QueryMethod<typeof findByEmail>;
-}
-
-function findByEmail(this: ReturnModelType<typeof User, UserQueries>, email: string) {
-    return this.findOne({ email });
-}
 
 @modelOptions({ schemaOptions: { collection: 'users' } })
 export class User {

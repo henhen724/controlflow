@@ -1,8 +1,7 @@
-import { makeExecutableSchema } from 'graphql-tools'
-import typeDefs from './type-defs'
-import { resolvers } from './resolvers/index'
+import "reflect-metadata";
+import { buildSchema } from 'type-graphql';
+import path from "path";
 
-export default makeExecutableSchema({
-  typeDefs,
-  resolvers,
-})
+export default () => buildSchema({
+  resolvers: [path.join(__dirname, "./resolvers/**.ts")]
+});
