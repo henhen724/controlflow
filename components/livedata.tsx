@@ -1,6 +1,6 @@
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 import { useState, useEffect } from 'react';
-import { useSubscription, useMutation, useQuery } from '@apollo/react-hooks';
+import { useSubscription, useMutation, useQuery } from '@apollo/client';
 import { getErrorMessage } from './errorFormating';
 import { UnionPanelSettings, UnionPanelProps, getPanelFromProps } from './Panel';
 

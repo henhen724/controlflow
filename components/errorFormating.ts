@@ -1,4 +1,4 @@
-import { ApolloError } from 'apollo-client';
+import { ApolloError } from '@apollo/client';
 
 export function getErrorMessage(error: ApolloError) {
   if (error.graphQLErrors) {

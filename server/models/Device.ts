@@ -1,13 +1,14 @@
 import { models } from 'mongoose';
 import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
 import { URL } from 'url';
+import { JSONSchema7 } from 'json-schema';
 
 interface deviceSchema {
     in: {
-        [key: string]: Object;
+        [key: string]: JSONSchema7;
     }
     out: {
-        [key: string]: Object;
+        [key: string]: JSONSchema7;
     }
 }
 
@@ -48,7 +49,7 @@ class Device {
     osName!: string;
 
     @prop({ default: {} })
-    deviceSchema!: Object;
+    deviceSchema!: deviceSchema;
 
     @prop({ default: false })
     connected!: boolean

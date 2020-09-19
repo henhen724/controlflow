@@ -1,6 +1,6 @@
 import { useState, MouseEvent } from 'react';
-import gql from 'graphql-tag';
-import { useQuery, useMutation, useSubscription } from '@apollo/react-hooks';
+import { gql } from '@apollo/client';
+import { useQuery, useMutation, useSubscription } from '@apollo/client';
 import Link from 'next/link';
 import { IconButton, MenuItem, Menu, Badge, Typography, Tooltip, Card, CardContent } from '@material-ui/core';
 import { makeStyles, useTheme, Theme, createStyles } from '@material-ui/core/styles';

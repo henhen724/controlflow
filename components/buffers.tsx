@@ -1,6 +1,5 @@
 import { useState, useCallback } from 'react';
-import gql from 'graphql-tag';
-import { useMutation, useQuery } from '@apollo/react-hooks';
+import { gql, useMutation, useQuery } from '@apollo/client';
 import MaterialTable, { Column, MTableToolbar } from 'material-table';
 import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@material-ui/core';
 import { Replay as ReplayIcon } from '@material-ui/icons';
@@ -55,26 +54,6 @@ interface SuccessBoolean {
 }
 
 const Buffers = () => {
-    // Queries
-    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = useQuery<BufferQuery>(BufferQuery, {
-        onCompleted: (queryData: BufferQuery) => {
-            const buffers = queryData.runningBuffers ? queryData.runningBuffers : [];
-            setState({ columns: state.columns, data: buffers });
-        }
-    });
-    const refetch = useCallback(() => {
-        setTimeout(() => _refetch({
-            onCompleted: (queryData: BufferQuery) => {
-                const buffers = queryData.runningBuffers ? queryData.runningBuffers : [];
-                setState({ columns: state.columns, data: buffers });
-            },
-        }), 0)
-    }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
-
-    // Mutations
-    const [sendTopic] = useMutation<SuccessBoolean, { input: BufferPacket }>(RecordTopic);
-    const [deleteTopic] = useMutation<SuccessBoolean, { topic: string }>(DeleteTopic);
-
     // Page state
     const [state, setState] = useState<TableState>({
         columns: [
@@ -89,6 +68,25 @@ const Buffers = () => {
     })
     const [isModalOpen, setModelOpen] = useState<boolean>(false);
     const [topicToDelete, setTopicToDelete] = useState<string | null>(null);
+
+
+    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = useQuery<BufferQuery>(BufferQuery, {
+        onCompleted: (queryData: BufferQuery) => {
+            const buffers = queryData.runningBuffers ? queryData.runningBuffers.map(buf => Object.assign({}, buf)) : [];
+            setState({ columns: state.columns, data: buffers });
+        }
+    });
+    const refetch = useCallback(() => {
+        setTimeout(() => _refetch({
+            onCompleted: (queryData: BufferQuery) => {
+                const buffers = queryData.runningBuffers ? queryData.runningBuffers.map(buf => Object.assign({}, buf)) : [];
+                setState({ columns: state.columns, data: buffers });
+            },
+        }), 0)
+    }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
+    const [sendTopic] = useMutation<SuccessBoolean, { input: BufferPacket }>(RecordTopic);
+    const [deleteTopic] = useMutation<SuccessBoolean, { topic: string }>(DeleteTopic);
+
 
     const onModalFinish = (accepted: boolean) => {
         setModelOpen(false);

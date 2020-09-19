@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import gql from 'graphql-tag';
-import { useQuery } from '@apollo/react-hooks';
+import { gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
 import Navbar from '../components/Navbar';
 import LiveData from '../components/livedata';
 import { UnionPanelSettings } from '../components/Panel';

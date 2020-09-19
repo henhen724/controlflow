@@ -1,6 +1,6 @@
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery } from '@apollo/client';
 import Link from 'next/link';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 import { CircularProgress, Container, List, ListItem, ListItemText } from '@material-ui/core';
 import { Notification } from '../../server/models/Notification';
 import Navbar from '../../components/Navbar';

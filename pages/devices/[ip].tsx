@@ -1,6 +1,6 @@
-import { useQuery } from '@apollo/react-hooks';
+import { useQuery } from '@apollo/client';
 import { useRouter } from 'next/router';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 import { Container, CircularProgress, Typography } from '@material-ui/core';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import Navbar from '../../components/Navbar';
@@ -48,7 +48,7 @@ const aDevice = () => {
     });
 
     if (loading) {
-        return (<Container maxWidth="sm"><h1>Loading Notification</h1><CircularProgress /></ Container>);
+        return (<Container maxWidth="sm"><h1>Loading Device Info</h1><CircularProgress /></ Container>);
     } else if (error) {
         console.error(error);
         return (<Container maxWidth="sm"><h1>An error has occured</h1>{getErrorMessage(error)}</ Container>);

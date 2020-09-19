@@ -10,8 +10,9 @@ const nextHandler = nextApp.getRequestHandler();
 import schema from './apollo/schema';
 import { getSession } from './lib/auth';
 
+// Making all models into apollo data sources
+
 //TODO: Add a MQTT state request bundle. (Ask every mqtt client with an on change type packet to post its current state.)
-//TODO: Update name to Wi- DAQ
 
 const PORT = process.env.PORT || "3000";
 
@@ -42,7 +43,7 @@ const startServer = async () => {
                 req: ctx.req,
                 res: ctx.res,
             }
-        },
+        }
     });
     apollo.applyMiddleware({ app: expressApp, path: '/graphql' });
     expressApp.use(express.static('public'));

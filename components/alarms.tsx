@@ -1,37 +1,12 @@
 import { useState, useCallback } from 'react';
-import gql from 'graphql-tag';
-import { useMutation, useQuery } from '@apollo/react-hooks';
 import MaterialTable, { Column, MTableToolbar } from 'material-table';
 import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@material-ui/core';
 import { Replay as ReplayIcon } from '@material-ui/icons';
 
-import { Watchdog } from '../server/models/Watchdog';
+import { Watchdog } from "../server/models/Watchdog";
+import { WatchdogsQuery, SetWatchdog, DeleteWatchdog } from "./apollo/Watchdogs";
 
 import { getErrorMessage } from './errorFormating';
-
-const WatchdogsQuery = gql`
-query WatchdogsQuery {
-    watchdogs {
-        name
-        topics
-        messageString
-    }
-}
-`
-const SetWatchdog = gql`
-mutation SetWatchdog($input: WatchdogInput!) {
-  setWatchdog(input: $input) {
-    success
-  }
-}
-`
-const DeleteWatchdog = gql`
-mutation DeleteWatchdog($name:String!) {
-    deleteWatchdog(name:$name) {
-        success
-    }
-}
-`
 
 interface WatchdogDisplay {
     name: string,
@@ -40,17 +15,9 @@ interface WatchdogDisplay {
     messageString: string,
 }
 
-interface WatchdogQuery {
-    watchdogs: Watchdog[]
-}
-
 interface TableState {
     columns: Array<Column<WatchdogDisplay>>,
     data: WatchdogDisplay[],
-}
-
-interface SuccessBoolean {
-    success: Boolean
 }
 
 const AlarmsPage = () => {
@@ -67,11 +34,11 @@ const AlarmsPage = () => {
     const [nameToDelete, setNameToDelete] = useState<string | null>(null);
 
     // Queries
-    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = useQuery<WatchdogQuery>(WatchdogsQuery, {
-        onCompleted: (queryData: WatchdogQuery) => {
+    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = WatchdogsQuery({
+        onCompleted: (queryData) => {
             const buffers = queryData.watchdogs ? queryData.watchdogs : [];
             const buffToDisplay = buffers.map(buf => {
-                const newBuf = buf as WatchdogDisplay;
+                var newBuf = Object.assign({}, buf) as WatchdogDisplay;
                 newBuf.topicsString = buf.topics.join(",");
                 return newBuf;
             })
@@ -83,8 +50,8 @@ const AlarmsPage = () => {
     }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
 
     // Mutations
-    const [sendTopic] = useMutation<SuccessBoolean, { input: Watchdog }>(SetWatchdog);
-    const [deleteTopic] = useMutation<SuccessBoolean, { name: string }>(DeleteWatchdog);
+    const [sendTopic] = SetWatchdog();
+    const [deleteTopic] = DeleteWatchdog();
 
     const onModalFinish = (accepted: boolean) => {
         setModelOpen(false);
@@ -98,9 +65,9 @@ const AlarmsPage = () => {
                 variables: {
                     name: nameToDelete
                 }
-            }).then(success => {
+            }).then(() => {
                 setNameToDelete(null);
-            }).catch(err => getErrorMessage(err))
+            }).catch((err: any) => getErrorMessage(err))
         } else {
             setNameToDelete(null);
         }

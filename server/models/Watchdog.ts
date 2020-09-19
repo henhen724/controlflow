@@ -6,7 +6,7 @@ import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoos
 export class Watchdog {
     @prop({ required: true })
     name!: string;
-    @prop({ required: true, type: Schema.Types.Mixed })
+    @prop({ required: true, type: [String] })
     topics!: string[];
     @prop({ required: true })
     messageString!: string;

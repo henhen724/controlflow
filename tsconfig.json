@@ -33,7 +33,7 @@
     "pages/**/*.ts",
     "pages/**/*.tsx",
     "components/**/*.ts",
-    "components/**/*.tsx",
+    "components/**/*.tsx", "test/Watchdogs.test.ts",
   ],
   "typedocOptions": {
     "out": "docs"

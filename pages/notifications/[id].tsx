@@ -1,6 +1,6 @@
-import { useQuery, useMutation } from '@apollo/react-hooks';
+import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/router';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 import { Container, CircularProgress, Paper, Grid, IconButton, Typography } from '@material-ui/core';
 import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import { Delete as DeleteIcon, LocalConvenienceStoreOutlined } from '@material-ui/icons';

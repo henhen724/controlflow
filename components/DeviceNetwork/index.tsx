@@ -1,6 +1,6 @@
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
 import { useState, useEffect } from 'react';
-import { useSubscription, useMutation, useQuery } from '@apollo/react-hooks';
+import { useSubscription, useMutation, useQuery } from '@apollo/client';
 import { Button, CircularProgress, Container } from '@material-ui/core';
 import DeviceNode, { device } from './DeviceNode';
 
@@ -19,7 +19,7 @@ query GetDevices {
 
 
 interface QRslt {
-    devices: device[]
+  devices: device[]
 }
 
 // const DataSubscription = gql`
@@ -43,24 +43,24 @@ mutation SendDeviceRefresh{
 `
 
 const devicenetwork = (props: any) => {
-    const [network, setNetwork] = useState<device[] | null>(null);
-    const [refreshDevices] = useMutation(SendDeviceRefresh);
-    useQuery<QRslt>(GetDevices, {
-        onCompleted: (data) => {
-            setNetwork(data.devices)
-        }
-    })
-    if (network) {
-        const redneredDevices = network.map(device => {
-            console.log(device);
-            return <DeviceNode device={device} />
-        })
-        return (<Container>
-            {redneredDevices}
-        </Container>)
-    } else {
-        return (<Container maxWidth="sm"><h1>Device Network Loading</h1><CircularProgress /></ Container>)
+  const [network, setNetwork] = useState<device[] | null>(null);
+  const [refreshDevices] = useMutation(SendDeviceRefresh);
+  useQuery<QRslt>(GetDevices, {
+    onCompleted: (data) => {
+      setNetwork(data.devices)
     }
+  })
+  if (network) {
+    const redneredDevices = network.map(device => {
+      console.log(device);
+      return <DeviceNode device={device} />
+    })
+    return (<Container>
+      {redneredDevices}
+    </Container>)
+  } else {
+    return (<Container maxWidth="sm"><h1>Device Network Loading</h1><CircularProgress /></ Container>)
+  }
 
 }
 

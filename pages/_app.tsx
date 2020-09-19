@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
-import { ApolloProvider } from '@apollo/react-hooks';
+import { ApolloProvider, NormalizedCache } from '@apollo/client';
 import { AppProps } from 'next/app';
-import { NormalizedCache } from 'apollo-cache-inmemory';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { useApollo } from '../server/apollo/client';
+import { useApollo } from '../components/apollo/client';
 import Theme from '../components/theme';
 import Head from 'next/head';
 
