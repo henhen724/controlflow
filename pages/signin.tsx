@@ -8,11 +8,9 @@ import { Theme, createStyles, makeStyles } from '@material-ui/core/styles';
 
 const SignInMutation = gql`
   mutation SignInMutation($email: String!, $password: String!) {
-    signIn(input: { email: $email, password: $password }) {
-      user {
-        id
+    signIn(email: $email, password: $password) {
+        _id
         email
-      }
     }
   }
 `
@@ -58,7 +56,7 @@ function SignIn() {
           password: passwordElement.value,
         },
       });
-      if (data.signIn.user) {
+      if (data) {
         await router.push('/dashboard')
       }
     } catch (error) {

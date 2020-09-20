@@ -11,7 +11,7 @@ import UserAvatar from './userAvatar';
 const NavViewerQuery = gql`
   query NavViewerQuery {
     viewer {
-        id
+        _id
         email
     }
   }

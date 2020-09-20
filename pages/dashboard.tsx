@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import Head from 'next/head';
 import { gql } from '@apollo/client';
 import { useQuery } from '@apollo/client';
 import Navbar from '../components/Navbar';
@@ -16,7 +15,7 @@ import { Timeline as TimelineIcon, Storage as StorageIcon, Alarm as AlarmIcon, W
 const ViewerQuery = gql`
   query ViewerQuery {
     viewer {
-      id
+      _id
       email
     }
   }

@@ -37,7 +37,7 @@ class UserResolver {
     async users() {
         return await UserModel.find({}).exec();
     }
-    @Query(returns => User)
+    @Query(returns => User, { nullable: true })
     async viewer(@Ctx() ctx: any) {
         if (ctx.session) {
             return await UserModel.findById(ctx.session.id).exec();
@@ -59,6 +59,7 @@ class UserResolver {
     @Mutation(returns => User)
     async signIn(@Args() input: SignInOrUp, @Ctx() ctx: any): Promise<User> {
         const { email, password } = input;
+        console.log(`Sign in from ${email}`);
         const user = await UserModel.find({ email }).exec(); // Find returns an array here I check that there is exactly one match
         if (user.length === 0)
             throw new UserInputError(`There is no users with the email ${email}`, { type: 'USER_DOES_NOT_EXIST' });

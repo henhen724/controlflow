@@ -7,50 +7,11 @@ import { Replay as ReplayIcon } from '@material-ui/icons';
 import { getErrorMessage } from './errorFormating';
 import { BufferInfo } from '../server/models/TopicBufferInfo';
 
-const BufferQuery = gql`
-query BuffersQuery {
-    runningBuffers {
-        topic
-        expires
-        experationTime
-        sizeLimited
-        maxSize
-        currSize
-    }
-}
-`
-const RecordTopic = gql`
-mutation RecordTopic($input: RecordTopicInput!) {
-  recordTopic(input: $input) {
-    success
-  }
-}
-`
-const DeleteTopic = gql`
-mutation DeleteTopicBuffer($topic:String!) {
-    deleteTopicBuffer(topic:$topic) {
-        success
-    }
-}
-`
-
-interface BufferQuery {
-    runningBuffers: BufferInfo[]
-}
+import { BufferQuery, BufferQueryRslt, BufferPacket, RecordTopic, DeleteTopic } from "./apollo/Buffers";
 
 interface TableState {
     columns: Array<Column<BufferInfo>>,
     data: BufferInfo[],
-}
-
-interface BufferPacket {
-    topic: string,
-    experationTime?: number,
-    maxSize?: number,
-}
-
-interface SuccessBoolean {
-    success: Boolean
 }
 
 const Buffers = () => {
@@ -70,22 +31,22 @@ const Buffers = () => {
     const [topicToDelete, setTopicToDelete] = useState<string | null>(null);
 
 
-    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = useQuery<BufferQuery>(BufferQuery, {
-        onCompleted: (queryData: BufferQuery) => {
+    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = BufferQuery({
+        onCompleted: (queryData) => {
             const buffers = queryData.runningBuffers ? queryData.runningBuffers.map(buf => Object.assign({}, buf)) : [];
             setState({ columns: state.columns, data: buffers });
         }
     });
     const refetch = useCallback(() => {
         setTimeout(() => _refetch({
-            onCompleted: (queryData: BufferQuery) => {
+            onCompleted: (queryData: BufferQueryRslt) => {
                 const buffers = queryData.runningBuffers ? queryData.runningBuffers.map(buf => Object.assign({}, buf)) : [];
                 setState({ columns: state.columns, data: buffers });
             },
         }), 0)
     }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
-    const [sendTopic] = useMutation<SuccessBoolean, { input: BufferPacket }>(RecordTopic);
-    const [deleteTopic] = useMutation<SuccessBoolean, { topic: string }>(DeleteTopic);
+    const [sendTopic] = RecordTopic();
+    const [deleteTopic] = DeleteTopic();
 
 
     const onModalFinish = (accepted: boolean) => {
@@ -112,7 +73,7 @@ const Buffers = () => {
     if (bufferLoading) {
         return (<Container maxWidth="sm"><h1>Buffer Info Loading</h1><CircularProgress /></ Container>)
     } else if (bufferError) {
-        return (<h1>Buffer Query Error: {bufferError}</h1>)
+        return (<h1>Buffer Query Error: {getErrorMessage(bufferError)}</h1>)
     } else {
         return (
             <div>

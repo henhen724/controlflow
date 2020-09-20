@@ -8,11 +8,9 @@ import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 
 const SignUpMutation = gql`
   mutation SignUpMutation($email: String!, $password: String!) {
-    signUp(input: { email: $email, password: $password }) {
-      user {
-        id
+    signUp(email: $email, password: $password) {
+        _id
         email
-      }
     }
   }
 `

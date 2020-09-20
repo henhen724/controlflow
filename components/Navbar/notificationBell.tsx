@@ -26,24 +26,20 @@ mutation ViewNotification($id:String!){
     }
 }
 `
-const NotificationSubscription = gql`
-subscription NotificationSubscription{
-    notificationChange {
-      __typename
-      ... on NotoInsert {
-        fullDocument {
-            _id
-            name
-            message
-            viewed
-        }
-      }
-      ... on NotoDelete {
-        documentKey {
-            _id
-        }
-      }
+const WatchCreatedNotifications = gql`
+subscription WatchCreatedNotifications{
+    watchCreatedNotifications {
+        _id
+        name
+        message
+        viewed
     }
+}
+`
+
+const WatchDeletedNotifications = gql`
+subscription WatchDeletedNotifications{
+    watchDeletedNotifications 
 }
 `
 
@@ -67,42 +63,32 @@ interface NotoQData {
     notifications: notification[]
 }
 
-interface NotoInsert {
-    __typename: "NotoInsert",
-    fullDocument: notification
-}
-
-interface NotoDelete {
-    __typename: "NotoDelete",
-    documentKey: {
-        _id: string,
-    }
-}
-
-interface NotoSData {
-    notificationChange: NotoInsert | NotoDelete
+interface NotoCData {
+    watchCreatedNotifications: notification
 }
 
 export default function notificationBell() {
     const [notifications, setNotifications] = useState<notification[]>([]);
-    // console.log(notifications);
-    useSubscription<NotoSData>(NotificationSubscription, {
+    useSubscription<NotoCData>(WatchCreatedNotifications, {
         onSubscriptionData: ({ subscriptionData: data }) => {
-            console.log("Got Notification");
             console.log(data);
             if (data.data) {
-                const notificationChange = data.data.notificationChange;
+                const notificationChange = data.data.watchCreatedNotifications;
                 console.log(data.data);
-                switch (notificationChange.__typename) {
-                    case "NotoInsert":
-                        notifications.push(notificationChange.fullDocument)
-                        setNotifications(notifications);
-                        break;
-                    case "NotoDelete":
-                        const newNotifications = notifications.filter(noto => noto._id !== notificationChange.documentKey._id);
-                        setNotifications(newNotifications);
-                        break;
-                }
+                notifications.push(notificationChange)
+                setNotifications(notifications);
+            } else if (data.error) {
+                console.error(data.error);
+            }
+        }
+    });
+    useSubscription<{ watchDeletedNotifications: string }>(WatchDeletedNotifications, {
+        onSubscriptionData: ({ subscriptionData: data }) => {
+            console.log(data);
+            if (data.data) {
+                const id = data.data.watchDeletedNotifications;
+                const newNotifications = notifications.filter(noto => noto._id !== id);
+                setNotifications(newNotifications);
             } else if (data.error) {
                 console.error(data.error);
             }

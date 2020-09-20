@@ -26,11 +26,11 @@ class BufferInfo {
     topic: string;
     @Field()
     expires: boolean;
-    @Field(type => Int)
+    @Field(type => Int, { nullable: true })
     experationTime: number;
     @Field()
     sizeLimited: boolean;
-    @Field(type => Int)
+    @Field(type => Int, { nullable: true })
     maxSize: number;
     @Field(type => Int)
     currSize: number;
@@ -72,7 +72,7 @@ class MqttTopicInput {
 
 @Resolver()
 class BufferResolver {
-    @Query(returns => BufferInfo)
+    @Query(returns => [BufferInfo])
     async runningBuffers() {
         const buffers = await TopicBufferInfo.find({}).exec();
         const bufferMoreInfo = [];
