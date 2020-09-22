@@ -36,10 +36,7 @@ const useStyles = makeStyles((theme: Theme) =>
 const aDevice = () => {
     const router = useRouter();
     const classes = useStyles();
-    console.log(router.query);
     const { ip } = router.query;
-
-    console.log(ip);
 
     const { data, loading, error } = useQuery(SingleDeviceQuery, {
         variables: {

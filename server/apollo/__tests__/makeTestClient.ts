@@ -11,19 +11,22 @@ const makeTestClient = async () => {
     dotenv.config({ path: './.env.local' });
     await mongoose.connect(`${process.env.MONGODB_PROTO}${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_DOMAIN}`, { useNewUrlParser: true, useUnifiedTopology: true });
     const schema = await makeSchema();
-    server = new ApolloServer({
-        schema,
-        context: (ctx) => {
-            return {
-                session: { id: '1', email: 'test@beep.com' },
-                req: ctx.req,
-                res: ctx.res,
-            }
-        },
-    })
-    const rslt = createTestClient(server);
-    query = rslt.query;
-    mutate = rslt.mutate;
+    expect(schema).toBeDefined();
+    if (schema) {
+        server = new ApolloServer({
+            schema,
+            context: (ctx) => {
+                return {
+                    session: { id: '1', email: 'test@beep.com' },
+                    req: ctx.req,
+                    res: ctx.res,
+                }
+            },
+        })
+        const rslt = createTestClient(server);
+        query = rslt.query;
+        mutate = rslt.mutate;
+    }
 }
 
 beforeAll(makeTestClient);

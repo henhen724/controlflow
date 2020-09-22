@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { Switch, SwitchSettings, SwitchProps } from './Switch';
 import { LineGraph, LineGraphProps, LineGraphSettings } from './LineGraph';
-import { MutationFunctionOptions } from '@apollo/react-common/lib/types/types';
+import { MutationFunctionOptions } from '@apollo/client';
 
 interface SendMqttPacketInput {
     topic: string,

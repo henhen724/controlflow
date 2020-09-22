@@ -2,13 +2,14 @@
   "name": "wi-daq",
   "version": "0.0.1",
   "scripts": {
-    "server-dev": "nodemon server/index.ts",
-    "worker-dev": "nodemon workers/index.ts",
+    "dev:server": "nodemon server/index.ts",
+    "dev:worker": "nodemon workers/index.ts",
     "test": "jest",
+    "clean": "rimraf .dist",
     "build": "next build && tsc --project server/tsconfig.json",
     "docs": "typedoc --plugin typedoc-plugin-markdown",
-    "server-start": "cross-env NODE_ENV=production node dist/server/index.js",
-    "worker-start": "cross-env NODE_ENV=production node dist/workers/index.js"
+    "start:server": "cross-env NODE_ENV=production node .dist/server/index.js",
+    "start:worker": "cross-env NODE_ENV=production node .dist/workers/index.js"
   },
   "jest": {
     "testEnvironment": "node"
@@ -74,6 +75,7 @@
     "expect": "^26.4.2",
     "jest": "^26.4.2",
     "nodemon": "^2.0.4",
+    "rimraf": "^3.0.2",
     "ts-jest": "^26.3.0",
     "ts-node": "^8.10.2",
     "typedoc": "^0.19.1",
