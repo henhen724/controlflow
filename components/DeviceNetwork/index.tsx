@@ -8,6 +8,7 @@ import DeviceNode, { device } from './DeviceNode';
 const GetDevices = gql`
 query GetDevices {
   devices {
+    ip
     uri
     deviceSchema
     name
@@ -53,7 +54,9 @@ const devicenetwork = (props: any) => {
   if (network) {
     const redneredDevices = network.map(device => {
       console.log(device);
-      return <DeviceNode device={device} />
+      return (<>
+        <DeviceNode device={device} key={device.uri} />
+      </>)
     })
     return (<Container>
       {redneredDevices}

@@ -32,7 +32,7 @@ class DeviceResolver {
     async devices(): Promise<Device[]> {
         return await DeviceModel.find({}).exec();
     }
-    @Query(returns => Device)
+    @Query(returns => Device, { nullable: true })
     async deviceByIp(@Arg("ip") ip: string): Promise<Device | null> {
         return await DeviceModel.findOne({ ip }).exec();
     }
