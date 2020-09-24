@@ -3,7 +3,7 @@ import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoos
 import { URL } from 'url';
 import { JSONSchema7 } from 'json-schema';
 
-interface deviceSchema {
+export interface deviceSchema {
     in: {
         [key: string]: JSONSchema7;
     }

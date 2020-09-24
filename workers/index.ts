@@ -2,8 +2,10 @@ import mongoose from 'mongoose';
 import { MongoError } from 'mongodb';
 import rollingBuffer, { bufferListner } from './runningBuffer';
 import handleAlarms, { alarmListner } from './alarmHandlers';
-import topicNetworkStart, { topicNetworkListner } from './deviceNetwork';
+import deviceNetworkStart, { deviceNetworkListner } from './deviceNetwork';
 import mqttConnect from '../server/lib/mqttConnect';
+import { ApolloClient, InMemoryCache, gql, NormalizedCacheObject } from "@apollo/client";
+
 if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config({ path: '.env.local' })
 }
@@ -24,16 +26,24 @@ const runWorkers = async () => {
         }
     );
 
-    const client = mqttConnect(`🤖`, "Worker");
+    const mqttClient = mqttConnect(`🤖`, "Worker");
 
-    client.on("message", (msgTopic, message) => {
+    const PORT = process.env.PORT || 3000;
+
+    const apolloClient: ApolloClient<NormalizedCacheObject> = new ApolloClient({
+        uri: `http://localhost:${PORT}/`,
+        cache: new InMemoryCache(),
+        credentials: "include"
+    });
+
+    mqttClient.on("message", (msgTopic, message) => {
         bufferListner(msgTopic, message);
         alarmListner(msgTopic, message);
-        topicNetworkListner(msgTopic, message);
+        deviceNetworkListner(apolloClient, msgTopic, message);
     });
-    rollingBuffer(client);
-    handleAlarms(client);
-    topicNetworkStart(client);
+    rollingBuffer(mqttClient);
+    handleAlarms(mqttClient);
+    deviceNetworkStart(mqttClient);
 }
 
 runWorkers();
