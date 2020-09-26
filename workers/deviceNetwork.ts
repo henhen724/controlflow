@@ -1,5 +1,4 @@
 import { MqttClient } from 'mqtt';
-import Device from '../server/models/Device';
 import { ApolloClient, NormalizedCacheObject, gql } from "@apollo/client";
 
 export const deviceNetworkListner = async (client: ApolloClient<NormalizedCacheObject>, msgTopic: string, messageStr: Buffer) => {

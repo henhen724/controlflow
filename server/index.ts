@@ -44,6 +44,12 @@ const startServer = async () => {
                 req: ctx.req,
                 res: ctx.res,
             }
+        },
+        introspection: true,
+        playground: {
+            settings: {
+                "request.credentials": "include"
+            }
         }
     });
     apollo.applyMiddleware({ app: expressApp, path: '/graphql' });

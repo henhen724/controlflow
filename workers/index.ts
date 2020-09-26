@@ -1,14 +1,14 @@
+require('dotenv').config({ path: '.env.local' })
 import mongoose from 'mongoose';
 import { MongoError } from 'mongodb';
 import rollingBuffer, { bufferListner } from './runningBuffer';
 import handleAlarms, { alarmListner } from './alarmHandlers';
 import deviceNetworkStart, { deviceNetworkListner } from './deviceNetwork';
 import mqttConnect from '../server/lib/mqttConnect';
-import { ApolloClient, InMemoryCache, gql, NormalizedCacheObject } from "@apollo/client";
+import 'cross-fetch/polyfill';
+import { ApolloClient, InMemoryCache, NormalizedCacheObject } from "@apollo/client";
 
-if (process.env.NODE_ENV !== 'production') {
-    require('dotenv').config({ path: '.env.local' })
-}
+
 const runWorkers = async () => {
     await mongoose.connect(`${process.env.MONGODB_PROTO}${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@${process.env.MONGODB_DOMAIN}`,
         {
@@ -38,7 +38,7 @@ const runWorkers = async () => {
 
     mqttClient.on("message", (msgTopic, message) => {
         bufferListner(msgTopic, message);
-        alarmListner(msgTopic, message);
+        alarmListner(apolloClient, msgTopic, message);
         deviceNetworkListner(apolloClient, msgTopic, message);
     });
     rollingBuffer(mqttClient);

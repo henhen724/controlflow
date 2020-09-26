@@ -18,7 +18,7 @@ interface QRslt {
 }
 
 const DataSubscription = gql`
-subscription getData($topicList: [String]!) {
+subscription getData($topicList: [String!]!) {
   mqttTopics(topics: $topicList) {
       data
   }
@@ -30,8 +30,8 @@ interface SubRslt {
 }
 
 const SendMqttPacket = gql`
-mutation sendData($topic:String!, $payload:JSON){
-  mqttPublish(input:{topic:$topic, payload:$payload}) {
+mutation sendData($topic:String!, $payload:JSON!){
+  mqttPublish(topic:$topic, payload:$payload) {
     success
   }
 }

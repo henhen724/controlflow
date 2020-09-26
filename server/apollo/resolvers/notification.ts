@@ -61,6 +61,7 @@ class NotificationResolver {
     }
     @Mutation(returns => Notification)
     async createNotification(@Args() input: CreateNotificationInput, @PubSub() pubSub: PubSubEngine) {
+        console.log(input);
         const newNoto = new NotificationModel(input);
         await pubSub.publish("CREATE", newNoto);
         await newNoto.save((err, noto) => {

@@ -26,6 +26,7 @@
     "class-validator": "^0.12.2",
     "cookie": "^0.4.1",
     "cross-env": "^7.0.2",
+    "cross-fetch": "^3.0.6",
     "graphql": "^15.3.0",
     "graphql-mqtt-subscriptions": "^1.2.0",
     "graphql-scalars": "^1.2.1",
