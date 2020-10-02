@@ -1,7 +1,9 @@
 import { MqttClient } from 'mqtt';
-import { ApolloClient, NormalizedCacheObject, gql } from "@apollo/client";
+import { GraphQLClient, request, gql } from 'graphql-request';
 
-export const deviceNetworkListner = async (client: ApolloClient<NormalizedCacheObject>, msgTopic: string, messageStr: Buffer) => {
+const PORT = process.env.PORT || "3000";
+
+export const deviceNetworkListner = async (client: GraphQLClient, msgTopic: string, messageStr: Buffer) => {
     // console.log(`${msgTopic}:${messageStr.toString()}`);
     let message = null;
     try {
@@ -12,26 +14,24 @@ export const deviceNetworkListner = async (client: ApolloClient<NormalizedCacheO
     }
     switch (msgTopic) {
         case "__widaq_info__":
-            client.mutate({
-                mutation: gql`
+            client.request(
+                gql`
                 mutation ConnectDevice($ip: IPv4!,$port: Float!,$secure: Boolean!,$name: String!,$platform: String!,$osName: String!,$deviceSchema: JSON!) {
                     connect(ip:$ip, port:$port, secure:$secure, name:$name, platform:$platform, osName:$osName, deviceSchema:$deviceSchema) {
 	                    success
                     }
                 }`,
-                variables: message
-            })
+                message)
             break;
         case "__widaq_disconnect__":
-            client.mutate({
-                mutation: gql`
+            client.request(
+                gql`
                 mutation DisconnectDevice($ip: IPv4!) {
                     disconnectByIp(ip:$ip) {
 	                    success
                     }
                 }`,
-                variables: message
-            });
+                message);
             break;
     }
 }

@@ -5,8 +5,7 @@ import rollingBuffer, { bufferListner } from './runningBuffer';
 import handleAlarms, { alarmListner } from './alarmHandlers';
 import deviceNetworkStart, { deviceNetworkListner } from './deviceNetwork';
 import mqttConnect from '../server/lib/mqttConnect';
-import 'cross-fetch/polyfill';
-import { ApolloClient, InMemoryCache, NormalizedCacheObject } from "@apollo/client";
+import { GraphQLClient } from 'graphql-request';
 
 
 const runWorkers = async () => {
@@ -30,16 +29,15 @@ const runWorkers = async () => {
 
     const PORT = process.env.PORT || 3000;
 
-    const apolloClient: ApolloClient<NormalizedCacheObject> = new ApolloClient({
-        uri: `http://localhost:${PORT}/`,
-        cache: new InMemoryCache(),
-        credentials: "include"
+    const gqlClient: GraphQLClient = new GraphQLClient(`http://localhost:${PORT}/graphql`, {
+        credentials: "include",
+        mode: "cors"
     });
 
     mqttClient.on("message", (msgTopic, message) => {
         bufferListner(msgTopic, message);
-        alarmListner(apolloClient, msgTopic, message);
-        deviceNetworkListner(apolloClient, msgTopic, message);
+        alarmListner(gqlClient, msgTopic, message);
+        deviceNetworkListner(gqlClient, msgTopic, message);
     });
     rollingBuffer(mqttClient);
     handleAlarms(mqttClient);

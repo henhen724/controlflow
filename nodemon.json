@@ -1,7 +1,7 @@
 {
     "watch": ["server", "workers", "pages", "components"],
     "execMap": {
-      "ts":"rimraf .dist && ts-node --project server/tsconfig.json",
+      "ts":"ts-node --project server/tsconfig.json",
       "js":"node"
     },
     "ext": "js ts"

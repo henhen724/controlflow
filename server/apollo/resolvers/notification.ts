@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { ObjectType, ArgsType, Arg, Resolver, Query, Mutation, Subscription, Field, ID, Int, Ctx, Args, PubSub, PubSubEngine, Root } from "type-graphql";
+import { ObjectType, ArgsType, Arg, Resolver, Query, Mutation, Subscription, Field, ID, Int, Ctx, Args, PubSub, Publisher, PubSubEngine, Root } from "type-graphql";
 import { GraphQLTimestamp } from "graphql-scalars";
 
 import NotificationModel from "../../models/Notification";
@@ -60,18 +60,18 @@ class NotificationResolver {
         }
     }
     @Mutation(returns => Notification)
-    async createNotification(@Args() input: CreateNotificationInput, @PubSub() pubSub: PubSubEngine) {
-        console.log(input);
+    async createNotification(@Args() input: CreateNotificationInput, @PubSub("CREATE") publish: Publisher<Notification>) {
         const newNoto = new NotificationModel(input);
-        await pubSub.publish("CREATE", newNoto);
+        console.log(newNoto._id);
+        await publish(newNoto);
         await newNoto.save((err, noto) => {
             if (err) throw new UserInputError(err);
         });
         return newNoto;
     }
     @Mutation(returns => SuccessBoolean)
-    async deleteNotification(@Arg("id") id: string, @PubSub() pubSub: PubSubEngine) {
-        await pubSub.publish("DELETE", id);
+    async deleteNotification(@Arg("id") id: string, @PubSub("DELETE") publish: Publisher<string>) {
+        await publish(id);
         await NotificationModel.findByIdAndDelete(id);
         return { success: true };
     }
@@ -79,6 +79,7 @@ class NotificationResolver {
 
     @Subscription(returns => Notification, { topics: "CREATE" })
     watchCreatedNotifications(@Root() notification: Notification): Notification {
+        // console.log("Create notification", notification);
         return notification;
     }
     @Subscription(returns => String, { topics: "DELETE" })

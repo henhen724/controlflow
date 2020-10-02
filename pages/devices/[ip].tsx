@@ -9,7 +9,7 @@ import { getErrorMessage } from '../../components/errorFormating';
 import DisplaySchema from '../../components/DeviceNetwork/DisplaySchema';
 
 const SingleDeviceQuery = gql`
-query GetDevice($ip:String!) {
+query GetDevice($ip:IPv4!) {
   deviceByIp(ip:$ip){
     uri
     deviceSchema
