@@ -27,7 +27,7 @@ const runWorkers = async () => {
 
     const mqttClient = mqttConnect(`🤖`, "Worker");
 
-    const PORT = process.env.PORT || 3000;
+    const PORT = process.env.PORT || "3000";
 
     const gqlClient: GraphQLClient = new GraphQLClient(`http://localhost:${PORT}/graphql`, {
         credentials: "include",
