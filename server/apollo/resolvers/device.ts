@@ -62,7 +62,7 @@ class DeviceResolver {
     async connect(@Args() device: ConnInput, @PubSub("CONNECT") publish: Publisher<Device>) {
         await DeviceModel.updateOne({ ip: device.ip }, device, (err, deviceM) => {
             if (err) throw new UserInputError(err);
-            publish(deviceM);
+            publish(deviceM.toObject());
         }).exec();
 
         return { success: true };

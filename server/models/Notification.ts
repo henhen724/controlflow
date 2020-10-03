@@ -3,7 +3,7 @@ import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoos
 
 @modelOptions({ schemaOptions: { collection: 'notifications' } })
 export class Notification {
-    _id!: string;
+    _id?: string;
     @prop({ required: true })
     name!: string;
     @prop({ required: true })
@@ -13,11 +13,9 @@ export class Notification {
     @prop({ required: true })
     mqttMessage!: string;
     @prop({ default: Date.now })
-    received!: Date;
-    @prop({
-        default: false
-    })
-    viewed!: boolean;
+    received?: Date;
+    @prop({ default: false })
+    viewed?: boolean;
 }
 
 export default models.Notification as ReturnModelType<typeof Notification, {}> || getModelForClass(Notification);

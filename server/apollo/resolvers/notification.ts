@@ -2,7 +2,7 @@ import "reflect-metadata";
 import { ObjectType, ArgsType, Arg, Resolver, Query, Mutation, Subscription, Field, ID, Int, Ctx, Args, PubSub, Publisher, PubSubEngine, Root } from "type-graphql";
 import { GraphQLTimestamp } from "graphql-scalars";
 
-import NotificationModel from "../../models/Notification";
+import NotificationModel, { Notification as NotificationDoc } from "../../models/Notification";
 import SuccessBoolean from "../types/SuccessBoolean";
 import { UserInputError } from 'apollo-server';
 
@@ -61,13 +61,13 @@ class NotificationResolver {
     }
     @Mutation(returns => Notification)
     async createNotification(@Args() input: CreateNotificationInput, @PubSub("CREATE") publish: Publisher<Notification>) {
-        const newNoto = new NotificationModel(input);
-        console.log(newNoto._id);
-        await publish(newNoto);
-        await newNoto.save((err, noto) => {
+        return await new Promise(res => NotificationModel.create(input, (err: any, noto: any) => {
             if (err) throw new UserInputError(err);
-        });
-        return newNoto;
+            console.log(noto._id, noto.name, noto.topic);
+            publish(noto.toObject());
+            res(noto);
+        }));
+
     }
     @Mutation(returns => SuccessBoolean)
     async deleteNotification(@Arg("id") id: string, @PubSub("DELETE") publish: Publisher<string>) {
@@ -78,9 +78,9 @@ class NotificationResolver {
 
 
     @Subscription(returns => Notification, { topics: "CREATE" })
-    watchCreatedNotifications(@Root() notification: Notification): Notification {
-        // console.log("Create notification", notification);
-        return notification;
+    watchCreatedNotifications(@Root() noto: Notification): Notification {
+        console.log(noto._id, noto.name, noto.topic);
+        return noto;
     }
     @Subscription(returns => String, { topics: "DELETE" })
     watchDeletedNotifications(@Root() id: string): string {

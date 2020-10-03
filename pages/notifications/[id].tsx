@@ -9,7 +9,7 @@ import { getErrorMessage } from '../../components/errorFormating';
 import moment from 'moment-timezone';
 
 const SingleNotificationQuery = gql`
-query SingleNotificationQuery($id:String){
+query SingleNotificationQuery($id:String!){
     notificationById(id:$id){
         _id,
         name,
