@@ -10,11 +10,13 @@ export default () => {
         path: path.resolve(__dirname, "../../../public/schema.gql"),
         commentDescriptions: true,
         sortedSchema: true,
-      }
+      },
+      validate: false
     });
-  } else {
+  } else {  
     return buildSchema({
-      resolvers: [path.resolve(__dirname, "./resolvers/**(.ts|.js)")]
+      resolvers: [path.resolve(__dirname, "./resolvers/**(.ts|.js)")],
+      validate: false
     });
   }
 }

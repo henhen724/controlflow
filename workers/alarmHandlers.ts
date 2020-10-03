@@ -7,7 +7,6 @@ let topics = null as string[] | null;
 
 export const alarmListner = (client: GraphQLClient, msgTopic: string, message: Buffer) => {
     if (currWatchdogs && topics && topics.find(topic => topic === msgTopic)) {
-        console.log(`Topic alarm found for ${msgTopic}`);
         currWatchdogs.forEach(currWatch => {
             if (currWatch.topics.find(topic => topic === msgTopic)) {
                 client.request(

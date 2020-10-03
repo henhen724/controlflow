@@ -123,7 +123,6 @@ class BufferResolver {
     }
     @Mutation(returns => SuccessBoolean)
     async deleteTopicBuffer(@Arg("topic") topic: string) {
-        console.log(`Deleteing ${topic}`);
         await TopicBufferInfo.deleteMany({ topic }).exec();
         await DataPacketModel.deleteMany({ topic }).exec();
         return { success: true };

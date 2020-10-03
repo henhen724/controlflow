@@ -25,7 +25,6 @@ class WatchdogResolver {
 
     @Mutation(returns => SuccessBoolean)
     async deleteWatchdog(@Arg("name") name: string) {
-        console.log(`Deleteing ${name}`);
         await WatchdogModel.deleteMany({ name }).exec();
         return { success: true };
     }

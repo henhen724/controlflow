@@ -63,7 +63,6 @@ class NotificationResolver {
     async createNotification(@Args() input: CreateNotificationInput, @PubSub("CREATE") publish: Publisher<Notification>) {
         return await new Promise(res => NotificationModel.create(input, (err: any, noto: any) => {
             if (err) throw new UserInputError(err);
-            console.log(noto._id, noto.name, noto.topic);
             publish(noto.toObject());
             res(noto);
         }));
@@ -79,7 +78,6 @@ class NotificationResolver {
 
     @Subscription(returns => Notification, { topics: "CREATE" })
     watchCreatedNotifications(@Root() noto: Notification): Notification {
-        console.log(noto._id, noto.name, noto.topic);
         return noto;
     }
     @Subscription(returns => String, { topics: "DELETE" })
