@@ -1,41 +1,8 @@
-import { gql } from '@apollo/client';
 import { useState, useEffect } from 'react';
-import { useSubscription, useMutation, useQuery } from '@apollo/client';
 import { getErrorMessage } from './errorFormating';
 import { UnionPanelSettings, UnionPanelProps, getPanelFromProps } from './Panel';
+import { DataQuery, DataSubscription, SendMqttPacket } from './apollo/Data';
 
-
-const DataQuery = gql`
-query DataQuery($topic:String!) {
-    topicBuffer(topic:$topic) {
-        data
-    }
-}
-`
-
-interface QRslt {
-    topicBuffer: { data: Object }[]
-}
-
-const DataSubscription = gql`
-subscription getData($topicList: [String!]!) {
-  mqttTopics(topics: $topicList) {
-      data
-  }
-}
-`
-
-interface SubRslt {
-    mqttTopics: { data: Object }
-}
-
-const SendMqttPacket = gql`
-mutation sendData($topic:String!, $payload:JSON!){
-  mqttPublish(topic:$topic, payload:$payload) {
-    success
-  }
-}
-`
 
 interface DashboardProps {
     dataElements: UnionPanelSettings[],
@@ -48,14 +15,14 @@ interface DataByTopic {
 const livedata = (props: DashboardProps) => {
     const [data, setData] = useState<DataByTopic>({});
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [mqttPublish] = useMutation(SendMqttPacket);
+    const [mqttPublish] = SendMqttPacket();
     const allTopics = props.dataElements.reduce<string[]>((prevTopics, { topic }) => {
         prevTopics.unshift(topic);
         return prevTopics;
     }, []);
     const topicsRefetch = {} as { [key: string]: (() => any) };
     allTopics.forEach(topic => {
-        const { refetch } = useQuery<QRslt>(DataQuery, {
+        const { refetch } = DataQuery({
             variables: { topic },
             onCompleted: async res => {
                 // console.log(`Received query`, res);
@@ -64,7 +31,7 @@ const livedata = (props: DashboardProps) => {
             }
         });
         topicsRefetch[topic] = refetch;
-        useSubscription<SubRslt>(DataSubscription, {
+        DataSubscription({
             variables: { topicList: [topic] },
             onSubscriptionData: async res => {
                 if (res.subscriptionData.error) {

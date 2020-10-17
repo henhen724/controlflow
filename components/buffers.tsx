@@ -1,11 +1,11 @@
 import { useState, useCallback } from 'react';
-import { gql, useMutation, useQuery } from '@apollo/client';
-import MaterialTable, { Column, MTableToolbar } from 'material-table';
+import MaterialTable, { Column } from 'material-table';
 import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@material-ui/core';
-import { Replay as ReplayIcon } from '@material-ui/icons';
+import { Replay as ReplayIcon, GetApp as GetAppIcon } from '@material-ui/icons';
 
 import { getErrorMessage } from './errorFormating';
 import { BufferInfo } from '../server/models/TopicBufferInfo';
+import CsvDownloadModal from './csvDownloadModal';
 
 import { BufferQuery, BufferQueryRslt, BufferPacket, RecordTopic, DeleteTopic } from "./apollo/Buffers";
 
@@ -27,9 +27,10 @@ const Buffers = () => {
         ],
         data: [],
     })
-    const [isModalOpen, setModelOpen] = useState<boolean>(false);
+
     const [topicToDelete, setTopicToDelete] = useState<string | null>(null);
 
+    const [topicToDownload, setTopicToDownload] = useState<string | null>(null);
 
     const { loading: bufferLoading, error: bufferError, refetch: _refetch } = BufferQuery({
         onCompleted: (queryData) => {
@@ -49,8 +50,8 @@ const Buffers = () => {
     const [deleteTopic] = DeleteTopic();
 
 
-    const onModalFinish = (accepted: boolean) => {
-        setModelOpen(false);
+    const onDeleteModalFinish = (accepted: boolean) => {
+        setTopicToDelete(null);
         console.log(`Accepted: ${accepted}\nTopic to Delete: ${topicToDelete}`);
         if (accepted && topicToDelete) {
             setState((prevState) => {
@@ -79,12 +80,23 @@ const Buffers = () => {
             <div>
                 <Container>
                     <MaterialTable title="Data Buffers" columns={state.columns} data={state.data}
-                        components={{
-                            Toolbar: props => (<div>
-                                <MTableToolbar {...props} />
-                                <IconButton onClick={refetch}><ReplayIcon /></IconButton>
-                            </div>),
-                        }}
+                        actions={[
+                            {
+                                icon: () => <GetAppIcon />,
+                                tooltip: 'Download Data',
+                                onClick: (event, rowData) => {
+                                    if (!Array.isArray(rowData)) {
+                                        setTopicToDownload(rowData.topic);
+                                    }
+                                }
+                            },
+                            {
+                                icon: () => <ReplayIcon />,
+                                tooltip: 'Refresh Table',
+                                onClick: refetch,
+                                isFreeAction: true
+                            }
+                        ]}
                         editable={{
                             onRowAdd: (newData) => new Promise((resolve) => {
                                 setState((prevState) => {
@@ -134,31 +146,39 @@ const Buffers = () => {
                             }),
                             onRowDelete: (oldData) => new Promise((resolve) => {
                                 setTopicToDelete(oldData.topic);
-                                setModelOpen(true);
                                 resolve(true);
                             })
                         }} />
                     <Dialog
-                        open={isModalOpen}
+                        open={!!topicToDelete}
                         keepMounted
-                        onClose={() => onModalFinish(false)}
-                        aria-labelledby="alert-dialog-slide-title"
-                        aria-describedby="alert-dialog-slide-description"
+                        onClose={() => onDeleteModalFinish(false)}
+                        aria-labelledby="delete-modal-title"
+                        aria-describedby="delete-modal-description"
                     >
-                        <DialogTitle id="alert-dialog-slide-title">{`WARNING: Deleting ${topicToDelete} Data Buffer`}</DialogTitle>
+                        <DialogTitle id="delete-modal-title">{`WARNING: Deleting ${topicToDelete} Data Buffer`}</DialogTitle>
                         <DialogContent>
-                            <DialogContentText id="alert-dialog-slide-description">
+                            <DialogContentText id="delete-modal-description">
                                 All data currently in this buffer will be lost and unrecoverable. Are sure you want to do this?
                             </DialogContentText>
                         </DialogContent>
                         <DialogActions>
-                            <Button onClick={() => onModalFinish(false)} color="primary">
+                            <Button onClick={() => onDeleteModalFinish(false)} color="primary">
                                 Disagree
                             </Button>
-                            <Button onClick={() => onModalFinish(true)} color="primary">
+                            <Button onClick={() => onDeleteModalFinish(true)} color="primary">
                                 Agree
                             </Button>
                         </DialogActions>
+                    </Dialog>
+                    <Dialog
+                        open={!!topicToDownload}
+                        keepMounted
+                        onClose={() => setTopicToDownload(null)}
+                        aria-labelledby="download-modal-title"
+                        aria-describedby="download-modal-description"
+                    >
+                        <CsvDownloadModal topic={topicToDownload} setTopic={setTopicToDownload} />
                     </Dialog>
                 </Container>
             </div>
