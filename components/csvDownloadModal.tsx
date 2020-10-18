@@ -1,6 +1,8 @@
 import { DataQuery } from './apollo/Data';
-import { Button, CircularProgress, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
+import { Button, CircularProgress, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
 import { getErrorMessage } from './errorFormating';
+import download from 'downloadjs';
+import { Parser } from 'json2csv';
 
 interface csvDownloadProps {
     topic: string | null;
@@ -8,16 +10,6 @@ interface csvDownloadProps {
 }
 
 const csvDownloadModal = (props: csvDownloadProps) => {
-
-    const onDownloadModalFinish = (accepted: boolean) => {
-        props.setTopic(null);
-        if (accepted && props.topic) {
-
-        } else {
-            props.setTopic(null);
-        }
-    }
-
     if (!props.topic) {
         return <div>
             Internal Error: CSV Download recieved no topic.
@@ -29,6 +21,14 @@ const csvDownloadModal = (props: csvDownloadProps) => {
     } else if (error) {
         return <div>{getErrorMessage(error)}</div>
     } else {
+        const rowData = data?.topicBuffer.map(packet => packet.data)!;
+        const onDownloadModalFinish = (accepted: boolean) => {
+            if (accepted && props.topic) {
+                const parser = new Parser();
+                download(parser.parse(rowData), `${props.topic}.csv`);
+            }
+            props.setTopic(null);
+        }
         if (data?.topicBuffer.length === 0) {
             return <div>The ${props.topic} buffer is empty.</div>
         } else {
@@ -46,10 +46,10 @@ const csvDownloadModal = (props: csvDownloadProps) => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {data?.topicBuffer.map(packet => {
+                                    {rowData.map(data => {
                                         return (
                                             <TableRow>
-                                                {colomnHeaders.map(key => <TableCell>{packet.data[key]}</TableCell>)}
+                                                {colomnHeaders.map(key => <TableCell>{data[key]}</TableCell>)}
                                             </TableRow>);
                                     })}
                                 </TableBody>
@@ -59,10 +59,10 @@ const csvDownloadModal = (props: csvDownloadProps) => {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => onDownloadModalFinish(false)} color="primary">
-                        Disagree
+                        Cancel
                     </Button>
                     <Button onClick={() => onDownloadModalFinish(true)} color="primary">
-                        Agree
+                        Save CSV
                     </Button>
                 </DialogActions>
             </>)
