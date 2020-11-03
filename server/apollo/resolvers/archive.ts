@@ -42,10 +42,10 @@ class TimeRange {
 class ArchiveDataInput {
     @Field()
     topic: string;
-    @Field(type => GraphQLTimestamp)
-    from: Date;
-    @Field(type => GraphQLTimestamp)
-    to: Date;
+    @Field(type => GraphQLTimestamp, { nullable: true })
+    from?: Date;
+    @Field(type => GraphQLTimestamp, { nullable: true })
+    to?: Date;
 }
 
 @Resolver()

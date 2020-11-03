@@ -1,10 +1,15 @@
 import makeTestClient, { query, mutate } from './makeTestClient';
-import { DataQueryGQL, DataSubscriptionGQL, SendMqttPacketGQL } from "../../../components/apollo/Data";
+import { DataQueryGQL, ArchiveDataQueryGQL, DataSubscriptionGQL, SendMqttPacketGQL } from "../../../components/apollo/Data";
 
 beforeAll(makeTestClient);
 
 it('data query completes', async () => {
     const res = await query({ query: DataQueryGQL, variables: { topic: "TEST_TOPIC" } });
+    expect(res.data).toBeDefined();
+});
+
+it('archive data query completes', async () => {
+    const res = await query({ query: ArchiveDataQueryGQL, variables: { topic: "TEST_TOPIC" } });
     expect(res.data).toBeDefined();
 });
 
