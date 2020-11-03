@@ -1,13 +1,5 @@
-import { gql, useMutation, MutationTuple, useQuery, QueryHookOptions, MutationHookOptions, SubscriptionHookOptions, QueryResult, useSubscription } from '@apollo/client';
-import { BufferInfo } from '../../server/models/TopicBufferInfo';
+import { gql, useMutation, useQuery, QueryHookOptions, MutationHookOptions, SubscriptionHookOptions, QueryResult, useSubscription } from '@apollo/client';
 
-export const DataQueryGQL = gql`
-query DataQuery($topic:String!) {
-    topicBuffer(topic:$topic) {
-        data
-    }
-}
-`
 
 interface DataPacket {
     data: { [key: string]: string | number };
@@ -17,7 +9,28 @@ export interface DataQueryRslt {
     topicBuffer: DataPacket[];
 }
 
+// Rolling Buffer Query
+export const DataQueryGQL = gql`
+query DataQuery($topic:String!) {
+    topicBuffer(topic:$topic) {
+        data
+    }
+}
+`
+// This queries data from rolling buffers (ie. the small data buffers on mongoDB server which remove data after the buffer over runs it memory limit or packets expire).
 export const DataQuery = (opts: QueryHookOptions<DataQueryRslt, {}>): QueryResult<DataQueryRslt, {}> => useQuery<DataQueryRslt, {}>(DataQueryGQL, opts);
+
+
+// Archive Data Query
+export const ArchiveDataQueryGQL = gql`
+query ArchiveDataQuery($topic:String!, $from:Timestamp, $to:Timestamp) {
+    archiveData(topic:$topic, from:$from, to:$to) {
+        data
+    }
+}
+`
+// This queries data from the archive (ie. long term storage which will take longer to return a result, but never deletes data).
+export const ArchiveDataQuery = (opts: QueryHookOptions<DataQueryRslt, {}>): QueryResult<DataQueryRslt, {}> => useQuery<DataQueryRslt, {}>(ArchiveDataQueryGQL, opts);
 
 export const DataSubscriptionGQL = gql`
 subscription getData($topicList: [String!]!) {

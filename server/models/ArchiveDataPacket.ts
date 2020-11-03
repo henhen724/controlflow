@@ -1,8 +1,8 @@
 import { models, Schema } from 'mongoose';
 import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
 
-@modelOptions({ schemaOptions: { collection: 'data' } })
-export class DataPacket {
+@modelOptions({ schemaOptions: { collection: 'data-archive' } })
+export class ArchiveDataPacket {
     @prop({ default: Date.now, required: true })
     public created!: Date;
     @prop({ required: true })
@@ -11,4 +11,4 @@ export class DataPacket {
     public data!: Object;
 }
 
-export default models.DataPacket as ReturnModelType<typeof DataPacket, {}> || getModelForClass(DataPacket);
+export default models.ArchiveDataPacket as ReturnModelType<typeof ArchiveDataPacket, {}> || getModelForClass(ArchiveDataPacket);

@@ -22,14 +22,14 @@ interface SuccessBoolean {
 }
 
 export const SetWatchdogGQL = gql`
-mutation SetWatchdog($input: WatchdogInput!) {
-  setWatchdog(input: $input) {
+mutation SetWatchdog($name:String!, $topics:[String!]!, $messageString:String!) {
+  setWatchdog(name:$name, topics:$topics, messageString:$messageString) {
     success
   }
 }
 `
 
-export const SetWatchdog = (opts?: MutationHookOptions<SuccessBoolean, { input: Watchdog }>): MutationTuple<SuccessBoolean, { input: Watchdog }> => useMutation<SuccessBoolean, { input: Watchdog }>(SetWatchdogGQL, opts);
+export const SetWatchdog = (opts?: MutationHookOptions<SuccessBoolean, Watchdog>) => useMutation<SuccessBoolean, Watchdog>(SetWatchdogGQL, opts);
 
 export const DeleteWatchdogGQL = gql`
 mutation DeleteWatchdog($name:String!) {

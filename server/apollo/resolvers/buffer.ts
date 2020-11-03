@@ -58,10 +58,10 @@ class MqttPublishInput {
 class RecordTopicInput {
     @Field()
     topic: string;
-    @Field(type => Int)
-    experationTime: number;
-    @Field(type => Int)
-    maxSize: number;
+    @Field(type => Int, { nullable: true })
+    experationTime?: number;
+    @Field(type => Int, { nullable: true })
+    maxSize?: number;
 }
 
 @ArgsType()

@@ -6,6 +6,7 @@ import Navbar from '../components/Navbar';
 import LiveData from '../components/livedata';
 import { UnionPanelSettings } from '../components/Panel';
 import Buffers from '../components/buffers';
+import Archives from '../components/archives';
 import Alarms from '../components/alarms';
 import DeviceNetwork from '../components/DeviceNetwork';
 import { CircularProgress, BottomNavigation, BottomNavigationAction, Paper } from '@material-ui/core';
@@ -22,7 +23,7 @@ const ViewerQuery = gql`
 `
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
-    paperFooter: {
+    paperFooter: { //position footer
         width: "100%",
         position: 'fixed',
         left: 0,
@@ -33,6 +34,12 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
         textAlign: 'center',
         backgroundColor: theme.palette.secondary.light,
         color: theme.palette.secondary.light,
+    },
+    footerLengthMargin: { // This is used to make sure no content at the bottom of the page is covered by the footer
+        margin: theme.spacing(10)
+    },
+    marginDiv: {
+        margin: theme.spacing(2)
     }
 }));
 
@@ -90,10 +97,19 @@ const Index = () => {
                 component = <LiveData dataElements={[dataElement, controlElement]} />;
                 break;
             case "data-buffers":
-                component = <Buffers />;
+                component = (<div>
+                    <div className={classes.marginDiv}>
+                        <Buffers />
+                    </div>
+                    <div className={classes.marginDiv}>
+                        <Archives />
+                    </div>
+                </div >);
                 break;
             case "alarms":
-                component = <Alarms />;
+                component = (<div className={classes.marginDiv}>
+                    <Alarms />
+                </div>);
                 break;
             case "device-network":
                 component = <DeviceNetwork />
@@ -105,6 +121,7 @@ const Index = () => {
             <div>
                 <Navbar />
                 {component}
+                <div className={classes.footerLengthMargin} />
                 <Paper className={classes.paperFooter}>
                     <BottomNavigation value={tab} onChange={(e, val) => changeTab(val)} className={classes.navFooter}>
                         <BottomNavigationAction label="Live Data and Control" value="live-data" icon={<TimelineIcon />} />

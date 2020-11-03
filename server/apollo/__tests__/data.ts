@@ -5,9 +5,10 @@ beforeAll(makeTestClient);
 
 it('data query completes', async () => {
     const res = await query({ query: DataQueryGQL, variables: { topic: "TEST_TOPIC" } });
-    expect(res).toHaveProperty("data");
+    expect(res.data).toBeDefined();
 });
 
 it('mqtt publish packet completes', async () => {
-    expect(await mutate({ mutation: SendMqttPacketGQL, variables: { topic: "TEST_TOPIC", packet: { msg: 'Hello' } } })).toHaveProperty("data");
-});
+    const res = await mutate({ mutation: SendMqttPacketGQL, variables: { topic: "TEST_TOPIC", payload: { msg: 'Hello' } } })
+    expect(res.data).toBeDefined();
+})

@@ -40,7 +40,7 @@
     "json-schema": "^0.2.5",
     "json2csv": "^5.0.3",
     "jsonwebtoken": "^8.5.1",
-    "material-table": "^1.68.0",
+    "material-table": "1.67.1",
     "moment-timezone": "^0.5.31",
     "mongoose": "^5.9.20",
     "next": "^9.4.4",

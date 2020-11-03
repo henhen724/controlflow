@@ -5,7 +5,7 @@ beforeAll(makeTestClient);
 
 it('buffer query returns data', async () => {
     const res = await query({ query: BufferQueryGQL });
-    expect(res).toHaveProperty("data");
+    expect(res.data).toBeDefined();
 });
 
 it('record and delete buffer works', async () => {
@@ -13,13 +13,15 @@ it('record and delete buffer works', async () => {
         topic: "__TEST_BUFFER__",
         maxSize: 2000
     };
-    expect(await mutate({ mutation: RecordTopicGQL, variables: { input: testBuffer } })).toHaveProperty("data");
+    const rslt = await mutate({ mutation: RecordTopicGQL, variables: testBuffer });
+    expect(rslt.data).toBeDefined();
 
     const res = await query({ query: BufferQueryGQL });
-    expect(res).toHaveProperty("data");
+    expect(res.data).toBeDefined();
     if (res.data) {
         const thisBuf = res.data.find((buffer: any) => buffer.topic === testBuffer.topic);
         expect(thisBuf).toMatchObject(testBuffer);
     }
-    expect(await mutate({ mutation: DeleteTopicGQL, variables: { topic: testBuffer.topic } })).toHaveProperty("data");
+    const delRes = await mutate({ mutation: DeleteTopicGQL, variables: { topic: testBuffer.topic } });
+    expect(delRes.data).toBeDefined();
 });

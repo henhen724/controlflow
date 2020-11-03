@@ -31,14 +31,14 @@ export interface BufferPacket {
 }
 
 export const RecordTopicGQL = gql`
-mutation RecordTopic($input: RecordTopicInput!) {
-  recordTopic(input: $input) {
+mutation RecordTopic($topic:String!, $experationTime: Int, $maxSize: Int) {
+  recordTopic(topic: $topic, experationTime: $experationTime, maxSize: $maxSize) {
     success
   }
 }
 `
 
-export const RecordTopic = (opts?: MutationHookOptions<SuccessBoolean, { input: BufferPacket }>): MutationTuple<SuccessBoolean, { input: BufferPacket }> => useMutation<SuccessBoolean, { input: BufferPacket }>(RecordTopicGQL, opts);
+export const RecordTopic = (opts?: MutationHookOptions<SuccessBoolean, BufferPacket>) => useMutation<SuccessBoolean, BufferPacket>(RecordTopicGQL, opts);
 
 export const DeleteTopicGQL = gql`
 mutation DeleteTopicBuffer($topic:String!) {

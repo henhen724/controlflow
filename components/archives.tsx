@@ -4,26 +4,21 @@ import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent
 import { Replay as ReplayIcon, GetApp as GetAppIcon } from '@material-ui/icons';
 
 import { getErrorMessage } from './errorFormating';
-import { BufferInfo } from '../server/models/TopicBufferInfo';
+import { TopicArchive } from '../server/models/TopicArchive';
 import CsvDownloadModal from './csvDownloadModal';
 
-import { BufferQuery, BufferQueryRslt, BufferPacket, RecordTopic, DeleteTopic } from "./apollo/Buffers";
+import { ArchiveInfoRslt, ArchiveQuery, ArchiveTopic, DeleteTopicArchive } from "./apollo/Archives";
 
 interface TableState {
-    columns: Array<Column<BufferInfo>>,
-    data: BufferInfo[],
+    columns: Array<Column<TopicArchive>>,
+    data: TopicArchive[],
 }
 
-const Buffers = () => {
+const Archives = () => {
     // Page state
     const [state, setState] = useState<TableState>({
         columns: [
             { title: 'Topic Name', field: 'topic', type: 'string', editable: 'onAdd' },
-            { title: 'Current Size', field: 'currSize', type: 'numeric', editable: 'never' },
-            { title: 'Packets Expire (T/F)', field: 'expires', type: 'boolean', editable: 'always' },
-            { title: 'Experation Time (ms)', field: 'experationTime', type: 'numeric', editable: 'always' },
-            { title: 'Is Memory Limited (T/F)', field: 'sizeLimited', type: 'boolean', editable: 'always' },
-            { title: 'Memory Limit (bytes)', field: 'maxSize', type: 'numeric', editable: 'always' },
         ],
         data: [],
     })
@@ -32,22 +27,22 @@ const Buffers = () => {
 
     const [topicToDownload, setTopicToDownload] = useState<string | null>(null);
 
-    const { loading: bufferLoading, error: bufferError, refetch: _refetch } = BufferQuery({
+    const { loading, error, refetch: _refetch } = ArchiveQuery({
         onCompleted: (queryData) => {
-            const buffers = queryData.runningBuffers ? queryData.runningBuffers.map(buf => Object.assign({}, buf)) : [];
+            const buffers = queryData.runningArchives ? queryData.runningArchives.map(buf => Object.assign({}, buf)) : [];
             setState({ columns: state.columns, data: buffers });
         }
     });
     const refetch = useCallback(() => {
         setTimeout(() => _refetch({
-            onCompleted: (queryData: BufferQueryRslt) => {
-                const buffers = queryData.runningBuffers ? queryData.runningBuffers.map(buf => Object.assign({}, buf)) : [];
+            onCompleted: (queryData: ArchiveInfoRslt) => {
+                const buffers = queryData.runningArchives ? queryData.runningArchives.map(buf => Object.assign({}, buf)) : [];
                 setState({ columns: state.columns, data: buffers });
             },
         }), 0)
     }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
-    const [sendTopic] = RecordTopic();
-    const [deleteTopic] = DeleteTopic();
+    const [sendTopic] = ArchiveTopic();
+    const [deleteTopic] = DeleteTopicArchive();
 
 
     const onDeleteModalFinish = (accepted: boolean) => {
@@ -55,7 +50,7 @@ const Buffers = () => {
         console.log(`Accepted: ${accepted}\nTopic to Delete: ${topicToDelete}`);
         if (accepted && topicToDelete) {
             setState((prevState) => {
-                const data = prevState.data.filter((topicObj: BufferInfo) => topicObj.topic !== topicToDelete);
+                const data = prevState.data.filter((topicObj: TopicArchive) => topicObj.topic !== topicToDelete);
                 return { ...prevState, data };
             });
             deleteTopic({
@@ -71,15 +66,15 @@ const Buffers = () => {
     }
 
     // Render Table
-    if (bufferLoading) {
-        return (<Container maxWidth="sm"><h1>Buffer Info Loading</h1><CircularProgress /></ Container>)
-    } else if (bufferError) {
-        return (<h1>Buffer Query Error: {getErrorMessage(bufferError)}</h1>)
+    if (loading) {
+        return (<Container maxWidth="sm"><h1>Archive Info Loading</h1><CircularProgress /></ Container>)
+    } else if (error) {
+        return (<h1>Archive Query Error: {getErrorMessage(error)}</h1>)
     } else {
         return (
             <div>
                 <Container>
-                    <MaterialTable title="Rolling Buffers" columns={state.columns} data={state.data}
+                    <MaterialTable title="Topic Archives" columns={state.columns} data={state.data}
                         actions={[
                             {
                                 icon: () => <GetAppIcon />,
@@ -104,40 +99,30 @@ const Buffers = () => {
                                     data.push(newData);
                                     return { ...prevState, data };
                                 });
-                                var input = {
+                                const input = {
                                     topic: newData.topic
-                                } as BufferPacket;
-                                newData.expires = !!newData.expires;
-                                newData.sizeLimited = !!newData.sizeLimited;
-                                if (newData.expires) {
-                                    input.experationTime = newData.experationTime;
-                                }
-                                if (newData.sizeLimited) {
-                                    input.maxSize = newData.maxSize;
-                                }
+                                };
                                 console.log(`Sending topic record with`, input);
                                 sendTopic({
-                                    variables: input
+                                    variables: {
+                                        input
+                                    }
                                 }).then(success => resolve(success)).catch(err => console.error(err));
                             }),
                             onRowUpdate: (newData, oldData) => new Promise((resolve) => {
                                 setState((prevState) => {
-                                    const index = prevState.data.findIndex((topicObj: BufferInfo) => topicObj.topic === newData.topic);
+                                    const index = prevState.data.findIndex((topicObj) => topicObj.topic === newData.topic);
                                     const data = [...prevState.data]
                                     data[index] = newData;
                                     return { ...prevState, data };
                                 });
                                 var input = {
                                     topic: newData.topic
-                                } as BufferPacket;
-                                if (newData.expires) {
-                                    input.experationTime = newData.experationTime;
-                                }
-                                if (newData.sizeLimited) {
-                                    input.maxSize = newData.maxSize;
                                 }
                                 sendTopic({
-                                    variables: input
+                                    variables: {
+                                        input
+                                    }
                                 }).then(success => resolve(success));
                             }),
                             onRowDelete: (oldData) => new Promise((resolve) => {
@@ -152,10 +137,10 @@ const Buffers = () => {
                         aria-labelledby="delete-modal-title"
                         aria-describedby="delete-modal-description"
                     >
-                        <DialogTitle id="delete-modal-title">{`WARNING: Deleting ${topicToDelete} Data Buffer`}</DialogTitle>
+                        <DialogTitle id="delete-modal-title">{`WARNING: Deleting ${topicToDelete} Data Archive`}</DialogTitle>
                         <DialogContent>
                             <DialogContentText id="delete-modal-description">
-                                All data currently in this buffer will be lost and unrecoverable. Are sure you want to do this?
+                                All data currently in this Archive will be lost and unrecoverable. Are sure you want to do this?
                             </DialogContentText>
                         </DialogContent>
                         <DialogActions>
@@ -182,4 +167,4 @@ const Buffers = () => {
     }
 }
 
-export default Buffers;
+export default Archives;

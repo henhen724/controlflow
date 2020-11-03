@@ -5,7 +5,7 @@ beforeAll(makeTestClient);
 
 it('watchdog query returns data', async () => {
     const res = await query({ query: WatchdogsQueryGQL });
-    expect(res).toHaveProperty("data");
+    expect(res.data).toBeDefined();
 });
 
 it('set and delete watchdog works', async () => {
@@ -14,13 +14,15 @@ it('set and delete watchdog works', async () => {
         topics: ["notatopic"],
         messageString: "You should not see this",
     };
-    expect(await mutate({ mutation: SetWatchdogGQL, variables: { input: testWatchdog } })).toHaveProperty("data");
+    const res = await mutate({ mutation: SetWatchdogGQL, variables: testWatchdog });
+    expect(res.data).toBeDefined();
 
-    const res = await query({ query: WatchdogsQueryGQL });
-    expect(res).toHaveProperty("data");
-    if (res.data) {
-        const thisWatchdog = res.data.find((alarm: any) => alarm.name === testWatchdog.name);
+    const queryRes = await query({ query: WatchdogsQueryGQL });
+    expect(queryRes.data).toBeDefined();
+    if (queryRes.data) {
+        const thisWatchdog = queryRes.data.watchdogs.find((alarm) => alarm.name === testWatchdog.name);
         expect(thisWatchdog).toMatchObject(testWatchdog);
     }
-    expect(await mutate({ mutation: DeleteWatchdogGQL, variables: { name: testWatchdog.name } })).toHaveProperty("data");
+    const delRes = await mutate({ mutation: DeleteWatchdogGQL, variables: { name: testWatchdog.name } })
+    expect(delRes.data).toBeDefined();
 });
