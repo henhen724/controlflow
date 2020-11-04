@@ -15,14 +15,14 @@ export interface ArchiveInfoRslt {
 export const ArchiveQuery = (opts?: QueryHookOptions<ArchiveInfoRslt, {}>) => useQuery<ArchiveInfoRslt, {}>(ArchiveQueryGQL, opts);
 
 export const ArchiveTopicGQL = gql`
-mutation ArchiveTopic($input: ArchiveTopicInput!) {
-    archiveTopic(input: $input) {
+mutation ArchiveTopic($topic: String!) {
+    archiveTopic(topic: $topic) {
         success
     }
 }
 `
 
-export const ArchiveTopic = (opts?: MutationHookOptions<{ success: boolean }, { input: { topic: string } }>) => useMutation<{ success: boolean }, { input: { topic: string } }>(ArchiveTopicGQL, opts);
+export const ArchiveTopic = (opts?: MutationHookOptions<{ success: boolean }, { topic: string }>) => useMutation<{ success: boolean }, { input: { topic: string } }>(ArchiveTopicGQL, opts);
 
 export const DeleteTopicArchiveGQL = gql`
 mutation DeleteTopicArchive($topic: String!) {

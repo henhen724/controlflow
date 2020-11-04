@@ -104,9 +104,7 @@ const Archives = () => {
                                 };
                                 console.log(`Sending topic record with`, input);
                                 sendTopic({
-                                    variables: {
-                                        input
-                                    }
+                                    variables: input
                                 }).then(success => resolve(success)).catch(err => console.error(err));
                             }),
                             onRowUpdate: (newData, oldData) => new Promise((resolve) => {
@@ -120,9 +118,7 @@ const Archives = () => {
                                     topic: newData.topic
                                 }
                                 sendTopic({
-                                    variables: {
-                                        input
-                                    }
+                                    variables: input
                                 }).then(success => resolve(success));
                             }),
                             onRowDelete: (oldData) => new Promise((resolve) => {
