@@ -103,9 +103,7 @@ const AlarmsPage = () => {
                                 } as Watchdog;
                                 console.log(`Sending topic record with`, input);
                                 sendTopic({
-                                    variables: {
-                                        input
-                                    }
+                                    variables: input
                                 }).then(success => resolve(success)).catch(err => console.error(err));
                             }),
                             onRowUpdate: (newData, oldData) => new Promise((resolve) => {
@@ -121,9 +119,7 @@ const AlarmsPage = () => {
                                 } as Watchdog;
                                 console.log(`Sending topic record with`, input);
                                 sendTopic({
-                                    variables: {
-                                        input
-                                    }
+                                    variables: input
                                 }).then(success => resolve(success)).catch(err => console.error(err));
                             }),
                             onRowDelete: (oldData) => new Promise((resolve) => {

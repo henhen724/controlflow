@@ -22,7 +22,7 @@ mutation ArchiveTopic($topic: String!) {
 }
 `
 
-export const ArchiveTopic = (opts?: MutationHookOptions<{ success: boolean }, { topic: string }>) => useMutation<{ success: boolean }, { input: { topic: string } }>(ArchiveTopicGQL, opts);
+export const ArchiveTopic = (opts?: MutationHookOptions<{ success: boolean }, { topic: string }>) => useMutation<{ success: boolean }, { topic: string }>(ArchiveTopicGQL, opts);
 
 export const DeleteTopicArchiveGQL = gql`
 mutation DeleteTopicArchive($topic: String!) {
