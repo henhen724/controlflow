@@ -4,6 +4,7 @@ import { MongoError } from 'mongodb';
 import rollingBuffer, { bufferListner } from './runningBuffer';
 import handleAlarms, { alarmListner } from './alarmHandlers';
 import deviceNetworkStart, { deviceNetworkListner } from './deviceNetwork';
+import upkeepArchive, { archiveListner } from './archiveUpkeep';
 import mqttConnect from '../server/lib/mqttConnect';
 import { GraphQLClient } from 'graphql-request';
 
@@ -35,11 +36,14 @@ const runWorkers = async () => {
     });
 
     mqttClient.on("message", (msgTopic, message) => {
+        console.log(msgTopic)
         bufferListner(msgTopic, message);
+        archiveListner(msgTopic, message);
         alarmListner(gqlClient, msgTopic, message);
         deviceNetworkListner(gqlClient, msgTopic, message);
     });
     rollingBuffer(mqttClient);
+    upkeepArchive(mqttClient);
     handleAlarms(mqttClient);
     deviceNetworkStart(mqttClient);
 }

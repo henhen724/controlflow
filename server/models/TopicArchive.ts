@@ -6,6 +6,8 @@ import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoos
 export class TopicArchive {
     @prop({ required: true, unique: true })
     topic!: string;
+    @prop({ required: true, default: true })
+    recording!: boolean
 }
 
 export default models.TopicBuffersInfo as ReturnModelType<typeof TopicArchive, {}> || getModelForClass(TopicArchive);

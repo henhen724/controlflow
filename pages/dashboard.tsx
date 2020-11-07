@@ -75,7 +75,7 @@ const Index = () => {
         return <p>{error.message}</p>
     }
 
-    const dataElement = { topic: "SENSOR", displayProps: { firstDataKey: "timestamp", secondDataKey: "data" }, elemType: "data", displayType: "line-graph" } as UnionPanelSettings;
+    const dataElement = { topic: "evanspi/systeminfo/gputemp", displayProps: { firstDataKey: "timestamp", secondDataKey: "data" }, elemType: "data", displayType: "line-graph" } as UnionPanelSettings;
     const controlElement = {
         topic: "LEDONOFF",
         displayProps: {

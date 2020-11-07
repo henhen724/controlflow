@@ -73,6 +73,7 @@ export const updateTopicSubsriptions = async (client: MqttClient) => {
     var oldTopics = [] as string[];
     if (topicBufferInfos)
         oldTopics = topicBufferInfos.map(({ topic }) => topic);
+    topicBufferInfos = newTopicBufferInfos;
     const newTopics = newTopicBufferInfos.map(({ topic }) => topic);
     const addedTopics = newTopics.filter(topic => !oldTopics.includes(topic));
     const removedTopics = oldTopics.filter(topic => !newTopics.includes(topic));

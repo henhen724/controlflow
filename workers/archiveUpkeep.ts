@@ -1,13 +1,15 @@
 import ArchiveDataPacket from '../server/models/ArchiveDataPacket';
 import { MqttClient } from 'mqtt';
-import BufferInfoModel, { BufferInfo } from '../server/models/TopicBufferInfo';
+import TopicArchiveModel, { TopicArchive } from '../server/models/TopicArchive';
 
-let topicBufferInfos = null as BufferInfo[] | null;
+let topicArchiveInfos = null as TopicArchive[] | null;
 
-export const bufferListner = (msgTopic: string, message: Buffer) => {
-    if (topicBufferInfos) {
-        const bufferInfo = topicBufferInfos.find(({ topic }) => topic === msgTopic);
-        if (bufferInfo) {
+export const archiveListner = (msgTopic: string, message: Buffer) => {
+    console.log(msgTopic)
+    if (topicArchiveInfos) {
+        const bufferInfo = topicArchiveInfos.find(({ topic }) => topic === msgTopic);
+        if (bufferInfo && bufferInfo.recording) {
+            console.log(bufferInfo)
             try {
                 const msgObj = JSON.parse(message.toString())
                 if (msgObj) {
@@ -28,14 +30,16 @@ export const bufferListner = (msgTopic: string, message: Buffer) => {
 }
 
 export const updateTopicSubsriptions = async (client: MqttClient) => {
-    const newTopicBufferInfos = await BufferInfoModel.find().exec();
+    const newTopicArchive = await TopicArchiveModel.find().exec();
     var oldTopics = [] as string[];
-    if (topicBufferInfos)
-        oldTopics = topicBufferInfos.map(({ topic }) => topic);
-    const newTopics = newTopicBufferInfos.map(({ topic }) => topic);
+    if (topicArchiveInfos)
+        oldTopics = topicArchiveInfos.map(({ topic }) => topic);
+    topicArchiveInfos = newTopicArchive;
+    const newTopics = newTopicArchive.map(({ topic }) => topic);
     const addedTopics = newTopics.filter(topic => !oldTopics.includes(topic));
     const removedTopics = oldTopics.filter(topic => !newTopics.includes(topic));
     if (addedTopics.length !== 0) {
+        console.log(addedTopics)
         client.subscribe(addedTopics, err => {
             if (err)
                 console.error(err);
