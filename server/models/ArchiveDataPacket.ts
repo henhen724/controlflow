@@ -5,7 +5,7 @@ import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoos
 export class ArchiveDataPacket {
     @prop({ default: Date.now, required: true })
     public created!: Date;
-    @prop({ required: true })
+    @prop({ required: true, unique: false })
     public topic!: String;
     @prop({ required: true })
     public data!: Object;

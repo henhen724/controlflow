@@ -36,7 +36,6 @@ const runWorkers = async () => {
     });
 
     mqttClient.on("message", (msgTopic, message) => {
-        console.log(msgTopic)
         bufferListner(msgTopic, message);
         archiveListner(msgTopic, message);
         alarmListner(gqlClient, msgTopic, message);

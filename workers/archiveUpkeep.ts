@@ -5,11 +5,9 @@ import TopicArchiveModel, { TopicArchive } from '../server/models/TopicArchive';
 let topicArchiveInfos = null as TopicArchive[] | null;
 
 export const archiveListner = (msgTopic: string, message: Buffer) => {
-    console.log(msgTopic)
     if (topicArchiveInfos) {
         const bufferInfo = topicArchiveInfos.find(({ topic }) => topic === msgTopic);
         if (bufferInfo && bufferInfo.recording) {
-            console.log(bufferInfo)
             try {
                 const msgObj = JSON.parse(message.toString())
                 if (msgObj) {
