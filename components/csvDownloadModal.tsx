@@ -9,6 +9,26 @@ interface csvDownloadProps {
     setTopic: (topic: string | null) => void;
 }
 
+const flattenObject = (ob: any) => {
+    var toReturn: any = {};
+
+    for (var i in ob) {
+        if (!ob.hasOwnProperty(i)) continue;
+
+        if ((typeof ob[i]) == 'object' && ob[i] !== null) {
+            var flatObject = flattenObject(ob[i]);
+            for (var x in flatObject) {
+                if (!flatObject.hasOwnProperty(x)) continue;
+
+                toReturn[i + '.' + x] = flatObject[x];
+            }
+        } else {
+            toReturn[i] = ob[i];
+        }
+    }
+    return toReturn;
+}
+
 const csvDownloadModal = (props: csvDownloadProps) => {
     if (!props.topic) {
         return <div>
@@ -21,7 +41,7 @@ const csvDownloadModal = (props: csvDownloadProps) => {
     } else if (error) {
         return <div>{getErrorMessage(error)}</div>
     } else {
-        const rowData = data?.topicBuffer.map(packet => packet.data)!;
+        const rowData = data?.topicBuffer.map(packet => flattenObject(packet.data))!;
         const onDownloadModalFinish = (accepted: boolean) => {
             if (accepted && props.topic) {
                 const parser = new Parser();
@@ -32,8 +52,7 @@ const csvDownloadModal = (props: csvDownloadProps) => {
         if (data?.topicBuffer.length === 0) {
             return <div>The ${props.topic} buffer is empty.</div>
         } else {
-            console.log(data?.topicBuffer)
-            const colomnHeaders = Object.keys(data?.topicBuffer[0].data!);
+            const colomnHeaders = Object.keys(rowData[0]);
             return (<>
                 <DialogTitle id="download-modal-title">Downloading {props.topic}</DialogTitle>
                 <DialogContent>
@@ -49,7 +68,10 @@ const csvDownloadModal = (props: csvDownloadProps) => {
                                     {rowData.map(data => {
                                         return (
                                             <TableRow>
-                                                {colomnHeaders.map(key => <TableCell>{data[key]}</TableCell>)}
+                                                {colomnHeaders.map(key => {
+                                                    if (typeof data[key] !== 'object')
+                                                        return <TableCell>{data[key]}</TableCell>
+                                                })}
                                             </TableRow>);
                                     })}
                                 </TableBody>
