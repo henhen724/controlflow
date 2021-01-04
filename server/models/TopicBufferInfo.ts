@@ -22,6 +22,10 @@ export class BufferInfo {
     maxSize?: number;
     @prop({ required: true })
     sizeLimited!: Boolean;
+    @prop({ required: false })
+    maxFreq?: number;
+    @prop({ required: true })
+    freqLimited!: Boolean;
 }
 
 export default models.TopicBuffersInfo as ReturnModelType<typeof BufferInfo, BufferQueries> || getModelForClass(BufferInfo);

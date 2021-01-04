@@ -1,4 +1,4 @@
-import { gql, useMutation, useQuery, QueryHookOptions, MutationHookOptions, SubscriptionHookOptions, QueryResult, useSubscription } from '@apollo/client';
+import { gql, useMutation, useQuery, useLazyQuery, QueryHookOptions, MutationHookOptions, SubscriptionHookOptions, QueryResult, useSubscription } from '@apollo/client';
 
 
 interface DataPacket {
@@ -18,8 +18,9 @@ query DataQuery($topic:String!) {
 }
 `
 // This queries data from rolling buffers (ie. the small data buffers on mongoDB server which remove data after the buffer over runs it memory limit or packets expire).
-export const DataQuery = (opts: QueryHookOptions<DataQueryRslt, {}>): QueryResult<DataQueryRslt, {}> => useQuery<DataQueryRslt, {}>(DataQueryGQL, opts);
+export const LazyDataQuery = (opts: QueryHookOptions<DataQueryRslt, { topic: string }>) => useLazyQuery<DataQueryRslt, { topic: string }>(DataQueryGQL, opts);
 
+export const DataQuery = (opts: QueryHookOptions<DataQueryRslt, {}>): QueryResult<DataQueryRslt, {}> => useQuery<DataQueryRslt, {}>(DataQueryGQL, opts);
 
 // Archive Data Query
 export const ArchiveDataQueryGQL = gql`

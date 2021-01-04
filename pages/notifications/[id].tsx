@@ -6,7 +6,8 @@ import { makeStyles, createStyles, Theme } from '@material-ui/core/styles';
 import { Delete as DeleteIcon, LocalConvenienceStoreOutlined } from '@material-ui/icons';
 import Navbar from '../../components/Navbar';
 import { getErrorMessage } from '../../components/errorFormating';
-import moment from 'moment-timezone';
+import { DateTime } from 'luxon';
+DateTime.local()
 
 const SingleNotificationQuery = gql`
 query SingleNotificationQuery($id:String!){
@@ -83,7 +84,7 @@ const aNotification = () => {
                         <Typography variant="subtitle2" color="textSecondary">MQTT Message</Typography>
                         <Typography component="h5" variant="h5">{mqttMessage}</Typography>
                         <Typography variant="subtitle2" color="textSecondary">Time Received</Typography>
-                        <Typography component="h5" variant="h5">{moment.tz(received, moment.tz.guess()).format("h:mm:ss a z on MM/DD/YYYY")}</Typography>
+                        <Typography component="h5" variant="h5">{DateTime.fromMillis(received).toFormat("h:mm:ss a z on MM/DD/YYYY")}</Typography>
                         <IconButton onClick={handleDeleteClick}>
                             <DeleteIcon />
                         </IconButton>

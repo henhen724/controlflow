@@ -1,10 +1,12 @@
 import { useState, useCallback } from 'react';
 import MaterialTable, { Column } from 'material-table';
+import { ApolloError } from '@apollo/client'
 import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@material-ui/core';
 import { Replay as ReplayIcon, GetApp as GetAppIcon } from '@material-ui/icons';
 
 import { getErrorMessage } from './errorFormating';
 import { BufferInfo } from '../server/models/TopicBufferInfo';
+import { LazyDataQuery } from './apollo/Data';
 import CsvDownloadModal from './csvDownloadModal';
 
 import { BufferQuery, BufferQueryRslt, BufferPacket, RecordTopic, DeleteTopic } from "./apollo/Buffers";
@@ -29,7 +31,6 @@ const Buffers = () => {
     })
 
     const [topicToDelete, setTopicToDelete] = useState<string | null>(null);
-
     const [topicToDownload, setTopicToDownload] = useState<string | null>(null);
 
     const { loading: bufferLoading, error: bufferError, refetch: _refetch } = BufferQuery({
@@ -48,6 +49,13 @@ const Buffers = () => {
     }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
     const [sendTopic] = RecordTopic();
     const [deleteTopic] = DeleteTopic();
+
+    const [getBufferData, { data: downloadData, error: downloadError, loading: downloadLoading }] = LazyDataQuery({
+        variables: {
+            topic: topicToDownload!
+        }
+    });
+    const csvData = downloadData?.topicBuffer.map(packet => packet.data);
 
 
     const onDeleteModalFinish = (accepted: boolean) => {
@@ -87,6 +95,7 @@ const Buffers = () => {
                                 onClick: (event, rowData) => {
                                     if (!Array.isArray(rowData)) {
                                         setTopicToDownload(rowData.topic);
+                                        getBufferData();
                                     }
                                 }
                             },
@@ -174,7 +183,7 @@ const Buffers = () => {
                         aria-labelledby="download-modal-title"
                         aria-describedby="download-modal-description"
                     >
-                        <CsvDownloadModal topic={topicToDownload} setTopic={setTopicToDownload} />
+                        <CsvDownloadModal topic={topicToDownload} data={csvData} error={downloadError} loading={downloadLoading} setTopic={setTopicToDownload} />
                     </Dialog>
                 </Container>
             </div>

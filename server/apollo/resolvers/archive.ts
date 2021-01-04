@@ -1,11 +1,12 @@
 import "reflect-metadata";
-import { ObjectType, ArgsType, Arg, Resolver, Query, Mutation, Subscription, Field, ID, Int, Ctx, Args, Root } from "type-graphql";
+import { ObjectType, ArgsType, Arg, Resolver, Query, Mutation, Field, Int, ID, Args } from "type-graphql";
 import { GraphQLJSON, GraphQLTimestamp } from "graphql-scalars";
 
 import SuccessBoolean from "../types/SuccessBoolean";
 
 import TopicArchive from "../../models/TopicArchive";
 import ArchiveDataPacket from "../../models/ArchiveDataPacket";
+import { ConnectionInput, createConnectionOutput } from "../types/Connection";
 
 
 @ObjectType()
@@ -18,11 +19,11 @@ class ArchiveInfo {
 class ArchivePacket {
     @Field()
     topic: string;
-    @Field(type => GraphQLTimestamp)
-    created: Date;
     @Field(type => GraphQLJSON)
     data: Object;
 }
+
+const ArchiveConnectionOuput = createConnectionOutput(ArchivePacket);
 
 @ArgsType()
 class ArchiveTopicInput {
@@ -31,15 +32,7 @@ class ArchiveTopicInput {
 }
 
 @ArgsType()
-class TimeRange {
-    @Field()
-    start: Date
-    @Field()
-    end: Date
-}
-
-@ArgsType()
-class ArchiveDataInput {
+class ArchiveDataInput extends ConnectionInput {
     @Field()
     topic: string;
     @Field(type => GraphQLTimestamp, { nullable: true })
@@ -61,21 +54,42 @@ class ArchiveResolver {
         return archiveMoreInfo;
     }
 
-    @Query(returns => [ArchivePacket])
+    @Query(returns => ArchiveConnectionOuput)
     async archiveData(@Args() input: ArchiveDataInput) {
-        const { topic, from, to } = input;
+        console.log("Data query started:", input)
+        const { topic, from, to, first, after } = input;
         var query = { topic } as { topic: string, created?: { $gte?: Date, $lte?: Date } };
-        if (from || to) {
+        if (from || to || after) {
             query = {
                 ...query,
                 created: {}
             }
-            if (from)
-                query.created = { ...query.created, $gte: from }
+            if (from && after) {
+                const afterDate = new Date(after)
+                if (from < afterDate) {
+                    query.created = { ...query.created, $gte: afterDate }
+                } else {
+                    query.created = { ...query.created, $gte: from }
+                }
+            } else {
+                if (from) {
+                    query.created = { ...query.created, $gte: from }
+                }
+                if (after) {
+                    query.created = { ...query.created, $gte: new Date(after) }
+                }
+            }
             if (to)
                 query.created = { ...query.created, $lte: to }
         }
-        return await ArchiveDataPacket.find(query).exec();
+        const nodes = await ArchiveDataPacket.find(query).limit(first + 1).exec();
+        console.log("Query finished.")
+        const hasNextPage = nodes.length > first;
+        const edges = nodes.splice(0, first).map(node => {
+            return { node, cursor: node.created.getTime() }
+        })
+        const endCursor = edges[edges.length - 1].cursor;
+        return { edges, pageInfo: { endCursor, hasNextPage } }
     }
 
     @Mutation(returns => SuccessBoolean)

@@ -1,7 +1,7 @@
 import { PanelProps, PanelSettings } from './index';
 import { LineChart, Line, CartesianAxis, XAxis, YAxis, CartesianGrid, PolarAngleAxis, PolarRadiusAxis, Tooltip, Legend, ResponsiveContainer, } from "recharts";
-import moment from 'moment-timezone';
-import { Component } from 'react';
+import { DateTime } from 'luxon';
+DateTime.local();
 import { CircularProgress, Container } from '@material-ui/core';
 import { useTheme } from '@material-ui/core';
 
@@ -31,9 +31,9 @@ export const LineGraph = (props: LineGraphProps) => {
     if (data) {
         return (<ResponsiveContainer width={width!.toString() + "%"} height={height}>
             <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <XAxis type="number" dataKey={firstDataKey} tickFormatter={(unixTime) => moment.tz(unixTime, moment.tz.guess()).format('h:mm:ss a')} domain={["dataMin", "dataMax"]} />
+                <XAxis type="number" dataKey={firstDataKey} tickFormatter={(unixTime) => DateTime.fromMillis(unixTime).toFormat('h:mm:ss a')} domain={["dataMin", "dataMax"]} />
                 <YAxis />
-                <Tooltip contentStyle={{ background: theme.palette.background.default }} labelFormatter={(value) => moment.tz(value, moment.tz.guess()).format('h:mm:ss a z')} />
+                <Tooltip contentStyle={{ background: theme.palette.background.default }} labelFormatter={(value) => DateTime.fromMillis(value as number).toFormat('h:mm:ss a z')} />
                 <Legend />
                 <Line type="monotone" dataKey={secondDataKey} activeDot={{ r: 0 }} />
             </LineChart>

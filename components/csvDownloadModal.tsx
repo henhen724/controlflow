@@ -1,12 +1,17 @@
-import { DataQuery } from './apollo/Data';
 import { Button, CircularProgress, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
 import { getErrorMessage } from './errorFormating';
 import download from 'downloadjs';
 import { Parser } from 'json2csv';
+import { ApolloError } from '@apollo/client';
 
 interface csvDownloadProps {
     topic: string | null;
     setTopic: (topic: string | null) => void;
+    clearDownloadData: () => void;
+    data: Object[] | undefined;
+    loading: boolean;
+    error?: ApolloError;
+    progress?: number;
 }
 
 const flattenObject = (ob: any) => {
@@ -30,26 +35,27 @@ const flattenObject = (ob: any) => {
 }
 
 const csvDownloadModal = (props: csvDownloadProps) => {
+    console.log(props);
     if (!props.topic) {
         return <div>
             Internal Error: CSV Download recieved no topic.
         </div>
     }
-    const { data, loading, error } = DataQuery({ variables: { topic: props.topic } });
-    if (loading) {
+    if (props.loading) {
         return <CircularProgress />
-    } else if (error) {
-        return <div>{getErrorMessage(error)}</div>
+    } else if (props.error) {
+        return <div>{getErrorMessage(props.error)}</div>
     } else {
-        const rowData = data?.topicBuffer.map(packet => flattenObject(packet.data))!;
+        const rowData = props.data!.map(packet => flattenObject(packet));
         const onDownloadModalFinish = (accepted: boolean) => {
             if (accepted && props.topic) {
                 const parser = new Parser();
                 download(parser.parse(rowData), `${props.topic}.csv`);
             }
             props.setTopic(null);
+            props.clearDownloadData();
         }
-        if (data?.topicBuffer.length === 0) {
+        if (rowData.length === 0) {
             return <div>The ${props.topic} buffer is empty.</div>
         } else {
             const colomnHeaders = Object.keys(rowData[0]);
@@ -82,10 +88,10 @@ const csvDownloadModal = (props: csvDownloadProps) => {
                 <DialogActions>
                     <Button onClick={() => onDownloadModalFinish(false)} color="primary">
                         Cancel
-                    </Button>
+                        </Button>
                     <Button onClick={() => onDownloadModalFinish(true)} color="primary">
                         Save CSV
-                    </Button>
+                        </Button>
                 </DialogActions>
             </>)
         }

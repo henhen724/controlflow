@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { ObjectType, ArgsType, Arg, Resolver, Query, Mutation, Subscription, Field, ID, Int, Ctx, Args, Root } from "type-graphql";
+import { ObjectType, ArgsType, Arg, Resolver, Query, Mutation, Subscription, Field, ID, Int, Float, Ctx, Args, Root } from "type-graphql";
 import { GraphQLJSON, GraphQLTimestamp } from "graphql-scalars";
 
 import SuccessBoolean from "../types/SuccessBoolean";
@@ -32,6 +32,10 @@ class BufferInfo {
     sizeLimited: boolean;
     @Field(type => Int, { nullable: true })
     maxSize: number;
+    @Field()
+    freqLimited: boolean;
+    @Field(type => Float, { nullable: true })
+    maxFreq: number;
     @Field(type => Int)
     currSize: number;
 }
@@ -62,6 +66,8 @@ class RecordTopicInput {
     experationTime?: number;
     @Field(type => Int, { nullable: true })
     maxSize?: number;
+    @Field(type => Float, { nullable: true })
+    maxFreq?: number;
 }
 
 @ArgsType()
@@ -95,9 +101,10 @@ class BufferResolver {
     }
     @Mutation(returns => SuccessBoolean)
     async recordTopic(@Args() input: RecordTopicInput) {
-        const { topic, experationTime, maxSize } = input;
+        const { topic, experationTime, maxSize, maxFreq } = input;
         const expires = !!experationTime;
         const sizeLimited = !!maxSize;
+        const freqLimited = !!maxFreq;
         const bufferInfo = await TopicBufferInfo.find({ topic });
         switch (bufferInfo.length) {
             case 0:
@@ -107,6 +114,8 @@ class BufferResolver {
                     expires,
                     maxSize,
                     sizeLimited,
+                    maxFreq,
+                    freqLimited
                 })
                 await newBufInfo.save();
                 return { success: true };
@@ -115,6 +124,9 @@ class BufferResolver {
                 bufferInfo[0].expires = expires;
                 bufferInfo[0].maxSize = maxSize;
                 bufferInfo[0].sizeLimited = sizeLimited;
+                bufferInfo[0].freqLimited = freqLimited;
+                bufferInfo[0].maxFreq = maxFreq;
+
                 await bufferInfo[0].save();
                 return { success: true };
             default:

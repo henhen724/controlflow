@@ -11,7 +11,8 @@ it('buffer query returns data', async () => {
 it('record and delete buffer works', async () => {
     const testBuffer = {
         topic: "__TEST_BUFFER__",
-        maxSize: 2000
+        maxSize: 2000,
+        maxFreq: 1,
     };
     const rslt = await mutate({ mutation: RecordTopicGQL, variables: testBuffer });
     expect(rslt.data).toBeDefined();

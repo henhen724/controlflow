@@ -5,9 +5,10 @@ import { Replay as ReplayIcon, GetApp as GetAppIcon } from '@material-ui/icons';
 
 import { getErrorMessage } from './errorFormating';
 import { TopicArchive } from '../server/models/TopicArchive';
-import CsvDownloadModal from './csvDownloadModal';
 
 import { ArchiveInfoRslt, ArchiveQuery, ArchiveTopic, DeleteTopicArchive } from "./apollo/Archives";
+import { fullArchiveDownload } from './apollo/Archives';
+import CsvDownloadModal from './csvDownloadModal';
 
 interface TableState {
     columns: Array<Column<TopicArchive>>,
@@ -26,6 +27,15 @@ const Archives = () => {
     const [topicToDelete, setTopicToDelete] = useState<string | null>(null);
 
     const [topicToDownload, setTopicToDownload] = useState<string | null>(null);
+
+    const [getArchiveData, clearDownloadData, { data: downloadData, loading: downloadLoading, error: downloadError }] = fullArchiveDownload({
+        variables: { topic: topicToDownload! }
+    })
+    // let csvData;
+    // if (downloadData) {
+    //     console.log(downloadData)
+    //     csvData = downloadData.archiveData.edges.map(edge => edge.node.data);
+    // }
 
     const { loading, error, refetch: _refetch } = ArchiveQuery({
         onCompleted: (queryData) => {
@@ -82,6 +92,7 @@ const Archives = () => {
                                 onClick: (event, rowData) => {
                                     if (!Array.isArray(rowData)) {
                                         setTopicToDownload(rowData.topic);
+                                        getArchiveData({ variables: { topic: rowData.topic } });
                                     }
                                 }
                             },
@@ -155,7 +166,7 @@ const Archives = () => {
                         aria-labelledby="download-modal-title"
                         aria-describedby="download-modal-description"
                     >
-                        <CsvDownloadModal topic={topicToDownload} setTopic={setTopicToDownload} />
+                        <CsvDownloadModal data={downloadData} error={downloadError} loading={downloadLoading} topic={topicToDownload} setTopic={setTopicToDownload} clearDownloadData={clearDownloadData} />
                     </Dialog>
                 </Container>
             </div>
