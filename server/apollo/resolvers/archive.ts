@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { ObjectType, ArgsType, Arg, Resolver, Query, Mutation, Field, Int, ID, Args } from "type-graphql";
+import { ApolloError } from 'apollo-server';
 import { GraphQLJSON, GraphQLTimestamp } from "graphql-scalars";
 
 import SuccessBoolean from "../types/SuccessBoolean";
@@ -56,7 +57,6 @@ class ArchiveResolver {
 
     @Query(returns => ArchiveConnectionOuput)
     async archiveData(@Args() input: ArchiveDataInput) {
-        console.log("Data query started:", input)
         const { topic, from, to, first, after } = input;
         var query = { topic } as { topic: string, created?: { $gte?: Date, $lte?: Date } };
         if (from || to || after) {
@@ -65,9 +65,8 @@ class ArchiveResolver {
                 created: {}
             }
             if (from && after) {
-                const afterDate = new Date(after)
-                if (from < afterDate) {
-                    query.created = { ...query.created, $gte: afterDate }
+                if (from < after) {
+                    query.created = { ...query.created, $gte: after }
                 } else {
                     query.created = { ...query.created, $gte: from }
                 }
@@ -76,14 +75,16 @@ class ArchiveResolver {
                     query.created = { ...query.created, $gte: from }
                 }
                 if (after) {
-                    query.created = { ...query.created, $gte: new Date(after) }
+                    query.created = { ...query.created, $gte: after }
                 }
             }
             if (to)
                 query.created = { ...query.created, $lte: to }
         }
         const nodes = await ArchiveDataPacket.find(query).limit(first + 1).exec();
-        console.log("Query finished.")
+        if (nodes.length === 0) {
+            throw new ApolloError("No data is available for the selected time range.", "NO_DATA");
+        }
         const hasNextPage = nodes.length > first;
         const edges = nodes.splice(0, first).map(node => {
             return { node, cursor: node.created.getTime() }

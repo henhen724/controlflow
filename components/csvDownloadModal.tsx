@@ -1,4 +1,5 @@
 import { Button, CircularProgress, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
+import MaterialTable, { Column } from 'material-table';
 import { getErrorMessage } from './errorFormating';
 import download from 'downloadjs';
 import { Parser } from 'json2csv';
@@ -7,7 +8,7 @@ import { ApolloError } from '@apollo/client';
 interface csvDownloadProps {
     topic: string | null;
     setTopic: (topic: string | null) => void;
-    clearDownloadData: () => void;
+    clearDownloadData?: () => void;
     data: Object[] | undefined;
     loading: boolean;
     error?: ApolloError;
@@ -35,12 +36,12 @@ const flattenObject = (ob: any) => {
 }
 
 const csvDownloadModal = (props: csvDownloadProps) => {
-    console.log(props);
     if (!props.topic) {
         return <div>
             Internal Error: CSV Download recieved no topic.
         </div>
     }
+    console.log(props);
     if (props.loading) {
         return <CircularProgress />
     } else if (props.error) {
@@ -53,36 +54,18 @@ const csvDownloadModal = (props: csvDownloadProps) => {
                 download(parser.parse(rowData), `${props.topic}.csv`);
             }
             props.setTopic(null);
-            props.clearDownloadData();
+            props.clearDownloadData ? props.clearDownloadData() : true;
         }
         if (rowData.length === 0) {
             return <div>The ${props.topic} buffer is empty.</div>
         } else {
-            const colomnHeaders = Object.keys(rowData[0]);
+            const colomnHeaders = Object.keys(rowData[0]).map(key => { return { title: key, field: key, type: typeof rowData[0][key], editable: 'never' } }) as Array<Column<any>>;
             return (<>
-                <DialogTitle id="download-modal-title">Downloading {props.topic}</DialogTitle>
                 <DialogContent>
                     <DialogContentText id="download-modal-description">
-                        <TableContainer>
-                            <Table>
-                                <TableHead>
-                                    <TableRow>
-                                        {colomnHeaders.map(key => <TableCell>{key}</TableCell>)}
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {rowData.map(data => {
-                                        return (
-                                            <TableRow>
-                                                {colomnHeaders.map(key => {
-                                                    if (typeof data[key] !== 'object')
-                                                        return <TableCell>{data[key]}</TableCell>
-                                                })}
-                                            </TableRow>);
-                                    })}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                        <MaterialTable title={`Downloading ${props.topic}`} columns={colomnHeaders} data={rowData}>
+
+                        </MaterialTable>
                     </DialogContentText>
                 </DialogContent>
                 <DialogActions>

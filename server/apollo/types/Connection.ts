@@ -6,22 +6,22 @@ import { GraphQLJSON, GraphQLTimestamp } from "graphql-scalars";
 export class ConnectionInput {
     @Field(type => Int)
     first: number = 100;
-    @Field(type => ID, { nullable: true })
-    after?: number;
+    @Field(type => GraphQLTimestamp, { nullable: true })
+    after?: Date;
 }
 export const createConnectionOutput = (nodeType: any) => {
     @ObjectType()
     class Edge {
         @Field(type => nodeType)
         node: any;
-        @Field(type => ID)
-        cursor: number;
+        @Field(type => GraphQLTimestamp)
+        cursor: Date;
     }
 
     @ObjectType()
     class PageInfo {
-        @Field(type => ID)
-        endCursor: number;
+        @Field(type => GraphQLTimestamp)
+        endCursor: Date;
         @Field()
         hasNextPage: boolean;
     }

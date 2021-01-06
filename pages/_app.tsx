@@ -2,15 +2,14 @@ import { useEffect } from 'react';
 import { ApolloProvider, NormalizedCache } from '@apollo/client';
 import { AppProps } from 'next/app';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { useApollo } from '../components/apollo/client';
+import { myApolloClient } from '../components/apollo/client';
 import Theme from '../components/theme';
 import Head from 'next/head';
 
 
 
 // This default export is required in a new `pages/_app.js` file.
-export default function MyApp(props: AppProps<{ initialApolloState: NormalizedCache }>) {
-  const myApolloClient = useApollo(props.pageProps.initialApolloState);
+export default function MyApp(props: AppProps<{}>) {
 
   useEffect(() => {
     const jssStyles = document.querySelector('#jss-server-side');

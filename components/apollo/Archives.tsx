@@ -1,9 +1,10 @@
 import { ApolloError, gql, useMutation, useLazyQuery, useQuery, QueryHookOptions, MutationHookOptions } from '@apollo/client';
 import { TopicArchive } from '../../server/models/TopicArchive';
 import { useState } from 'react';
+import { myApolloClient } from './client';
 
 export const ArchiveDataQueryGQL = gql`
-query ArchiveDataQuery($topic:String!, $from:Timestamp, $to:Timestamp, $first:Int, $after:ID) {
+query ArchiveDataQuery($topic:String!, $from:Timestamp, $to:Timestamp, $first:Int, $after:Timestamp) {
     archiveData(topic: $topic, from: $from, to: $to, first: $first, after: $after) {
         edges {
             node{
@@ -23,6 +24,7 @@ export interface ArchiveDataQueryInput {
     to?: Date;
     first?: number;
     after?: number;
+    stopDownloading?: boolean;
 }
 
 interface edge {
@@ -44,51 +46,50 @@ interface DataQueryOutput {
 }
 
 
-export const ArchiveDataQuery = (opts?: QueryHookOptions<ArchiveDataOutput, ArchiveDataQueryInput>) => useQuery<ArchiveDataOutput, ArchiveDataQueryInput>(ArchiveDataQueryGQL, opts);
+interface ArchiveDownloadState {
+    data: Object[];
+    loading: boolean;
+    hasNextPage: boolean;
+    error?: ApolloError;
+    variables?: ArchiveDataQueryInput;
+}
 
-export const LazyArchiveDataQuery = (opts?: QueryHookOptions<ArchiveDataOutput, ArchiveDataQueryInput>) => useLazyQuery<ArchiveDataOutput, ArchiveDataQueryInput>(ArchiveDataQueryGQL, opts);
+export const useArchiveDownload = (): [ArchiveDownloadState, (variables: ArchiveDataQueryInput) => void] => {
+    const [state, setState] = useState<ArchiveDownloadState>({ data: [], loading: true, hasNextPage: false })
 
-export const fullArchiveDownload = (opts: QueryHookOptions<ArchiveDataOutput, ArchiveDataQueryInput>): [(newOpts?: QueryHookOptions<ArchiveDataOutput, ArchiveDataQueryInput>) => void, () => void, { data?: Object[], loading: boolean, error?: ApolloError, cursor?: number }] => {
-    const [data, setData] = useState<Object[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<ApolloError | undefined>(undefined);
-    const [cursor, setCursor] = useState<number | undefined>(undefined);
-
-    const [getData, { data: newData, error: newError }] = LazyArchiveDataQuery(opts);
-
-    const startLoadingData = (newOpts?: QueryHookOptions<ArchiveDataOutput, ArchiveDataQueryInput>) => {
-        opts = {
-            ...opts,
-            ...newOpts
+    const reducer = async (state: ArchiveDownloadState, variables: ArchiveDataQueryInput): Promise<ArchiveDownloadState> => {
+        if (variables.stopDownloading) {
+            return { ...state, hasNextPage: false, variables };
         }
-        setError(newError);
-        if (cursor) {
-            opts.variables!.after = cursor;
+        if (!variables || !variables.topic)
+            throw new Error(`Download data started with out adiquit arguements: topic ${variables ? variables.topic : "NO VARAIBLE OBJECT"}`);
+        const { data: newData, error: newError } = await myApolloClient.query<ArchiveDataOutput, ArchiveDataQueryInput>({ query: ArchiveDataQueryGQL, variables });
+        if (newData) {
+            var newRowData = newData!.archiveData.edges.map(edge => edge.node.data);
+            newRowData.push(...state.data);
+            return {
+                data: newRowData, loading: false,
+                hasNextPage: newData!.archiveData.pageInfo.hasNextPage,
+                error: newError,
+                variables: {
+                    ...variables,
+                    after: newData!.archiveData.pageInfo.endCursor
+                }
+            };
         }
-        opts.notifyOnNetworkStatusChange = true;
-        console.log(opts)
-        getData(opts);
+        return { ...state, loading: false, error: newError }
     }
 
-    const clearDownloadData = () => {
-        setData([]);
-        setLoading(true);
-        setError(undefined);
-        setCursor(undefined);
+    const setLoading = async (variables: ArchiveDataQueryInput) => {
+        const nextState = await reducer(state, variables);
+        setState(nextState);
     }
 
-    console.log("Download data:", newData);
-
-    if (newData && (!cursor || newData!.archiveData.pageInfo.endCursor > cursor)) {
-        console.log("Archive Data Q complete:", newData);
-        setLoading(false);
-        setData(data.concat(newData!.archiveData.edges.map(edge => edge.node.data)));
-        setCursor(newData!.archiveData.pageInfo.endCursor);
-        if (newData!.archiveData.pageInfo.hasNextPage)
-            startLoadingData();
+    if (state.hasNextPage && state.variables) {
+        setLoading(state.variables)
     }
 
-    return [startLoadingData, clearDownloadData, { data, loading, error, cursor }];
+    return [state, setLoading];
 }
 
 export const ArchiveQueryGQL = gql`

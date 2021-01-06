@@ -7,7 +7,7 @@ import { getErrorMessage } from './errorFormating';
 import { TopicArchive } from '../server/models/TopicArchive';
 
 import { ArchiveInfoRslt, ArchiveQuery, ArchiveTopic, DeleteTopicArchive } from "./apollo/Archives";
-import { fullArchiveDownload } from './apollo/Archives';
+import { useArchiveDownload } from './apollo/Archives';
 import CsvDownloadModal from './csvDownloadModal';
 
 interface TableState {
@@ -28,9 +28,7 @@ const Archives = () => {
 
     const [topicToDownload, setTopicToDownload] = useState<string | null>(null);
 
-    const [getArchiveData, clearDownloadData, { data: downloadData, loading: downloadLoading, error: downloadError }] = fullArchiveDownload({
-        variables: { topic: topicToDownload! }
-    })
+    const [{ data: downloadData, loading: downloadLoading, error: downloadError }, getArchiveData] = useArchiveDownload()
     // let csvData;
     // if (downloadData) {
     //     console.log(downloadData)
@@ -92,7 +90,7 @@ const Archives = () => {
                                 onClick: (event, rowData) => {
                                     if (!Array.isArray(rowData)) {
                                         setTopicToDownload(rowData.topic);
-                                        getArchiveData({ variables: { topic: rowData.topic } });
+                                        getArchiveData({ topic: rowData.topic });
                                     }
                                 }
                             },
@@ -166,7 +164,7 @@ const Archives = () => {
                         aria-labelledby="download-modal-title"
                         aria-describedby="download-modal-description"
                     >
-                        <CsvDownloadModal data={downloadData} error={downloadError} loading={downloadLoading} topic={topicToDownload} setTopic={setTopicToDownload} clearDownloadData={clearDownloadData} />
+                        <CsvDownloadModal data={downloadData} error={downloadError} loading={downloadLoading} topic={topicToDownload} setTopic={setTopicToDownload} clearDownloadData={() => { getArchiveData({ topic: "", stopDownloading: true }) }} />
                     </Dialog>
                 </Container>
             </div>

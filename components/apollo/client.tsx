@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { ApolloClient, ApolloLink, split, InMemoryCache, NormalizedCache, NormalizedCacheObject, HttpLink } from '@apollo/client';
 import { WebSocketLink } from '@apollo/client/link/ws';
 import { getMainDefinition } from '@apollo/client/utilities';
+import fetch from "cross-fetch";
 
 let apolloClient: ApolloClient<NormalizedCacheObject>;
 
@@ -16,6 +17,7 @@ function createIsomorphLink() {
     const httpLink = new HttpLink({
       uri: '/graphql',
       credentials: 'same-origin',
+      fetch
     });
     const WEBSOCKET_URI = process.env.NODE_ENV === 'production' && window.location.hostname !== 'localhost' ? `wss://${window.location.host}/graphql` : `ws://${window.location.host}/graphql`;
     const wsLink = new WebSocketLink({
@@ -62,7 +64,9 @@ export function initializeApollo(initialState?: NormalizedCache) {
   return _apolloClient
 }
 
-export function useApollo(initialState: undefined | NormalizedCache) {
-  const store = useMemo(() => initializeApollo(initialState), [initialState])
-  return store
-}
+// export function useApollo(initialState?: NormalizedCache) {
+//   const store = useMemo(() => initializeApollo(initialState), [initialState])
+//   return store
+// }
+
+export const myApolloClient = initializeApollo();
