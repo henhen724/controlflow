@@ -28,7 +28,7 @@ export const archiveListner = (msgTopic: string, message: Buffer) => {
 }
 
 export const updateTopicSubsriptions = async (client: MqttClient) => {
-    const newTopicArchive = await TopicArchiveModel.find().exec();
+    const newTopicArchive = (await TopicArchiveModel.find()) as TopicArchive[];
     var oldTopics = [] as string[];
     if (topicArchiveInfos)
         oldTopics = topicArchiveInfos.map(({ topic }) => topic);

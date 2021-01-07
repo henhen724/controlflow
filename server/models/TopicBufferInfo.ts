@@ -28,4 +28,4 @@ export class BufferInfo {
     freqLimited!: Boolean;
 }
 
-export default models.TopicBuffersInfo as ReturnModelType<typeof BufferInfo, BufferQueries> || getModelForClass(BufferInfo);
+export default models.TopicBuffersInfo as ReturnModelType<typeof BufferInfo, {}> || getModelForClass(BufferInfo);

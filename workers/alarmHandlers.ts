@@ -28,7 +28,7 @@ export const alarmListner = (client: GraphQLClient, msgTopic: string, message: B
 }
 
 export const updateTopicSubsriptions = async (client: MqttClient) => {
-    currWatchdogs = await WatchdogModel.find().exec();
+    currWatchdogs = (await WatchdogModel.find()) as Watchdog[];
     topics = currWatchdogs.reduce((topicsSoFar, { topics }) => topicsSoFar.concat(topics), [] as string[]);
     if (topics.length !== 0) {
         client.subscribe(topics, err => {

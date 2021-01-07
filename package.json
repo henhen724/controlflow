@@ -7,7 +7,6 @@
     "test": "jest",
     "clean": "rimraf .dist",
     "build": "next build && tsc --project server/tsconfig.json",
-    "docs": "typedoc --plugin typedoc-plugin-markdown",
     "start:server": "cross-env NODE_ENV=production node .dist/server/index.js",
     "start:worker": "cross-env NODE_ENV=production node .dist/workers/index.js"
   },

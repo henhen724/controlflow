@@ -1,6 +1,6 @@
 import DataPacket from '../server/models/DataPacket';
 import { MqttClient } from 'mqtt';
-import findBufferSize from '../server/lib/findBufferSize';
+import { findBufferSize } from '../server/lib/findBufferSize';
 import BufferInfoModel, { BufferInfo } from '../server/models/TopicBufferInfo';
 
 let topicBufferInfos = null as BufferInfo[] | null;
@@ -41,7 +41,7 @@ export const removeExpiredPackets = async () => {
             const bufferInfo = topicBufferInfos[i];
             if (bufferInfo.expires && bufferInfo.experationTime) {
                 const creationTimeOfExpPacket = new Date(Date.now() - bufferInfo.experationTime);
-                DataPacket.deleteMany({ topic: bufferInfo.topic, created: { $lte: creationTimeOfExpPacket } }, err => {
+                DataPacket.deleteMany({ topic: bufferInfo.topic, created: { $lte: creationTimeOfExpPacket } }, (err: any) => {
                     if (err)
                         console.error(err);
                 })
@@ -69,7 +69,7 @@ export const removePacketsOverMemLimit = async () => {
 }
 
 export const updateTopicSubsriptions = async (client: MqttClient) => {
-    const newTopicBufferInfos = await BufferInfoModel.find().exec();
+    const newTopicBufferInfos = (await BufferInfoModel.find()) as BufferInfo[];
     var oldTopics = [] as string[];
     if (topicBufferInfos)
         oldTopics = topicBufferInfos.map(({ topic }) => topic);
