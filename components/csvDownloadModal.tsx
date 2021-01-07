@@ -1,4 +1,4 @@
-import { Button, CircularProgress, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, DialogTitle, DialogContent, DialogContentText, DialogActions } from '@material-ui/core';
+import { Button, CircularProgress, TableContainer, Table, TableHead, TableBody, TableRow, TableCell, DialogTitle, DialogContent, DialogContentText, DialogActions, LinearProgress } from '@material-ui/core';
 import MaterialTable, { Column } from 'material-table';
 import { getErrorMessage } from './errorFormating';
 import download from 'downloadjs';
@@ -62,6 +62,7 @@ const csvDownloadModal = (props: csvDownloadProps) => {
             const colomnHeaders = Object.keys(rowData[0]).map(key => { return { title: key, field: key, type: typeof rowData[0][key], editable: 'never' } }) as Array<Column<any>>;
             return (<>
                 <DialogContent>
+                    <LinearProgress variant="determinate" value={props.progress} />
                     <DialogContentText id="download-modal-description">
                         <MaterialTable title={`Downloading ${props.topic}`} columns={colomnHeaders} data={rowData}>
 
@@ -72,7 +73,7 @@ const csvDownloadModal = (props: csvDownloadProps) => {
                     <Button onClick={() => onDownloadModalFinish(false)} color="primary">
                         Cancel
                         </Button>
-                    <Button onClick={() => onDownloadModalFinish(true)} color="primary">
+                    <Button onClick={() => onDownloadModalFinish(true)} color="primary" disabled={!!props.progress && props.progress !== 100}>
                         Save CSV
                         </Button>
                 </DialogActions>

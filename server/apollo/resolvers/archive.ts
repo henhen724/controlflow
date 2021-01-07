@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { ObjectType, ArgsType, Arg, Resolver, Query, Mutation, Field, Int, ID, Args } from "type-graphql";
 import { ApolloError } from 'apollo-server';
 import { GraphQLJSON, GraphQLTimestamp } from "graphql-scalars";
+import { findArchiveSize } from "../../lib/findBufferSize";
 
 import SuccessBoolean from "../types/SuccessBoolean";
 
@@ -14,6 +15,12 @@ import { ConnectionInput, createConnectionOutput } from "../types/Connection";
 class ArchiveInfo {
     @Field()
     topic: string;
+    @Field(type => GraphQLTimestamp, { nullable: true })
+    earliest: Date;
+    @Field(type => GraphQLTimestamp, { nullable: true })
+    latest: Date;
+    @Field(type => Int)
+    size: number;
 }
 
 @ObjectType()
@@ -48,8 +55,17 @@ class ArchiveResolver {
     async runningArchives() {
         const archives = await TopicArchive.find({}).exec();
         const archiveMoreInfo = [];
+        const archiveStatistics = (await ArchiveDataPacket.aggregate([
+            { $group: { _id: "$topic", latest: { $max: "$created" }, earliest: { $min: "$created" } } }
+        ]));
         for (var i = 0; i < archives.length; i++) {
-            const archive = archives[i] as any;
+            const archive = archives[i] as { topic: string, earliest?: Date, latest?: Date, size?: number };
+            const stats = archiveStatistics.find((stats: any) => archive.topic === stats._id);
+            if (stats) {
+                archive.earliest = stats.earliest;
+                archive.latest = stats.latest;
+            }
+            archive.size = (await findArchiveSize(archive.topic)).total_size;
             archiveMoreInfo.push(archive);
         }
         return archiveMoreInfo;
@@ -83,10 +99,10 @@ class ArchiveResolver {
         }
         const nodes = await ArchiveDataPacket.find(query).limit(first + 1).exec();
         if (nodes.length === 0) {
-            throw new ApolloError("No data is available for the selected time range.", "NO_DATA");
+            return { edges: [], pageInfo: { hasNextPage: false, endCursor: 0 } }
         }
         const hasNextPage = nodes.length > first;
-        const edges = nodes.splice(0, first).map(node => {
+        const edges = nodes.splice(0, first).map((node: any) => {
             return { node, cursor: node.created.getTime() }
         })
         const endCursor = edges[edges.length - 1].cursor;

@@ -1,18 +1,26 @@
 import { useState, useCallback } from 'react';
 import MaterialTable, { Column } from 'material-table';
-import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@material-ui/core';
+import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, LinearProgress, TextField } from '@material-ui/core';
 import { Replay as ReplayIcon, GetApp as GetAppIcon } from '@material-ui/icons';
 
 import { getErrorMessage } from './errorFormating';
-import { TopicArchive } from '../server/models/TopicArchive';
 
-import { ArchiveInfoRslt, ArchiveQuery, ArchiveTopic, DeleteTopicArchive } from "./apollo/Archives";
+import { ArchiveInfoRslt, ArchiveQuery, ArchiveTopic, DeleteTopicArchive, ArchiveInfo, ArchiveDataQueryInput } from "./apollo/Archives";
 import { useArchiveDownload } from './apollo/Archives';
 import CsvDownloadModal from './csvDownloadModal';
+import { formatByteSize } from './lib/formatByteSize';
+import { DateTime } from 'luxon';
+DateTime.local()
 
 interface TableState {
-    columns: Array<Column<TopicArchive>>,
-    data: TopicArchive[],
+    columns: Array<Column<ArchiveInfo>>,
+    data: ArchiveInfo[],
+}
+
+interface TimeSelectionState {
+    from?: number;
+    to?: number;
+    selecting: boolean;
 }
 
 const Archives = () => {
@@ -20,6 +28,23 @@ const Archives = () => {
     const [state, setState] = useState<TableState>({
         columns: [
             { title: 'Topic Name', field: 'topic', type: 'string', editable: 'onAdd' },
+            { title: 'Current Size', field: 'size', type: 'numeric', render: rowData => formatByteSize(rowData.size) },
+            {
+                title: 'Earliest packet recorded', field: 'earliest', render: rowData => {
+                    if (rowData.earliest)
+                        return DateTime.fromMillis(rowData.earliest).toFormat("h:mm:ss a DD");
+                    else
+                        return "";
+                }
+            },
+            {
+                title: 'Latest packet recorded', field: 'latest', render: rowData => {
+                    if (rowData.latest)
+                        return DateTime.fromMillis(rowData.latest).toFormat("h:mm:ss a DD");
+                    else
+                        return "";
+                }
+            }
         ],
         data: [],
     })
@@ -28,12 +53,9 @@ const Archives = () => {
 
     const [topicToDownload, setTopicToDownload] = useState<string | null>(null);
 
-    const [{ data: downloadData, loading: downloadLoading, error: downloadError }, getArchiveData] = useArchiveDownload()
-    // let csvData;
-    // if (downloadData) {
-    //     console.log(downloadData)
-    //     csvData = downloadData.archiveData.edges.map(edge => edge.node.data);
-    // }
+    const [timeSelectState, setTimeSelectState] = useState<TimeSelectionState>({ selecting: false });
+
+    const [{ data: downloadData, loading: downloadLoading, error: downloadError, progress }, getArchiveData] = useArchiveDownload()
 
     const { loading, error, refetch: _refetch } = ArchiveQuery({
         onCompleted: (queryData) => {
@@ -58,7 +80,7 @@ const Archives = () => {
         console.log(`Accepted: ${accepted}\nTopic to Delete: ${topicToDelete}`);
         if (accepted && topicToDelete) {
             setState((prevState) => {
-                const data = prevState.data.filter((topicObj: TopicArchive) => topicObj.topic !== topicToDelete);
+                const data = prevState.data.filter((topicObj: ArchiveInfo) => topicObj.topic !== topicToDelete);
                 return { ...prevState, data };
             });
             deleteTopic({
@@ -70,6 +92,29 @@ const Archives = () => {
             }).catch(err => getErrorMessage(err))
         } else {
             setTopicToDelete(null);
+        }
+    }
+
+    const onTimeSelectModalFinish = (accepted: boolean) => {
+        if (accepted) {
+            setTimeSelectState({ ...timeSelectState, selecting: false });
+            var query = { topic: topicToDownload! } as ArchiveDataQueryInput;
+            if (timeSelectState.from) {
+                query = {
+                    ...query,
+                    from: new Date(timeSelectState.from)
+                }
+            }
+            if (timeSelectState.to) {
+                query = {
+                    ...query,
+                    to: new Date(timeSelectState.to)
+                }
+            }
+            getArchiveData(query)
+        } else {
+            setTopicToDownload(null);
+            setTimeSelectState({ selecting: false });
         }
     }
 
@@ -89,8 +134,8 @@ const Archives = () => {
                                 tooltip: 'Download Data',
                                 onClick: (event, rowData) => {
                                     if (!Array.isArray(rowData)) {
+                                        setTimeSelectState({ selecting: true, from: rowData.earliest, to: rowData.latest });
                                         setTopicToDownload(rowData.topic);
-                                        getArchiveData({ topic: rowData.topic });
                                     }
                                 }
                             },
@@ -158,13 +203,63 @@ const Archives = () => {
                         </DialogActions>
                     </Dialog>
                     <Dialog
-                        open={!!topicToDownload}
+                        open={timeSelectState.selecting}
+                        keepMounted
+                        onClose={() => onTimeSelectModalFinish(false)}
+                        aria-labelledby="time-select-modal-title"
+                        aria-describedby="time-select-modal-description"
+                    >
+                        <DialogContent>
+                            <TextField
+                                id="datetime-local"
+                                label="Beginning"
+                                type="datetime-local"
+                                value={timeSelectState.from ? DateTime.fromMillis(timeSelectState.from).toFormat("yyyy'-'LL'-'dd'T'HH':'mm") : ""}
+                                onChange={(e) => {
+                                    console.log(e.target.value)
+                                    setTimeSelectState({
+                                        ...timeSelectState,
+                                        from: DateTime.fromISO(e.target.value).toMillis()
+                                    })
+                                }}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                            <TextField
+                                id="datetime-local"
+                                label="Ending"
+                                type="datetime-local"
+                                value={timeSelectState.to ? DateTime.fromMillis(timeSelectState.to).toFormat("yyyy'-'LL'-'dd'T'HH':'mm") : ""}
+                                onChange={(e) => {
+                                    console.log(e.target.value)
+                                    setTimeSelectState({
+                                        ...timeSelectState,
+                                        to: DateTime.fromISO(e.target.value).toMillis()
+                                    })
+                                }}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                            />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => onTimeSelectModalFinish(false)} color="primary">
+                                Disagree
+                            </Button>
+                            <Button onClick={() => onTimeSelectModalFinish(true)} color="primary">
+                                Agree
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                    <Dialog
+                        open={!!topicToDownload && !timeSelectState.selecting}
                         keepMounted
                         onClose={() => setTopicToDownload(null)}
                         aria-labelledby="download-modal-title"
                         aria-describedby="download-modal-description"
                     >
-                        <CsvDownloadModal data={downloadData} error={downloadError} loading={downloadLoading} topic={topicToDownload} setTopic={setTopicToDownload} clearDownloadData={() => { getArchiveData({ topic: "", stopDownloading: true }) }} />
+                        <CsvDownloadModal data={downloadData} error={downloadError} progress={progress} loading={downloadLoading} topic={topicToDownload} setTopic={setTopicToDownload} clearDownloadData={() => { getArchiveData({ topic: "", stopDownloading: true }) }} />
                     </Dialog>
                 </Container>
             </div>

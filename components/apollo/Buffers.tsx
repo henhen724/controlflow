@@ -1,5 +1,4 @@
 import { gql, useMutation, MutationTuple, useQuery, QueryHookOptions, MutationHookOptions, QueryResult } from '@apollo/client';
-import { BufferInfo } from '../../server/models/TopicBufferInfo';
 
 export const BufferQueryGQL = gql`
 query BuffersQuery {
@@ -13,6 +12,16 @@ query BuffersQuery {
     }
 }
 `
+
+export interface BufferInfo {
+    topic: string;
+    expires: boolean;
+    experationTime: number;
+    sizeLimited: boolean;
+    maxSize: number;
+    currSize: number;
+
+}
 
 export interface BufferQueryRslt {
     runningBuffers: BufferInfo[]

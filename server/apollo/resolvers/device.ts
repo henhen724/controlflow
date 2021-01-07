@@ -60,7 +60,7 @@ class DeviceResolver {
 
     @Mutation(returns => SuccessBoolean, { description: "This route allows the worker to tell the server that a device has connected.  You do not need to call this route to connect a device." })
     async connect(@Args() device: ConnInput, @PubSub("CONNECT") publish: Publisher<Device>) {
-        await DeviceModel.updateOne({ ip: device.ip }, device, (err, deviceM) => {
+        await DeviceModel.updateOne({ ip: device.ip }, device, (err: string | undefined, deviceM: any) => {
             if (err) throw new UserInputError(err);
             publish(deviceM.toObject());
         }).exec();

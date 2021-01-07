@@ -1,15 +1,15 @@
 import { useState, useCallback } from 'react';
 import MaterialTable, { Column } from 'material-table';
-import { ApolloError } from '@apollo/client'
+import { ApolloError } from '@apollo/client';
 import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton } from '@material-ui/core';
 import { Replay as ReplayIcon, GetApp as GetAppIcon } from '@material-ui/icons';
 
 import { getErrorMessage } from './errorFormating';
-import { BufferInfo } from '../server/models/TopicBufferInfo';
 import { LazyDataQuery } from './apollo/Data';
 import CsvDownloadModal from './csvDownloadModal';
+import { formatByteSize } from './lib/formatByteSize';
 
-import { BufferQuery, BufferQueryRslt, BufferPacket, RecordTopic, DeleteTopic } from "./apollo/Buffers";
+import { BufferQuery, BufferQueryRslt, BufferPacket, RecordTopic, DeleteTopic, BufferInfo } from "./apollo/Buffers";
 
 interface TableState {
     columns: Array<Column<BufferInfo>>,
@@ -21,11 +21,11 @@ const Buffers = () => {
     const [state, setState] = useState<TableState>({
         columns: [
             { title: 'Topic Name', field: 'topic', type: 'string', editable: 'onAdd' },
-            { title: 'Current Size', field: 'currSize', type: 'numeric', editable: 'never' },
+            { title: 'Current Size', field: 'currSize', render: rowData => formatByteSize(rowData.currSize) },
             { title: 'Packets Expire (T/F)', field: 'expires', type: 'boolean', editable: 'always' },
             { title: 'Experation Time (ms)', field: 'experationTime', type: 'numeric', editable: 'always' },
             { title: 'Is Memory Limited (T/F)', field: 'sizeLimited', type: 'boolean', editable: 'always' },
-            { title: 'Memory Limit (bytes)', field: 'maxSize', type: 'numeric', editable: 'always' },
+            { title: 'Memory Limit', field: 'maxSize', type: 'numeric', editable: 'always', render: rowData => formatByteSize(rowData.maxSize) },
         ],
         data: [],
     })

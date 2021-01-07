@@ -52,6 +52,7 @@ interface ArchiveDownloadState {
     hasNextPage: boolean;
     error?: ApolloError;
     variables?: ArchiveDataQueryInput;
+    progress?: number;
 }
 
 export const useArchiveDownload = (): [ArchiveDownloadState, (variables: ArchiveDataQueryInput) => void] => {
@@ -67,14 +68,20 @@ export const useArchiveDownload = (): [ArchiveDownloadState, (variables: Archive
         if (newData) {
             var newRowData = newData!.archiveData.edges.map(edge => edge.node.data);
             newRowData.push(...state.data);
+            const currTime = newData!.archiveData.pageInfo.endCursor;
+            let progress;
+            if (variables.from && variables.to) {
+                progress = (currTime - variables.from.getTime()) / (variables.to.getTime() - variables.from.getTime()) * 100;
+            }
             return {
                 data: newRowData, loading: false,
                 hasNextPage: newData!.archiveData.pageInfo.hasNextPage,
                 error: newError,
                 variables: {
                     ...variables,
-                    after: newData!.archiveData.pageInfo.endCursor
-                }
+                    after: currTime,
+                },
+                progress
             };
         }
         return { ...state, loading: false, error: newError }
@@ -85,8 +92,10 @@ export const useArchiveDownload = (): [ArchiveDownloadState, (variables: Archive
         setState(nextState);
     }
 
-    if (state.hasNextPage && state.variables) {
+    if (state.hasNextPage && state.variables && !state.variables.stopDownloading) {
         setLoading(state.variables)
+    } else if (state.variables && state.variables.stopDownloading) {
+        setState({ data: [], loading: true, hasNextPage: false });
     }
 
     return [state, setLoading];
@@ -96,11 +105,21 @@ export const ArchiveQueryGQL = gql`
 query ArchivesQuery {
     runningArchives {
         topic
+        earliest
+        latest
+        size
     }
 }
 `
+export interface ArchiveInfo {
+    topic: string;
+    earliest?: number;
+    latest?: number;
+    size: number;
+}
+
 export interface ArchiveInfoRslt {
-    runningArchives: TopicArchive[]
+    runningArchives: ArchiveInfo[]
 }
 
 export const ArchiveQuery = (opts?: QueryHookOptions<ArchiveInfoRslt, {}>) => useQuery<ArchiveInfoRslt, {}>(ArchiveQueryGQL, opts);

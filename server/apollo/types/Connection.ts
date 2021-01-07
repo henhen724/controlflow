@@ -5,7 +5,7 @@ import { GraphQLJSON, GraphQLTimestamp } from "graphql-scalars";
 @ArgsType()
 export class ConnectionInput {
     @Field(type => Int)
-    first: number = 100;
+    first: number = 1000;
     @Field(type => GraphQLTimestamp, { nullable: true })
     after?: Date;
 }

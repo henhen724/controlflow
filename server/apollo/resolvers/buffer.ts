@@ -5,7 +5,7 @@ import { GraphQLJSON, GraphQLTimestamp } from "graphql-scalars";
 import SuccessBoolean from "../types/SuccessBoolean";
 
 import TopicBufferInfo from "../../models/TopicBufferInfo";
-import findBufferSize from "../../lib/findBufferSize";
+import { findBufferSize } from "../../lib/findBufferSize";
 import DataPacketModel from "../../models/DataPacket";
 
 import { MQTTPubSub } from 'graphql-mqtt-subscriptions';
