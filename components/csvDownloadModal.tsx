@@ -13,6 +13,9 @@ interface csvDownloadProps {
     loading: boolean;
     error?: ApolloError;
     progress?: number;
+    csvLink?: string;
+    csvLinkLoading?: boolean;
+    useCsvLink?: boolean;
 }
 
 const flattenObject = (ob: any) => {

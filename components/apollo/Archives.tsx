@@ -3,6 +3,27 @@ import { TopicArchive } from '../../server/models/TopicArchive';
 import { useState } from 'react';
 import { myApolloClient } from './client';
 
+export const ArchiveCSVGQL = gql`
+query CSVQuery($topic:String!, $from:Timestamp, $to:Timestamp, $first:Int, $after:Timestamp) {
+    archiveDataCSVFile(topic: $topic, from: $from, to: $to, first: $first, after: $after)
+}
+`
+
+export interface ArchiveDataQueryInput {
+    topic: string;
+    from?: Date;
+    to?: Date;
+    first?: number;
+    after?: number;
+    stopDownloading?: boolean;
+}
+
+interface ArchiveCSVOutput {
+    archiveDataCSVFile: string;
+}
+
+export const ArchiveCSVDownload = (opts?: QueryHookOptions<ArchiveCSVOutput, ArchiveDataQueryInput>) => useLazyQuery<ArchiveCSVOutput, ArchiveDataQueryInput>(ArchiveCSVGQL, opts);
+
 export const ArchiveDataQueryGQL = gql`
 query ArchiveDataQuery($topic:String!, $from:Timestamp, $to:Timestamp, $first:Int, $after:Timestamp) {
     archiveData(topic: $topic, from: $from, to: $to, first: $first, after: $after) {
@@ -18,14 +39,6 @@ query ArchiveDataQuery($topic:String!, $from:Timestamp, $to:Timestamp, $first:In
     }
 }
 `
-export interface ArchiveDataQueryInput {
-    topic: string;
-    from?: Date;
-    to?: Date;
-    first?: number;
-    after?: number;
-    stopDownloading?: boolean;
-}
 
 interface edge {
     node: {

@@ -21,6 +21,7 @@
     "@typegoose/typegoose": "^7.4.1",
     "apollo-link-schema": "^1.2.5",
     "apollo-server": "^2.15.0-alpha.1",
+    "aws-sdk": "^2.824.0",
     "bootstrap": "^4.5.0",
     "bson": "^4.0.4",
     "class-validator": "^0.12.2",
@@ -59,6 +60,7 @@
     "@babel/core": "^7.11.6",
     "@babel/plugin-proposal-decorators": "^7.10.5",
     "@types/accept": "^3.1.1",
+    "@types/aws-sdk": "^2.7.0",
     "@types/chai": "^4.2.12",
     "@types/cookie": "^0.4.0",
     "@types/downloadjs": "^1.4.2",
@@ -72,6 +74,7 @@
     "@types/node": "^14.0.14",
     "@types/react": "^16.9.41",
     "@types/recharts": "^1.8.15",
+    "@types/uuid": "^8.3.0",
     "@zeit/next-typescript": "^1.1.1",
     "apollo-server-testing": "^2.15.0-alpha.1",
     "babel-plugin-transform-typescript-metadata": "^0.3.0",
@@ -83,8 +86,6 @@
     "rimraf": "^3.0.2",
     "ts-jest": "^26.3.0",
     "ts-node": "^8.10.2",
-    "typedoc": "^0.19.1",
-    "typedoc-plugin-markdown": "^2.4.2",
     "typescript": "^4.0.0-dev.20200729"
   }
 }

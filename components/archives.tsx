@@ -5,7 +5,7 @@ import { Replay as ReplayIcon, GetApp as GetAppIcon } from '@material-ui/icons';
 
 import { getErrorMessage } from './errorFormating';
 
-import { ArchiveInfoRslt, ArchiveQuery, ArchiveTopic, DeleteTopicArchive, ArchiveInfo, ArchiveDataQueryInput } from "./apollo/Archives";
+import { ArchiveInfoRslt, ArchiveCSVDownload, ArchiveQuery, ArchiveTopic, DeleteTopicArchive, ArchiveInfo, ArchiveDataQueryInput } from "./apollo/Archives";
 import { useArchiveDownload } from './apollo/Archives';
 import CsvDownloadModal from './csvDownloadModal';
 import { formatByteSize } from './lib/formatByteSize';
@@ -56,6 +56,7 @@ const Archives = () => {
     const [timeSelectState, setTimeSelectState] = useState<TimeSelectionState>({ selecting: false });
 
     const [{ data: downloadData, loading: downloadLoading, error: downloadError, progress }, getArchiveData] = useArchiveDownload()
+    const [getArchiveCSVLink, { data: csvLink, loading: csvLoading }] = ArchiveCSVDownload();
 
     const { loading, error, refetch: _refetch } = ArchiveQuery({
         onCompleted: (queryData) => {
@@ -112,6 +113,7 @@ const Archives = () => {
                 }
             }
             getArchiveData(query)
+            getArchiveCSVLink({ variables: query });
         } else {
             setTopicToDownload(null);
             setTimeSelectState({ selecting: false });

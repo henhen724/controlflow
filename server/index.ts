@@ -1,5 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
+import AWS from 'aws-sdk';
+AWS.config.update({ region: 'us-east-2' })
+
 import { MongoError } from 'mongodb';
 import { createServer } from 'http';
 import next from 'next';
@@ -36,6 +39,7 @@ const startServer = async () => {
 
     const expressApp = express();
     const schema = await makeSchema();
+    const s3 = new AWS.S3({ apiVersion: '2006-03-01' });
     const apollo = new ApolloServer({
         schema,
         context: (ctx) => {
@@ -43,6 +47,7 @@ const startServer = async () => {
                 session: getSession(ctx.req, ctx.res),
                 req: ctx.req,
                 res: ctx.res,
+                s3
             }
         },
         introspection: true,

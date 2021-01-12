@@ -8,8 +8,5 @@
       "strictPropertyInitialization": false,
       "noEmit": false
     },
-    "include": ["**/*.ts", "models/**/*.ts", "lib/**/*.ts", "apollo/**/*.ts", "../workers/**/*.ts"],
-    "typedocOptions": {
-      "out": "docs"
-    }
+    "include": ["**/*.ts", "models/**/*.ts", "lib/**/*.ts", "apollo/**/*.ts", "../workers/**/*.ts"]
 }
