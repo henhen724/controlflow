@@ -43,7 +43,7 @@
     "luxon": "^1.25.0",
     "material-table": "1.67.1",
     "mongoose": "^5.11.10",
-    "next": "^9.4.4",
+    "next": "^9.5.4",
     "popper.js": "^1.16.1",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
