@@ -56,7 +56,7 @@ const Archives = () => {
     const [timeSelectState, setTimeSelectState] = useState<TimeSelectionState>({ selecting: false });
 
     const [{ data: downloadData, loading: downloadLoading, error: downloadError, progress }, getArchiveData] = useArchiveDownload()
-    const [getArchiveCSVLink, { data: csvLink, loading: csvLoading }] = ArchiveCSVDownload();
+    const [getArchiveCSVLink, { data: archiveData, loading: csvLoading }] = ArchiveCSVDownload();
 
     const { loading, error, refetch: _refetch } = ArchiveQuery({
         onCompleted: (queryData) => {
@@ -261,7 +261,7 @@ const Archives = () => {
                         aria-labelledby="download-modal-title"
                         aria-describedby="download-modal-description"
                     >
-                        <CsvDownloadModal data={downloadData} error={downloadError} progress={progress} loading={downloadLoading} topic={topicToDownload} setTopic={setTopicToDownload} clearDownloadData={() => { getArchiveData({ topic: "", stopDownloading: true }) }} />
+                        <CsvDownloadModal data={downloadData} error={downloadError} progress={progress} loading={downloadLoading} topic={topicToDownload} setTopic={setTopicToDownload} clearDownloadData={() => { getArchiveData({ topic: "", stopDownloading: true }) }} csvLinkLoading={csvLoading} csvLink={archiveData ? archiveData.archiveDataCSVFile : undefined} useCsvLink={true} />
                     </Dialog>
                 </Container>
             </div>

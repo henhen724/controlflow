@@ -59,6 +59,20 @@ const csvDownloadModal = (props: csvDownloadProps) => {
             props.setTopic(null);
             props.clearDownloadData ? props.clearDownloadData() : true;
         }
+        var downloadCSVButton = <Button onClick={() => onDownloadModalFinish(true)} color="primary" disabled={!!props.progress && props.progress !== 100}>
+            Save CSV
+        </Button>
+        if (props.useCsvLink) {
+            downloadCSVButton = <Button onClick={() => {
+                if (props.csvLink)
+                    download(props.csvLink);
+                else
+                    console.log("Use press download before link exists.")
+                onDownloadModalFinish(false)
+            }} color="primary" disabled={props.csvLinkLoading}>
+                Save CSV
+        </Button>
+        }
         if (rowData.length === 0) {
             return <div>The ${props.topic} buffer is empty.</div>
         } else {
