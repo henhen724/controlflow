@@ -4,7 +4,7 @@ import { GraphQLJSON, GraphQLTimestamp } from "graphql-scalars";
 import { v4 } from 'uuid';
 import { S3 } from 'aws-sdk';
 import { Transform as CSVTransform } from 'json2csv';
-import { Transform, TransformCallback } from 'stream';
+import { Transform, TransformCallback, pipeline } from 'stream';
 
 import { findArchiveSize } from "../../lib/findBufferSize";
 import SuccessBoolean from "../types/SuccessBoolean";
@@ -71,34 +71,6 @@ const flattenObject = (ob: any) => {
     return toReturn;
 }
 
-const getDataTransform = new Transform({
-    readableObjectMode: true,
-    writableObjectMode: true,
-    transform(chunk: ArchiveDataPacket, encoding: BufferEncoding, callback: TransformCallback) {
-        if (chunk)
-            this.push(flattenObject(chunk.data));
-        callback();
-    }
-});
-
-let data = "";
-
-const bufferTranform = new Transform({
-    transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback) {
-        data += chunk.toString();
-        if (data.length > 1000000) {
-            this.push(data);
-            data = "";
-        }
-        callback();
-    },
-    flush(callback: TransformCallback) {
-        this.push(data);
-        data = "";
-        callback();
-    }
-});
-
 @Resolver()
 class ArchiveResolver {
     @Query(returns => [ArchiveInfo])
@@ -124,6 +96,7 @@ class ArchiveResolver {
     @Query(returns => String)
     async archiveDataCSVFile(@Args() input: ArchiveDataInput, @Ctx() ctx: { s3: S3 }): Promise<String> {
         const { topic, from, to } = input;
+        //console.log("starting csv query.");
         var query = { topic } as { topic: string, created?: { $gte?: Date, $lte?: Date } };
         query = {
             ...query
@@ -141,15 +114,59 @@ class ArchiveResolver {
             return "";
 
         const json2csv = new CSVTransform({ fields: Object.keys(flattenObject(exampleObject.data)) }, { objectMode: true, encoding: 'utf-8' });
-        const csvStream = ArchiveDataPacketModel.find(query).cursor({ batchSize: 10000 }).pipe(getDataTransform).pipe(json2csv).pipe(bufferTranform);
+        const getDataTransform = new Transform({
+            readableObjectMode: true,
+            writableObjectMode: true,
+            transform(chunk: ArchiveDataPacket, encoding: BufferEncoding, callback: TransformCallback) {
+                if (chunk)
+                    this.push(flattenObject(chunk.data));
+                callback();
+            }
+        });
+
+        let data = "";
+
+        const bufferTranform = new Transform({
+            transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback) {
+                data += chunk.toString();
+                if (data.length > 100000) {
+                    //console.log("Sending megabyte");
+                    this.push(Buffer.from(data, 'utf-8'));
+                    data = "";
+                }
+                callback();
+            },
+            flush(callback: TransformCallback) {
+                this.push(Buffer.from(data, 'utf-8'));
+                data = "";
+                callback();
+            }
+        });
+        const csvStream = pipeline(ArchiveDataPacketModel.find(query).cursor({ batchSize: 10000 }), getDataTransform,
+            json2csv,
+            bufferTranform,
+            (err: any) => {
+                if (err) {
+                    console.error(err);
+                }
+            });
 
         const fileName = `${topic}-${v4()}.csv`;
 
-        const resData = await new Promise<ManagedUpload.SendData>(accept => ctx.s3.upload({ Bucket: 'widaq-csv-download', Key: fileName, Body: csvStream, Expires: new Date(Date.now() + 24 * 60 * 60 * 1000), ACL: 'public-read' }, (err: any, data: ManagedUpload.SendData) => {
-            if (err)
-                console.log(err);
-            accept(data);
-        }));
+        const resData = await new Promise<{ Location: string }>(accept => {
+            ctx.s3.upload(
+                {
+                    Bucket: 'widaq-csv-download', Key: fileName, Body: csvStream,
+                    Expires: new Date(Date.now() + 60 * 60 * 1000), ACL: 'public-read'
+                },
+                (err: any, data: ManagedUpload.SendData) => {
+                    if (err)
+                        console.log(err);
+                    accept(data);
+                }
+            );
+            setTimeout(() => accept({ Location: `https://widaq-csv-download.s3.amazonaws.com/${fileName}` }), 119 * 1000) //If the request is about to timeout, guess the bucket location and respond.
+        });
 
         return resData.Location;
     }

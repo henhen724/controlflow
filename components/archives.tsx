@@ -5,11 +5,11 @@ import { Replay as ReplayIcon, GetApp as GetAppIcon } from '@material-ui/icons';
 
 import { getErrorMessage } from './errorFormating';
 
-import { ArchiveInfoRslt, ArchiveCSVDownload, ArchiveQuery, ArchiveTopic, DeleteTopicArchive, ArchiveInfo, ArchiveDataQueryInput } from "./apollo/Archives";
-import { useArchiveDownload } from './apollo/Archives';
+import { ArchiveInfoRslt, ArchiveCSVDownload, ArchiveQuery, ArchiveTopic, DeleteTopicArchive, ArchiveInfo, ArchiveDataQueryInput, ArchiveDataPreview } from "./apollo/Archives";
 import CsvDownloadModal from './csvDownloadModal';
 import { formatByteSize } from './lib/formatByteSize';
 import { DateTime } from 'luxon';
+import { loadGetInitialProps } from 'next/dist/next-server/lib/utils';
 DateTime.local()
 
 interface TableState {
@@ -55,8 +55,8 @@ const Archives = () => {
 
     const [timeSelectState, setTimeSelectState] = useState<TimeSelectionState>({ selecting: false });
 
-    const [{ data: downloadData, loading: downloadLoading, error: downloadError, progress }, getArchiveData] = useArchiveDownload()
-    const [getArchiveCSVLink, { data: archiveData, loading: csvLoading }] = ArchiveCSVDownload();
+    const [getArchiveData, { data: downloadData, loading: downloadLoading, error: downloadError }] = ArchiveDataPreview({ variables: { topic: topicToDownload! } })
+    const [getArchiveCSVLink, { data: archiveData, loading: csvLoading, error: csvError }] = ArchiveCSVDownload();
 
     const { loading, error, refetch: _refetch } = ArchiveQuery({
         onCompleted: (queryData) => {
@@ -112,7 +112,7 @@ const Archives = () => {
                     to: new Date(timeSelectState.to)
                 }
             }
-            getArchiveData(query)
+            getArchiveData({ variables: query })
             getArchiveCSVLink({ variables: query });
         } else {
             setTopicToDownload(null);
@@ -261,7 +261,7 @@ const Archives = () => {
                         aria-labelledby="download-modal-title"
                         aria-describedby="download-modal-description"
                     >
-                        <CsvDownloadModal data={downloadData} error={downloadError} progress={progress} loading={downloadLoading} topic={topicToDownload} setTopic={setTopicToDownload} clearDownloadData={() => { getArchiveData({ topic: "", stopDownloading: true }) }} csvLinkLoading={csvLoading} csvLink={archiveData ? archiveData.archiveDataCSVFile : undefined} useCsvLink={true} />
+                        <CsvDownloadModal data={downloadData ? downloadData.archiveData.edges.map(edge => edge.node.data) : undefined} error={downloadError} loading={downloadLoading} topic={topicToDownload} setTopic={setTopicToDownload} csvLinkLoading={csvLoading} csvLinkError={csvError} csvLink={archiveData ? archiveData.archiveDataCSVFile : undefined} useCsvLink={true} />
                     </Dialog>
                 </Container>
             </div>

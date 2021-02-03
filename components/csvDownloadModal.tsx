@@ -8,13 +8,12 @@ import { ApolloError } from '@apollo/client';
 interface csvDownloadProps {
     topic: string | null;
     setTopic: (topic: string | null) => void;
-    clearDownloadData?: () => void;
     data: Object[] | undefined;
     loading: boolean;
     error?: ApolloError;
-    progress?: number;
     csvLink?: string;
     csvLinkLoading?: boolean;
+    csvLinkError?: ApolloError;
     useCsvLink?: boolean;
 }
 
@@ -49,7 +48,9 @@ const csvDownloadModal = (props: csvDownloadProps) => {
         return <CircularProgress />
     } else if (props.error) {
         return <div>{getErrorMessage(props.error)}</div>
-    } else {
+    } else if (props.csvLinkError) {
+        return <div>{getErrorMessage(props.csvLinkError)}</div>
+    } else if (props.data) {
         const rowData = props.data!.map(packet => flattenObject(packet));
         const onDownloadModalFinish = (accepted: boolean) => {
             if (accepted && props.topic) {
@@ -57,15 +58,15 @@ const csvDownloadModal = (props: csvDownloadProps) => {
                 download(parser.parse(rowData), `${props.topic}.csv`);
             }
             props.setTopic(null);
-            props.clearDownloadData ? props.clearDownloadData() : true;
         }
-        var downloadCSVButton = <Button onClick={() => onDownloadModalFinish(true)} color="primary" disabled={!!props.progress && props.progress !== 100}>
+        var downloadCSVButton = <Button onClick={() => onDownloadModalFinish(true)} color="primary">
             Save CSV
         </Button>
         if (props.useCsvLink) {
+            console.log("Using csv link");
             downloadCSVButton = <Button onClick={() => {
                 if (props.csvLink)
-                    download(props.csvLink);
+                    window.open(props.csvLink, '_blank');
                 else
                     console.log("Use press download before link exists.")
                 onDownloadModalFinish(false)
@@ -79,9 +80,11 @@ const csvDownloadModal = (props: csvDownloadProps) => {
             const colomnHeaders = Object.keys(rowData[0]).map(key => { return { title: key, field: key, type: typeof rowData[0][key], editable: 'never' } }) as Array<Column<any>>;
             return (<>
                 <DialogContent>
-                    <LinearProgress variant="determinate" value={props.progress} />
                     <DialogContentText id="download-modal-description">
-                        <MaterialTable title={`Downloading ${props.topic}`} columns={colomnHeaders} data={rowData}>
+                        <MaterialTable title={`Downloading ${props.topic}`} columns={colomnHeaders} data={rowData/*query => new Promise((accept, reject) => {
+                            accept({ data: rowData, page: 1, totalCount: 1 })
+                        })
+                    */}>
 
                         </MaterialTable>
                     </DialogContentText>
@@ -90,12 +93,12 @@ const csvDownloadModal = (props: csvDownloadProps) => {
                     <Button onClick={() => onDownloadModalFinish(false)} color="primary">
                         Cancel
                         </Button>
-                    <Button onClick={() => onDownloadModalFinish(true)} color="primary" disabled={!!props.progress && props.progress !== 100}>
-                        Save CSV
-                        </Button>
+                    {downloadCSVButton}
                 </DialogActions>
             </>)
         }
+    } else {
+        return <div />;
     }
 }
 
