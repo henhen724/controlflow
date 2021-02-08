@@ -1,4 +1,5 @@
 import DataPacket from '../server/models/DataPacket';
+import ArchiveDataPacket from '../server/models/ArchiveDataPacket';
 import { MqttClient } from 'mqtt';
 import { findBufferSize } from '../server/lib/findBufferSize';
 import BufferInfoModel, { BufferInfo } from '../server/models/TopicBufferInfo';
@@ -7,7 +8,7 @@ let topicBufferInfos = null as BufferInfo[] | null;
 
 export const bufferListner = (msgTopic: string, message: Buffer) => {
     if (topicBufferInfos) {
-        const bufferInfo = topicBufferInfos.find(({ topic }) => topic === msgTopic);
+        const bufferInfo = topicBufferInfos.find(({ topic, recordRollingBuffer }) => recordRollingBuffer && topic === msgTopic);
         if (bufferInfo) {
             try {
                 const msgObj = JSON.parse(message.toString())
@@ -26,6 +27,29 @@ export const bufferListner = (msgTopic: string, message: Buffer) => {
                         newPacketObj.experationDate = new Date(currTime.getDate() + bufferInfo.experationTime);
                     }
                     const newPacket = new DataPacket(newPacketObj);
+                    newPacket.save();
+                }
+            } catch (err) {
+                console.error(`ERROR:\n${message.toString()}\nThis was not proper JSON.  See following error stack:`, err);
+            }
+        }
+    }
+}
+
+export const archiveListner = (msgTopic: string, message: Buffer) => {
+    if (topicBufferInfos) {
+        const bufferInfo = topicBufferInfos.find(({ topic, recordArchive }) => recordArchive && topic === msgTopic);
+        if (bufferInfo) {
+            try {
+                const msgObj = JSON.parse(message.toString())
+                if (msgObj) {
+                    const currTime = new Date();
+                    let newPacketObj = {
+                        created: currTime,
+                        topic: msgTopic,
+                        data: msgObj,
+                    };
+                    const newPacket = new ArchiveDataPacket(newPacketObj);
                     newPacket.save();
                 }
             } catch (err) {

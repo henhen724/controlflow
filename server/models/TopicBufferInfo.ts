@@ -26,6 +26,10 @@ export class BufferInfo {
     maxFreq?: number;
     @prop({ required: true })
     freqLimited!: Boolean;
+    @prop({ default: true, required: true })
+    recordArchive!: Boolean;
+    @prop({ default: true, required: true })
+    recordRollingBuffer!: Boolean;
 }
 
 export default models.TopicBuffersInfo as ReturnModelType<typeof BufferInfo, {}> || getModelForClass(BufferInfo);

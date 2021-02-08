@@ -1,10 +1,9 @@
 require('dotenv').config({ path: '.env.local' })
 import mongoose from 'mongoose';
 import { MongoError } from 'mongodb';
-import rollingBuffer, { bufferListner } from './runningBuffer';
+import rollingBuffer, { bufferListner, archiveListner } from './runningBuffer';
 import handleAlarms, { alarmListner } from './alarmHandlers';
 import deviceNetworkStart, { deviceNetworkListner } from './deviceNetwork';
-import upkeepArchive, { archiveListner } from './archiveUpkeep';
 import mqttConnect from '../server/lib/mqttConnect';
 import { GraphQLClient } from 'graphql-request';
 
@@ -42,7 +41,6 @@ const runWorkers = async () => {
         deviceNetworkListner(gqlClient, msgTopic, message);
     });
     rollingBuffer(mqttClient);
-    upkeepArchive(mqttClient);
     handleAlarms(mqttClient);
     deviceNetworkStart(mqttClient);
 }
