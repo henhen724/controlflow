@@ -5,8 +5,7 @@ import { useQuery } from '@apollo/client';
 import Navbar from '../components/Navbar';
 import LiveData from '../components/livedata';
 import { UnionPanelSettings } from '../components/Panel';
-import Buffers from '../components/buffers';
-import Archives from '../components/archives';
+import Topics from '../components/topics';
 import Alarms from '../components/alarms';
 import DeviceNetwork from '../components/DeviceNetwork';
 import { CircularProgress, BottomNavigation, BottomNavigationAction, Paper } from '@material-ui/core';
@@ -45,10 +44,11 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 
 const Index = () => {
     const router = useRouter();
-    var { element = "live-data" } = router.query;
+    var { element } = router.query;
+    console.log(element);
     element = Array.isArray(element) ? element[0] : element;
     const classes = useStyles();
-    const [tab, _changeTab] = useState<string>(element);
+    const [tab, _changeTab] = useState<string | undefined>(element);
     const changeTab = (val: string) => {
         _changeTab(val);
         router.push({
@@ -93,18 +93,11 @@ const Index = () => {
     if (viewer) {
         var component = <div />;
         switch (tab) {
+            case "data-buffers":
+                component = <Topics />;
+                break;
             case "live-data":
                 component = <LiveData dataElements={[dataElement, controlElement]} />;
-                break;
-            case "data-buffers":
-                component = (<div>
-                    <div className={classes.marginDiv}>
-                        <Buffers />
-                    </div>
-                    <div className={classes.marginDiv}>
-                        <Archives />
-                    </div>
-                </div >);
                 break;
             case "alarms":
                 component = (<div className={classes.marginDiv}>
@@ -115,7 +108,7 @@ const Index = () => {
                 component = <DeviceNetwork />
                 break;
             default:
-                changeTab("live-data");
+                changeTab("data-buffers");
         }
         return (
             <div>
@@ -124,8 +117,8 @@ const Index = () => {
                 <div className={classes.footerLengthMargin} />
                 <Paper className={classes.paperFooter}>
                     <BottomNavigation value={tab} onChange={(e, val) => changeTab(val)} className={classes.navFooter}>
-                        <BottomNavigationAction label="Live Data and Control" value="live-data" icon={<TimelineIcon />} />
                         <BottomNavigationAction label="Data Buffers" value="data-buffers" icon={<StorageIcon />} />
+                        <BottomNavigationAction label="Live Data and Control" value="live-data" icon={<TimelineIcon />} />
                         <BottomNavigationAction label="Alarms" value="alarms" icon={<AlarmIcon />} />
                         <BottomNavigationAction label="Network Viewer" value="device-network" icon={<NetworkIcon />} />
                     </BottomNavigation>

@@ -1,20 +1,19 @@
 import { useState, useCallback } from 'react';
 import MaterialTable, { Column } from 'material-table';
-import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, LinearProgress, TextField } from '@material-ui/core';
-import { Replay as ReplayIcon, GetApp as GetAppIcon } from '@material-ui/icons';
+import { Button, CircularProgress, Container, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, IconButton, LinearProgress, TextField, Tooltip } from '@material-ui/core';
+import { Replay as ReplayIcon, GetApp as GetAppIcon, FiberManualRecord as RecordCircle, FiberManualRecordOutlined as EmptyRecordCircle } from '@material-ui/icons';
 
 import { getErrorMessage } from './errorFormating';
 
-import { ArchiveInfoRslt, ArchiveCSVDownload, ArchiveQuery, ArchiveTopic, DeleteTopicArchive, ArchiveInfo, ArchiveDataQueryInput, ArchiveDataPreview } from "./apollo/Archives";
+import { ArchiveCSVDownload, ArchiveDataPreview, AbrvTopicInfo, TopicsQuery, TopicsQueryRslt, RecordTopic, DeleteTopicRecord, ArchiveDataQueryInput } from "./apollo/Topics";
 import CsvDownloadModal from './csvDownloadModal';
 import { formatByteSize } from './lib/formatByteSize';
 import { DateTime } from 'luxon';
-import { loadGetInitialProps } from 'next/dist/next-server/lib/utils';
 DateTime.local()
 
 interface TableState {
-    columns: Array<Column<ArchiveInfo>>,
-    data: ArchiveInfo[],
+    columns: Array<Column<AbrvTopicInfo>>,
+    data: AbrvTopicInfo[],
 }
 
 interface TimeSelectionState {
@@ -23,12 +22,25 @@ interface TimeSelectionState {
     selecting: boolean;
 }
 
-const Archives = () => {
+const Topics = () => {
     // Page state
     const [state, setState] = useState<TableState>({
         columns: [
             { title: 'Topic Name', field: 'topic', type: 'string', editable: 'onAdd' },
             { title: 'Current Size', field: 'size', type: 'numeric', render: rowData => formatByteSize(rowData.size) },
+            {
+                title: 'Recording', type: 'boolean', render: rowData => {
+                    if (rowData.recording) {
+                        return <Tooltip title="recording">
+                            <RecordCircle />
+                        </Tooltip>;
+                    } else {
+                        return <Tooltip title="not recording">
+                            <EmptyRecordCircle />
+                        </Tooltip>;
+                    }
+                }
+            },
             {
                 title: 'Earliest packet recorded', field: 'earliest', render: rowData => {
                     if (rowData.earliest)
@@ -55,25 +67,26 @@ const Archives = () => {
 
     const [timeSelectState, setTimeSelectState] = useState<TimeSelectionState>({ selecting: false });
 
-    const [getArchiveData, { data: downloadData, loading: downloadLoading, error: downloadError }] = ArchiveDataPreview({ variables: { topic: topicToDownload! } })
+    const [getArchiveData, { data: downloadData, loading: downloadLoading, error: downloadError }] = ArchiveDataPreview({ variables: { topic: topicToDownload! } });
     const [getArchiveCSVLink, { data: archiveData, loading: csvLoading, error: csvError }] = ArchiveCSVDownload();
 
-    const { loading, error, refetch: _refetch } = ArchiveQuery({
+    const { loading, error, refetch: _refetch } = TopicsQuery({
         onCompleted: (queryData) => {
-            const buffers = queryData.runningArchives ? queryData.runningArchives.map(buf => Object.assign({}, buf)) : [];
+            console.log(queryData)
+            const buffers = queryData.topicInfos ? queryData.topicInfos.map(buf => Object.assign({}, buf)) : [];
             setState({ columns: state.columns, data: buffers });
         }
     });
     const refetch = useCallback(() => {
         setTimeout(() => _refetch({
-            onCompleted: (queryData: ArchiveInfoRslt) => {
-                const buffers = queryData.runningArchives ? queryData.runningArchives.map(buf => Object.assign({}, buf)) : [];
+            onCompleted: (queryData: TopicsQueryRslt) => {
+                const buffers = queryData.topicInfos ? queryData.topicInfos.map(buf => Object.assign({}, buf)) : [];
                 setState({ columns: state.columns, data: buffers });
             },
         }), 0)
     }, [_refetch]); //This avoids an error where nextJS unmounts the component and refetch becomes undefined.
-    const [sendTopic] = ArchiveTopic();
-    const [deleteTopic] = DeleteTopicArchive();
+    const [sendTopic] = RecordTopic();
+    const [deleteTopic] = DeleteTopicRecord();
 
 
     const onDeleteModalFinish = (accepted: boolean) => {
@@ -81,7 +94,7 @@ const Archives = () => {
         console.log(`Accepted: ${accepted}\nTopic to Delete: ${topicToDelete}`);
         if (accepted && topicToDelete) {
             setState((prevState) => {
-                const data = prevState.data.filter((topicObj: ArchiveInfo) => topicObj.topic !== topicToDelete);
+                const data = prevState.data.filter((topicObj: AbrvTopicInfo) => topicObj.topic !== topicToDelete);
                 return { ...prevState, data };
             });
             deleteTopic({
@@ -129,7 +142,7 @@ const Archives = () => {
         return (
             <div>
                 <Container>
-                    <MaterialTable title="Topic Archives" columns={state.columns} data={state.data}
+                    <MaterialTable title="Topics Information" columns={state.columns} data={state.data}
                         actions={[
                             {
                                 icon: () => <GetAppIcon />,
@@ -269,4 +282,4 @@ const Archives = () => {
     }
 }
 
-export default Archives;
+export default Topics;

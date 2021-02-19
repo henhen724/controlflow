@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { ObjectType, ArgsType, Arg, Resolver, Query, Mutation, Subscription, Field, ID, Int, Float, Ctx, Args, Root } from "type-graphql";
 import { GraphQLJSON, GraphQLTimestamp } from "graphql-scalars";
+import { Document, Model } from 'mongoose';
 import { v4 } from 'uuid';
 import { S3 } from 'aws-sdk';
 import { ManagedUpload } from 'aws-sdk/clients/s3';
@@ -9,7 +10,7 @@ import { Transform, TransformCallback, pipeline } from 'stream';
 
 import SuccessBoolean from "../types/SuccessBoolean";
 
-import TopicBufferInfo from "../../models/TopicBufferInfo";
+import TopicInfoModel, { DBTopicInfo } from "../../models/TopicBufferInfo";
 import { findBufferSize } from "../../lib/findBufferSize";
 import DataPacketModel from "../../models/DataPacket";
 
@@ -21,16 +22,11 @@ import { MQTTPubSub } from 'graphql-mqtt-subscriptions';
 import mqttConnect from '../../lib/mqttConnect';
 
 const client = mqttConnect("👽", "Server");
-const mqttPubSub = new MQTTPubSub({ client });
+const mqttPubSub = new MQTTPubSub({ client, includeFullPacketInfo: true });
+
 
 @ObjectType()
-class DataPacket {
-    @Field(type => GraphQLJSON)
-    data: Object;
-}
-
-@ObjectType()
-class BufferInfo {
+class TopicInfo {
     @Field()
     topic: string;
     @Field()
@@ -45,18 +41,34 @@ class BufferInfo {
     freqLimited: boolean;
     @Field(type => Float, { nullable: true })
     maxFreq: number;
+    @Field(type => Boolean)
+    recording!: Boolean;
+    @Field(type => Boolean)
+    recordArchive!: Boolean;
+    @Field(type => Boolean)
+    recordRollingBuffer!: Boolean;
+    @Field(type => GraphQLTimestamp, { nullable: true })
+    earliest: Date;
+    @Field(type => GraphQLTimestamp, { nullable: true })
+    latest: Date;
     @Field(type => Int)
-    currSize: number;
+    size: number;
+    @Field(type => Int)
+    archiveSize: number;
+    @Field(type => Int)
+    rollingBufferSize: number;
 }
 
 @ObjectType()
-class BufferPacket {
+class DataPacket {
     @Field()
     topic: string;
     @Field(type => GraphQLTimestamp)
     created: Date;
-    @Field(type => GraphQLJSON)
+    @Field(type => GraphQLJSON, { description: "The mqtt payload parsed as JSON.  If it parse fails, returns an empty object." })
     data: Object;
+    @Field(type => String, { description: "This feild is the rawBytes of the mqtt packet UTF-8 encoded.  It is only included if the packet is not valid json.", nullable: true })
+    rawData?: Buffer;
 }
 
 @ArgsType()
@@ -71,12 +83,22 @@ class MqttPublishInput {
 class RecordTopicInput {
     @Field()
     topic: string;
-    @Field(type => Int, { nullable: true })
-    experationTime?: number;
-    @Field(type => Int, { nullable: true })
-    maxSize?: number;
+    @Field()
+    recordRollingBuffer: boolean;
+    @Field()
+    recordArchive: boolean;
+    @Field({ nullable: true })
+    freqLimited?: boolean;
     @Field(type => Float, { nullable: true })
     maxFreq?: number;
+    @Field({ nullable: true })
+    expires?: boolean;
+    @Field(type => Int, { nullable: true })
+    experationTime?: number;
+    @Field({ nullable: true })
+    sizeLimited?: boolean;
+    @Field(type => Int, { nullable: true })
+    maxSize?: number;
 }
 
 @ArgsType()
@@ -91,12 +113,6 @@ class MqttTopicInput {
 class ArchiveInfo {
     @Field()
     topic: string;
-    @Field(type => GraphQLTimestamp, { nullable: true })
-    earliest: Date;
-    @Field(type => GraphQLTimestamp, { nullable: true })
-    latest: Date;
-    @Field(type => Int)
-    size: number;
 }
 
 @ObjectType()
@@ -108,12 +124,6 @@ class ArchivePacket {
 }
 
 const ArchiveConnectionOuput = createConnectionOutput(ArchivePacket);
-
-@ArgsType()
-class ArchiveTopicInput {
-    @Field()
-    topic: string;
-}
 
 @ArgsType()
 class ArchiveDataInput extends ConnectionInput {
@@ -146,18 +156,29 @@ const flattenObject = (ob: any) => {
 
 @Resolver()
 class TopicResolver {
-    @Query(returns => [BufferInfo])
-    async runningBuffers() {
-        const buffers = await TopicBufferInfo.find({}).exec();
-        const bufferMoreInfo = [];
-        for (var i = 0; i < buffers.length; i++) {
-            const buffer = buffers[i] as any;
-            buffer.currSize = (await findBufferSize(buffer.topic)).total_size;
-            bufferMoreInfo.push(buffer);
+    @Query(returns => [TopicInfo])
+    async topicInfos() {
+        const topicInfos = await TopicInfoModel.find({}).exec() as DBTopicInfo[];
+        const topicMoreInfo = [];
+        const archiveStatistics = (await ArchiveDataPacketModel.aggregate([
+            { $group: { _id: "$topic", latest: { $max: "$created" }, earliest: { $min: "$created" } } }
+        ]));
+        for (var i = 0; i < topicInfos.length; i++) {
+            const newTopicInfo = topicInfos[i] as TopicInfo;
+            newTopicInfo.rollingBufferSize = (await findBufferSize(newTopicInfo.topic)).total_size;
+            const stats = archiveStatistics.find((stats: any) => newTopicInfo.topic === stats._id);
+            if (stats) {
+                newTopicInfo.earliest = stats.earliest;
+                newTopicInfo.latest = stats.latest;
+            }
+            newTopicInfo.archiveSize = (await findArchiveSize(newTopicInfo.topic)).total_size;
+            newTopicInfo.size = newTopicInfo.archiveSize + newTopicInfo.rollingBufferSize;
+            newTopicInfo.recording = newTopicInfo.recordArchive || newTopicInfo.recordRollingBuffer;
+            topicMoreInfo.push(newTopicInfo);
         }
-        return bufferMoreInfo;
+        return topicMoreInfo;
     }
-    @Query(returns => [BufferPacket])
+    @Query(returns => [DataPacket])
     async topicBuffer(@Arg("topic") topic: string) {
         return await DataPacketModel.find({ topic }).exec();
     }
@@ -169,69 +190,36 @@ class TopicResolver {
     }
     @Mutation(returns => SuccessBoolean)
     async recordTopic(@Args() input: RecordTopicInput) {
-        const { topic, experationTime, maxSize, maxFreq } = input;
-        const expires = !!experationTime;
-        const sizeLimited = !!maxSize;
-        const freqLimited = !!maxFreq;
-        const bufferInfo = await TopicBufferInfo.find({ topic });
-        switch (bufferInfo.length) {
+        const { topic, freqLimited, maxFreq, expires, experationTime, sizeLimited, maxSize } = input;
+        const topicInfos = await TopicInfoModel.find({ topic }) as Document<DBTopicInfo>[];
+        switch (topicInfos.length) {
             case 0:
-                const newBufInfo = new TopicBufferInfo({
-                    topic,
-                    experationTime,
-                    expires,
-                    maxSize,
-                    sizeLimited,
-                    maxFreq,
-                    freqLimited
-                })
+                const newBufInfo = new TopicInfoModel(input);
                 await newBufInfo.save();
                 return { success: true };
             case 1:
-                bufferInfo[0].experationTime = experationTime;
-                bufferInfo[0].expires = expires;
-                bufferInfo[0].maxSize = maxSize;
-                bufferInfo[0].sizeLimited = sizeLimited;
-                bufferInfo[0].freqLimited = freqLimited;
-                bufferInfo[0].maxFreq = maxFreq;
-
-                await bufferInfo[0].save();
+                await (TopicInfoModel as Model<Document<DBTopicInfo>>).updateOne({ topic }, input);
                 return { success: true };
             default:
-                throw new Error(`Topic ${topic} has ${bufferInfo.length} buffer info entries, but topic buffer info must be unique.`);
+                throw new Error(`Topic ${topic} has ${topicInfos.length} topic info entries, but topic topic info must be unique.`);
         }
     }
     @Mutation(returns => SuccessBoolean)
     async deleteTopicBuffer(@Arg("topic") topic: string) {
-        await TopicBufferInfo.deleteMany({ topic }).exec();
+        await TopicInfoModel.deleteMany({ topic }).exec();
         await DataPacketModel.deleteMany({ topic }).exec();
         return { success: true };
     }
 
     @Subscription(returns => DataPacket, { subscribe: ({ args }) => mqttPubSub.asyncIterator(args.topics) })
-    mqttTopics(@Root() payload: Object, @Args() args: MqttTopicInput): DataPacket {
-        return { data: payload };
+    mqttTopics(@Root() mqttPacket: { topic: string, parsedMessage: Object, payload: Buffer }, @Args() args: MqttTopicInput): DataPacket {
+        console.log(mqttPacket);
+        if (typeof mqttPacket.parsedMessage === 'object')
+            return { topic: mqttPacket.topic, data: mqttPacket.parsedMessage, created: new Date() };
+        else
+            return { topic: mqttPacket.topic, data: {}, created: new Date(), rawData: mqttPacket.payload }
     }
     // Mutations and Queries for archives
-    @Query(returns => [ArchiveInfo])
-    async runningArchives() {
-        const archives = await TopicBufferInfo.find({ recordArchive: true }).exec();
-        const archiveMoreInfo = [];
-        const archiveStatistics = (await ArchiveDataPacketModel.aggregate([
-            { $group: { _id: "$topic", latest: { $max: "$created" }, earliest: { $min: "$created" } } }
-        ]));
-        for (var i = 0; i < archives.length; i++) {
-            const archive = archives[i] as { topic: string, earliest?: Date, latest?: Date, size?: number };
-            const stats = archiveStatistics.find((stats: any) => archive.topic === stats._id);
-            if (stats) {
-                archive.earliest = stats.earliest;
-                archive.latest = stats.latest;
-            }
-            archive.size = (await findArchiveSize(archive.topic)).total_size;
-            archiveMoreInfo.push(archive);
-        }
-        return archiveMoreInfo;
-    }
     @Query(returns => String)
     async archiveDataCSVFile(@Args() input: ArchiveDataInput, @Ctx() ctx: { s3: S3 }): Promise<String> {
         const { topic, from, to } = input;
@@ -347,28 +335,8 @@ class TopicResolver {
         return { edges, pageInfo: { endCursor, hasNextPage } }
     }
     @Mutation(returns => SuccessBoolean)
-    async archiveTopic(@Args() input: ArchiveTopicInput) {
-        const { topic } = input;
-        const archiveInfo = await TopicBufferInfo.find({ topic, archiveRecord: true });
-        switch (archiveInfo.length) {
-            case 0:
-                const newBufInfo = new TopicBufferInfo({
-                    topic,
-                    recordArchive: true,
-                    recordRollingBuffer: false,
-                })
-                await newBufInfo.save();
-                return { success: true };
-            case 1:
-                await archiveInfo[0].save();
-                return { success: true };
-            default:
-                throw new Error(`Topic ${topic} has ${archiveInfo.length} archive info entries, but topic archive info must be unique.`);
-        }
-    }
-    @Mutation(returns => SuccessBoolean)
     async deleteTopicArchive(@Arg("topic") topic: string) {
-        await TopicBufferInfo.deleteMany({ topic }).exec();
+        await TopicInfoModel.deleteMany({ topic }).exec();
         await ArchiveDataPacketModel.deleteMany({ topic }).exec();
         return { success: true };
     }

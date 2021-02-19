@@ -1,35 +1,31 @@
 import { Schema, Document, model, Model, models, Types } from 'mongoose';
 import { prop, modelOptions, getModelForClass, ReturnModelType } from '@typegoose/typegoose';
-import { QueryMethod } from '@typegoose/typegoose/lib/types';
 
-interface BufferQueries {
-    findByTopic: QueryMethod<typeof findByTopic>
-}
-
-function findByTopic(this: ReturnModelType<typeof BufferInfo, BufferQueries>, topic: string) {
-    return this.findOne({ topic });
-}
 
 @modelOptions({ schemaOptions: { collection: 'buffer-info' } })
-export class BufferInfo {
+export class DBTopicInfo {
     @prop({ required: true, unique: true })
     topic!: string;
-    @prop({ required: false })
-    experationTime?: number;
-    @prop({ required: true })
-    expires!: Boolean;
-    @prop({ required: false })
-    maxSize?: number;
-    @prop({ required: true })
-    sizeLimited!: Boolean;
-    @prop({ required: false })
-    maxFreq?: number;
-    @prop({ required: true })
-    freqLimited!: Boolean;
     @prop({ default: true, required: true })
     recordArchive!: Boolean;
     @prop({ default: true, required: true })
     recordRollingBuffer!: Boolean;
+    @prop({ required: true, default: false })
+    freqLimited!: Boolean;
+    @prop({ required: false })
+    maxFreq?: number;
+
+    //Rolling buffer info
+
+    @prop({ required: true, default: false })
+    expires!: boolean;
+    @prop({ required: false })
+    experationTime?: number;
+    @prop({ required: true, default: true })
+    sizeLimited!: boolean;
+    @prop({ required: false, default: 2000 }) // If not spesified, set a 2KB size limit on the rolling buffer.
+    maxSize?: number;
 }
 
-export default models.TopicBuffersInfo as ReturnModelType<typeof BufferInfo, {}> || getModelForClass(BufferInfo);
+
+export default models.TopicBuffersInfo as ReturnModelType<typeof DBTopicInfo, {}> || getModelForClass(DBTopicInfo);
