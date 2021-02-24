@@ -5,7 +5,7 @@ import { Replay as ReplayIcon, GetApp as GetAppIcon, FiberManualRecord as Record
 
 import { getErrorMessage } from './errorFormating';
 
-import { ArchiveCSVDownload, ArchiveDataPreview, AbrvTopicInfo, TopicsQuery, TopicsQueryRslt, RecordTopic, DeleteTopicRecord, ArchiveDataQueryInput } from "./apollo/Topics";
+import { ArchiveCSVDownload, ArchiveDataPreview, AbrvTopicInfo, TopicsQuery, TopicsQueryRslt, RecordTopic, DeleteTopicRecord, ArchiveDataQueryInput, TopicsSubscription } from "./apollo/Topics";
 import CsvDownloadModal from './csvDownloadModal';
 import { formatByteSize } from './lib/formatByteSize';
 import { DateTime } from 'luxon';
@@ -74,9 +74,27 @@ const Topics = () => {
         onCompleted: (queryData) => {
             console.log(queryData)
             const buffers = queryData.topicInfos ? queryData.topicInfos.map(buf => Object.assign({}, buf)) : [];
+            console.log(buffers);
             setState({ columns: state.columns, data: buffers });
         }
     });
+
+    TopicsSubscription({
+        onSubscriptionData: ({ subscriptionData: { data, error } }) => {
+            if (error) {
+                console.log(error);
+            } else if (data) {
+                if (!state.data.find(topicInfo => topicInfo.topic === data.mqttTopics.topic)) {
+                    state.data.push({ topic: data.mqttTopics.topic, recording: false, size: 0 });
+                    setState(state);
+                }
+            }
+        },
+        onSubscriptionComplete: () => {
+            console.log("Topics subscription closed.");
+        }
+    });
+
     const refetch = useCallback(() => {
         setTimeout(() => _refetch({
             onCompleted: (queryData: TopicsQueryRslt) => {
@@ -135,14 +153,15 @@ const Topics = () => {
 
     // Render Table
     if (loading) {
-        return (<Container maxWidth="sm"><h1>Archive Info Loading</h1><CircularProgress /></ Container>)
+        return (<Container maxWidth="sm"><h1>Topic Info Loading</h1><CircularProgress /></ Container>)
     } else if (error) {
-        return (<h1>Archive Query Error: {getErrorMessage(error)}</h1>)
+        return (<h1>Topic Query Error: {getErrorMessage(error)}</h1>)
     } else {
+        console.log(state.data)
         return (
             <div>
                 <Container>
-                    <MaterialTable title="Topics Information" columns={state.columns} data={state.data}
+                    <MaterialTable title="Topics Information" columns={state.columns} data={Array.from(state.data)}
                         actions={[
                             {
                                 icon: () => <GetAppIcon />,

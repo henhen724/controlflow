@@ -211,9 +211,8 @@ class TopicResolver {
         return { success: true };
     }
 
-    @Subscription(returns => DataPacket, { subscribe: ({ args }) => mqttPubSub.asyncIterator(args.topics) })
+    @Subscription(returns => DataPacket, { subscribe: (root, args) => mqttPubSub.asyncIterator(args.topics) })
     mqttTopics(@Root() mqttPacket: { topic: string, parsedMessage: Object, payload: Buffer }, @Args() args: MqttTopicInput): DataPacket {
-        console.log(mqttPacket);
         if (typeof mqttPacket.parsedMessage === 'object')
             return { topic: mqttPacket.topic, data: mqttPacket.parsedMessage, created: new Date() };
         else

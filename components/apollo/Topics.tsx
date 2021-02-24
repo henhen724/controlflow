@@ -1,4 +1,4 @@
-import { ApolloError, gql, useMutation, useLazyQuery, useQuery, QueryHookOptions, MutationHookOptions, MutationTuple, QueryResult } from '@apollo/client';
+import { ApolloError, gql, useMutation, useLazyQuery, useQuery, QueryHookOptions, MutationHookOptions, MutationTuple, QueryResult, useSubscription, SubscriptionHookOptions } from '@apollo/client';
 
 export const ArchiveCSVGQL = gql`
 query CSVQuery($topic:String!, $from:Timestamp, $to:Timestamp, $first:Int, $after:Timestamp) {
@@ -90,8 +90,8 @@ export interface TopicInfo {
 
 export interface AbrvTopicInfo {
     topic: string;
-    earliest: number;
-    latest: number;
+    earliest?: number;
+    latest?: number;
     size: number;
     recording: boolean
 }
@@ -105,6 +105,23 @@ export const TopicsQuery = (opts: QueryHookOptions<TopicsQueryRslt, {}>) => useQ
 interface SuccessBoolean {
     success: Boolean
 }
+
+
+export const TopicsSubscriptionGQL = gql`
+subscription AllTopicSub {
+  mqttTopics(topics:["#"]) {
+    topic
+  }
+}
+`
+
+export interface TopicSubRslt {
+    mqttTopics: {
+        topic: string
+    }
+}
+
+export const TopicsSubscription = (opts: SubscriptionHookOptions<TopicSubRslt, {}>) => useSubscription<TopicSubRslt, {}>(TopicsSubscriptionGQL, opts);
 
 export interface RecordTopicInput {
     topic: string,
