@@ -157,7 +157,6 @@ const Topics = () => {
     } else if (error) {
         return (<h1>Topic Query Error: {getErrorMessage(error)}</h1>)
     } else {
-        console.log(state.data)
         return (
             <div>
                 <Container>
@@ -168,6 +167,10 @@ const Topics = () => {
                                 tooltip: 'Download Data',
                                 onClick: (event, rowData) => {
                                     if (!Array.isArray(rowData)) {
+                                        if (rowData.size === 0 || !rowData.earliest || !rowData.latest) {
+                                            alert("Sorry, but that topic does not have archive data.  If the topic is already recording, refresh the topic info table to see if any arrives.  ");
+                                            return;
+                                        }
                                         setTimeSelectState({ selecting: true, from: rowData.earliest, to: rowData.latest });
                                         setTopicToDownload(rowData.topic);
                                     }
