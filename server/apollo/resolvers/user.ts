@@ -42,6 +42,9 @@ class UserResolver {
         if (ctx.session) {
             return await UserModel.findById(ctx.session.id).exec();
         }
+        if (process.env.DEMO) {
+            return { _id: "DEMO_USER", email: "hshunt@uchicago.edu" }
+        }
         return // We don't throw error here because this route is used to check wether the user is signed in.
     }
 

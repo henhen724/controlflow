@@ -57,7 +57,7 @@ function SignIn() {
         },
       });
       if (data) {
-        await router.push('/dashboard')
+        await router.push('/')
       }
     } catch (error) {
       setErrorMsg(getErrorMessage(error))

@@ -61,7 +61,7 @@ const aNotification = () => {
 
     const handleDeleteClick = () => {
         deleteNoto();
-        router.push("/dashboard");
+        router.push("/");
     }
 
     if (loading) {
