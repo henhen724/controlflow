@@ -298,7 +298,7 @@ class TopicResolver {
                     accept(data);
                 }
             );
-            setTimeout(() => accept({ Location: `https://widaq-csv-download.s3.amazonaws.com/${fileName}` }), 119 * 1000) //If the request is about to timeout, guess the bucket location and respond.
+            setTimeout(() => accept({ Location: `https://widaq-csv-download.s3.amazonaws.com/${fileName}` }), 29 * 1000) //If the request is about to timeout, guess the bucket location and respond.
         });
 
         return resData.Location;
