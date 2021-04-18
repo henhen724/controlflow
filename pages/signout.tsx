@@ -4,7 +4,9 @@ import { gql, useMutation, useApolloClient } from '@apollo/client';
 
 const SignOutMutation = gql`
   mutation SignOutMutation {
-    signOut
+    signOut {
+      success
+    }
   }
 `
 

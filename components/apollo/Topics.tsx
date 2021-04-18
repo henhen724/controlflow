@@ -141,7 +141,7 @@ export const RecordTopic = (opts?: MutationHookOptions<SuccessBoolean, RecordTop
 
 export const DeleteTopicGQL = gql`
 mutation DeleteTopicRecord($topic:String!) {
-    deleteTopicRecord(topic:$topic) {
+    deleteTopicData(topic:$topic) {
         success
     }
 }

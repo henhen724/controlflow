@@ -43,7 +43,7 @@ class UserResolver {
             return await UserModel.findById(ctx.session.id).exec();
         }
         if (process.env.DEMO) {
-            return { _id: "DEMO_USER", email: "hshunt@uchicago.edu" }
+            return { _id: "DEMO_USER", email: "DEMO_USER" }
         }
         return // We don't throw error here because this route is used to check wether the user is signed in.
     }
@@ -79,8 +79,14 @@ class UserResolver {
     }
     @Mutation(returns => SuccessBoolean)
     async signOut(@Ctx() ctx: any) {
-        deleteSession(ctx.res);
-        return { success: true };
+        if (ctx.session) {
+            deleteSession(ctx.res);
+            return { success: true };
+        }
+        if (process.env.DEMO) {
+            return { success: true, msg: 'You\'re signed in as DEMO_USER so this does nothing' };
+        }
+        return { success: false, msg: 'You are not signed in.' };
     }
 }
 

@@ -83,9 +83,9 @@ class MqttPublishInput {
 class RecordTopicInput {
     @Field()
     topic: string;
-    @Field()
+    @Field({ nullable: true })
     recordRollingBuffer: boolean;
-    @Field()
+    @Field({ nullable: true })
     recordArchive: boolean;
     @Field({ nullable: true })
     freqLimited?: boolean;
@@ -157,8 +157,13 @@ const flattenObject = (ob: any) => {
 @Resolver()
 class TopicResolver {
     @Query(returns => [TopicInfo])
-    async topicInfos() {
-        const topicInfos = await TopicInfoModel.find({}).exec() as DBTopicInfo[];
+    async topicInfos(@Arg("topic", { nullable: true }) topic: string) {
+        var topicInfos = [] as DBTopicInfo[];
+        if (topic) {
+            topicInfos = await TopicInfoModel.find({ topic }).exec() as DBTopicInfo[];
+        } else {
+            topicInfos = await TopicInfoModel.find({}).exec() as DBTopicInfo[];
+        }
         const topicMoreInfo = [];
         const archiveStatistics = (await ArchiveDataPacketModel.aggregate([
             { $group: { _id: "$topic", latest: { $max: "$created" }, earliest: { $min: "$created" } } }
@@ -205,9 +210,11 @@ class TopicResolver {
         }
     }
     @Mutation(returns => SuccessBoolean)
-    async deleteTopicBuffer(@Arg("topic") topic: string) {
+    async deleteTopicData(@Arg("topic") topic: string) {
+        if (process.env.DEMO) return { success: false };
         await TopicInfoModel.deleteMany({ topic }).exec();
         await DataPacketModel.deleteMany({ topic }).exec();
+        await ArchiveDataPacketModel.deleteMany({ topic }).exec();
         return { success: true };
     }
 
@@ -222,7 +229,7 @@ class TopicResolver {
     @Query(returns => String)
     async archiveDataCSVFile(@Args() input: ArchiveDataInput, @Ctx() ctx: { s3: S3 }): Promise<String> {
         const { topic, from, to } = input;
-        //console.log("starting csv query.");
+        console.log("starting csv query.");
         var query = { topic } as { topic: string, created?: { $gte?: Date, $lte?: Date } };
         query = {
             ...query
@@ -255,8 +262,8 @@ class TopicResolver {
         const bufferTranform = new Transform({
             transform(chunk: Buffer, encoding: BufferEncoding, callback: TransformCallback) {
                 data += chunk.toString();
-                if (data.length > 100000) {
-                    //console.log("Sending megabyte");
+                if (data.length > 1000000) {
+                    console.log("Sending megabyte");
                     this.push(Buffer.from(data, 'utf-8'));
                     data = "";
                 }
@@ -332,12 +339,6 @@ class TopicResolver {
         })
         const endCursor = edges[edges.length - 1].cursor;
         return { edges, pageInfo: { endCursor, hasNextPage } }
-    }
-    @Mutation(returns => SuccessBoolean)
-    async deleteTopicArchive(@Arg("topic") topic: string) {
-        await TopicInfoModel.deleteMany({ topic }).exec();
-        await ArchiveDataPacketModel.deleteMany({ topic }).exec();
-        return { success: true };
     }
 }
 

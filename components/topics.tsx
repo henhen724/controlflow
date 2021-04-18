@@ -27,9 +27,10 @@ const Topics = () => {
     const [state, setState] = useState<TableState>({
         columns: [
             { title: 'Topic Name', field: 'topic', type: 'string', editable: 'onAdd' },
-            { title: 'Current Size', field: 'size', type: 'numeric', render: rowData => formatByteSize(rowData.size) },
+            { title: 'Current Size', field: 'size', type: 'numeric', render: rowData => formatByteSize(rowData.size), editable: 'never' },
             {
-                title: 'Recording', type: 'boolean', render: rowData => {
+                title: 'Recording', field: 'recording', type: 'boolean',
+                render: rowData => {
                     if (rowData.recording) {
                         return <Tooltip title="recording">
                             <RecordCircle />
@@ -39,7 +40,7 @@ const Topics = () => {
                             <EmptyRecordCircle />
                         </Tooltip>;
                     }
-                }
+                },
             },
             {
                 title: 'Earliest packet recorded', field: 'earliest', render: rowData => {
@@ -181,6 +182,13 @@ const Topics = () => {
                                 tooltip: 'Refresh Table',
                                 onClick: refetch,
                                 isFreeAction: true
+                            },
+                            {
+                                icon: () => <ReplayIcon />,
+                                tooltip: '',
+                                onClick: () => {
+
+                                }
                             }
                         ]}
                         editable={{
